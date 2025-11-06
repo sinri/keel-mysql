@@ -13,7 +13,7 @@
         The Keel Integration for MySQL
     </description>
 
-    <url>https://github.com/sinri/Keel-MySQL</url>
+    <url>https://github.com/sinri/keel-mysql</url>
 
     <licenses>
         <license>
@@ -23,7 +23,7 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/sinri/Keel-MySQL.git</url>
+        <url>https://github.com/sinri/keel-mysql.git</url>
     </scm>
 
     <developers>
