@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql;
 
+import io.github.sinri.keel.base.KeelBase;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.sqlclient.SqlConnection;
@@ -10,14 +11,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class KeelMySQLDataSourceProvider {
 
     @Nonnull
     public static String defaultMySQLDataSourceName() {
-        return Objects.requireNonNull(Keel.getConfiguration()
-                                          .readString(List.of("mysql", "default_data_source_name"), "default"));
+        return Objects.requireNonNull(KeelBase.getConfiguration()
+                                              .readString(List.of("mysql", "default_data_source_name"), "default"));
     }
 
     /**
@@ -56,7 +56,7 @@ public class KeelMySQLDataSourceProvider {
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
             Promise<Void> initializedPromise
     ) {
-        var configuration = Keel.getConfiguration().extract("mysql", dataSourceName);
+        var configuration = KeelBase.getConfiguration().extract("mysql", dataSourceName);
         Objects.requireNonNull(configuration);
         KeelMySQLConfiguration mySQLConfigure = new KeelMySQLConfiguration(configuration);
         if (connectionSetUpFunction == null) {
@@ -64,7 +64,7 @@ public class KeelMySQLDataSourceProvider {
         }
         var dataSource = new NamedMySQLDataSource<>(mySQLConfigure, connectionSetUpFunction, sqlConnectionWrapper);
 
-        Keel.getVertx().setTimer(
+        KeelBase.getVertx().setTimer(
                 mySQLConfigure.getPoolOptions().getConnectionTimeout() * 1000L,
                 x -> {
                     initializedPromise.tryFail("MySQL Pool Connection Timeout on testing, the configuration might need adjusting.");

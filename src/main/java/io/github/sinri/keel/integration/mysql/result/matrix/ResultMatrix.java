@@ -10,16 +10,16 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.data.Numeric;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 1.1
  * @since 1.8 becomes interface
- * May overrides this class to get Customized Data Matrix
+ *         May overrides this class to get Customized Data Matrix
  */
 public interface ResultMatrix {
 
@@ -176,11 +176,11 @@ public interface ResultMatrix {
                     keyEntity.putNull(sk);
                 }
             });
-            String skEntityHash = Keel.jsonHelper().getJsonForObjectWhoseItemKeysSorted(keyEntity);
+            String skEntityHash = getSortedJsonObject(keyEntity).toString();
 
             keyMap.put(skEntityHash, keyEntity);
             bodyMap.computeIfAbsent(skEntityHash, s -> new ArrayList<>())
-                    .add(bodyEntity);
+                   .add(bodyEntity);
         });
         List<JsonObject> resultList = new ArrayList<>();
         new TreeMap<>(bodyMap).forEach((k, v) -> {
@@ -191,5 +191,31 @@ public interface ResultMatrix {
             x.put(shrinkBodyListKey, jsonObjects);
         });
         return Future.succeededFuture(resultList);
+    }
+
+    @Nonnull
+    private JsonObject getSortedJsonObject(@Nonnull JsonObject object) {
+        JsonObject result = new JsonObject();
+        List<String> keyList = new ArrayList<>(object.getMap().keySet());
+        keyList.sort(Comparator.naturalOrder());
+        keyList.forEach(key -> {
+            Object value = object.getValue(key);
+            if (value instanceof JsonObject) {
+                result.put(key, getSortedJsonObject((JsonObject) value));
+            } else if (value instanceof JsonArray) {
+                result.put(key, getSortedJsonArray((JsonArray) value));
+            } else {
+                result.put(key, value);
+            }
+        });
+        return result;
+    }
+
+    @Nonnull
+    private JsonArray getSortedJsonArray(@Nonnull JsonArray array) {
+        List<Object> list = new ArrayList<>();
+        array.forEach(list::add);
+        list.sort(Comparator.comparing(Object::toString));
+        return new JsonArray(list);
     }
 }

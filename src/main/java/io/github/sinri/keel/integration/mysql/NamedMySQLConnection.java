@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql;
 
-import io.github.sinri.keel.core.TechnicalPreview;
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.vertx.sqlclient.SqlConnection;
 
 import javax.annotation.Nonnull;

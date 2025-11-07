@@ -1,11 +1,11 @@
 package io.github.sinri.keel.integration.mysql.statement.templated;
 
+import io.github.sinri.keel.utils.io.FileUtils;
+
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
-
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 
 /**
@@ -23,7 +23,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 public interface TemplatedStatement {
     static TemplatedReadStatement loadTemplateToRead(@Nonnull String templatePath) {
         try {
-            byte[] bytes = Keel.fileHelper().readFileAsByteArray(templatePath, true);
+            byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
             String sqlTemplate = new String(bytes);
             return new TemplatedReadStatement(sqlTemplate);
         } catch (IOException e) {
@@ -33,7 +33,7 @@ public interface TemplatedStatement {
 
     static TemplatedModifyStatement loadTemplateToModify(@Nonnull String templatePath) {
         try {
-            byte[] bytes = Keel.fileHelper().readFileAsByteArray(templatePath, true);
+            byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
             String sqlTemplate = new String(bytes);
             return new TemplatedModifyStatement(sqlTemplate);
         } catch (IOException e) {

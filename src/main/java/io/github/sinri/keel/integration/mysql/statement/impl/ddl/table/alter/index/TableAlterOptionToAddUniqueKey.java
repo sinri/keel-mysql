@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * {@code ADD [CONSTRAINT [symbol]] UNIQUE [INDEX | KEY] [index_name] [index_type] (key_part,...) [index_option] ...}
@@ -56,7 +55,7 @@ public class TableAlterOptionToAddUniqueKey extends TableAlterOption {
                 + "UNIQUE KEY "
                 + (indexName == null ? "" : ("`" + indexName + "`")) + " "
                 + (indexType == null ? "" : (indexType)) + " "
-                + "(" + Keel.stringHelper().joinStringArray(list, ", ") + ") "
+                + "(" + String.join(", ", list) + ") "
                 + (indexOption == null ? "" : (indexOption)) + " ";
     }
 }

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 4.0.4
@@ -29,10 +28,7 @@ public abstract class TableCreateIndexDefinition extends TableCreateDefinition {
     }
 
     protected String getKeyPartsExpression() {
-        String s = Keel.stringHelper().joinStringArray(
-                keyParts.stream().map(x -> "`" + x + "`").collect(Collectors.toList()),
-                ", "
-        );
+        String s = keyParts.stream().map(x -> "`" + x + "`").collect(Collectors.joining(", "));
         return "(" + s + ")";
     }
 

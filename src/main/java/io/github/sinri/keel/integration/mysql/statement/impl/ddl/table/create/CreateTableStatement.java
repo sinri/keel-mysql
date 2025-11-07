@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * Follow Pattern:
@@ -64,7 +63,7 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
                 + (useIfNotExists() ? "IF NOT EXISTS " : " ")
                 + getTableExpression() + " " + SQL_COMPONENT_SEPARATOR
                 + "(" + SQL_COMPONENT_SEPARATOR
-                + Keel.stringHelper().joinStringArray(ds, ", " + SQL_COMPONENT_SEPARATOR)
+                + String.join(", " + SQL_COMPONENT_SEPARATOR, ds)
                 + SQL_COMPONENT_SEPARATOR
                 + ") " + SQL_COMPONENT_SEPARATOR
                 + tableOptions + " " + SQL_COMPONENT_SEPARATOR

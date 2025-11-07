@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/alter-view.html">ALTER VIEW Statement</a>
  * @since 4.0.4
  */
 public class AlterViewStatement extends AbstractStatement {
+    private final List<String> columns = new ArrayList<>();
     /**
      * {@code UNDEFINED | MERGE | TEMPTABLE }
      */
@@ -23,7 +23,6 @@ public class AlterViewStatement extends AbstractStatement {
     private @Nullable String definer = null;
     private @Nullable String sqlSecurity = null;
     private @Nonnull String viewName = "";
-    private final List<String> columns = new ArrayList<>();
     private SelectStatement selectStatement;
     /**
      * {@code [WITH [CASCADED | LOCAL] CHECK OPTION]}
@@ -79,10 +78,7 @@ public class AlterViewStatement extends AbstractStatement {
 
         var columnsString = "";
         if (!columns.isEmpty()) {
-            columnsString = "(" + Keel.stringHelper().joinStringArray(
-                    columns.stream().map(x -> "`" + x + "`").collect(Collectors.toList()),
-                    ", "
-            ) + ")";
+            columnsString = "(" + columns.stream().map(x -> "`" + x + "`").collect(Collectors.joining(", ")) + ")";
         }
         return "ALTER "
                 + (algorithm != null ? ("ALGORITHM=" + algorithm) : "") + " "

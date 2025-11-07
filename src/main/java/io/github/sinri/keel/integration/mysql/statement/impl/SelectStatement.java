@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class SelectStatement extends AbstractStatement implements SelectStatementMixin {
     final ConditionsComponent whereConditionsComponent;
@@ -219,31 +218,35 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         //  MYSQL 5.6 /*+ MAX_STATEMENT_TIME(1000) */ THIS IS NOT FOR ONE STATEMENT.
         if (this.maxExecutionTime != null) {
             sql.append("/*+ MAX_EXECUTION_TIME(").append(maxExecutionTime).append(") */ ")
-                    .append(AbstractStatement.SQL_COMPONENT_SEPARATOR);
+               .append(AbstractStatement.SQL_COMPONENT_SEPARATOR);
         }
 
         if (columns.isEmpty()) {
             sql.append("*");
         } else {
-            sql.append(Keel.stringHelper().joinStringArray(columns, ","));
+            sql.append(String.join(",", columns));
         }
         if (!tables.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("FROM ").append(Keel.stringHelper().joinStringArray(tables, AbstractStatement.SQL_COMPONENT_SEPARATOR));
+            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("FROM ")
+               .append(String.join(AbstractStatement.SQL_COMPONENT_SEPARATOR, tables));
         }
         if (!whereConditionsComponent.isEmpty()) {
             sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("WHERE ").append(whereConditionsComponent);
         }
         if (!categories.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("GROUP BY ").append(Keel.stringHelper().joinStringArray(categories, ","));
+            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("GROUP BY ")
+               .append(String.join(",", categories));
         }
         if (!havingConditionsComponent.isEmpty()) {
             sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("HAVING ").append(havingConditionsComponent);
         }
         if (!sortRules.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("ORDER BY ").append(Keel.stringHelper().joinStringArray(sortRules, ","));
+            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("ORDER BY ")
+               .append(String.join(",", sortRules));
         }
         if (limit > 0) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("LIMIT ").append(limit).append(" OFFSET ").append(offset);
+            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("LIMIT ").append(limit).append(" OFFSET ")
+               .append(offset);
         }
         if (!lockMode.isEmpty()) {
             sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append(lockMode);
@@ -278,22 +281,22 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         this.limit(pageSize, (pageNo - 1) * pageSize);
 
         return Future.all(
-                        countStatement.execute(sqlConnection)
-                                .compose(resultMatrix -> {
-                                    try {
-                                        long total = resultMatrix.getOneColumnOfFirstRowAsLong("total");
-                                        return Future.succeededFuture(total);
-                                    } catch (KeelSQLResultRowIndexError e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }),
-                        this.execute(sqlConnection)
-                )
-                .compose(compositeFuture -> {
-                    Long total = compositeFuture.resultAt(0);
-                    ResultMatrix resultMatrix = compositeFuture.resultAt(1);
-                    return Future.succeededFuture(new PaginationResult(total, resultMatrix));
-                });
+                             countStatement.execute(sqlConnection)
+                                           .compose(resultMatrix -> {
+                                               try {
+                                                   long total = resultMatrix.getOneColumnOfFirstRowAsLong("total");
+                                                   return Future.succeededFuture(total);
+                                               } catch (KeelSQLResultRowIndexError e) {
+                                                   throw new RuntimeException(e);
+                                               }
+                                           }),
+                             this.execute(sqlConnection)
+                     )
+                     .compose(compositeFuture -> {
+                         Long total = compositeFuture.resultAt(0);
+                         ResultMatrix resultMatrix = compositeFuture.resultAt(1);
+                         return Future.succeededFuture(new PaginationResult(total, resultMatrix));
+                     });
     }
 
     public static class JoinComponent {
@@ -346,7 +349,7 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
             }
             if (!onConditions.isEmpty()) {
                 s += " ON ";
-                s += Keel.stringHelper().joinStringArray(onConditions, " AND ");
+                s += String.join(" AND ", onConditions.stream().map(MySQLCondition::toString).toList());
             }
             return s;
         }

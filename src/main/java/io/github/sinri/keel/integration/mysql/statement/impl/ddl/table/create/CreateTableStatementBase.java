@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create;
 
-import io.github.sinri.keel.core.SelfInterface;
+import io.github.sinri.keel.base.annotations.SelfInterface;
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 
 import javax.annotation.Nonnull;

@@ -1,8 +1,10 @@
 package io.github.sinri.keel.integration.mysql;
 
-import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.facade.configuration.KeelConfigElement;
-import io.github.sinri.keel.facade.configuration.KeelConfigPropertiesBuilder;
+import io.github.sinri.keel.base.KeelBase;
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
+import io.github.sinri.keel.base.async.KeelAsyncMixin;
+import io.github.sinri.keel.base.configuration.KeelConfigElement;
+import io.github.sinri.keel.base.configuration.KeelConfigPropertiesBuilder;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
 import io.vertx.mysqlclient.MySQLBuilder;
@@ -15,7 +17,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * KeelMySQLConfigure for connections and pool.
@@ -202,7 +203,7 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
         var sqlClient = MySQLBuilder.client()
                                     .with(this.getPoolOptions())
                                     .connectingTo(this.getConnectOptions())
-                                    .using(Keel.getVertx())
+                                    .using(KeelBase.getVertx())
                                     .build();
         return Future.succeededFuture()
                      .compose(v -> sqlClient.preparedQuery(sql).execute()
@@ -226,27 +227,31 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
                          Pool pool = MySQLBuilder.pool()
                                                  .with(this.getPoolOptions())
                                                  .connectingTo(this.getConnectOptions())
-                                                 .using(Keel.getVertx())
+                                                 .using(KeelBase.getVertx())
                                                  .build();
                          return Future.succeededFuture(pool);
                      })
-                     .compose(pool -> pool.getConnection()
-                                          .compose(sqlConnection -> sqlConnection.prepare(sql)
-                                                                                 .compose(preparedStatement -> {
-                                                                                     Cursor cursor = preparedStatement.cursor();
+                     .compose(pool -> pool
+                             .getConnection()
+                             .compose(sqlConnection -> sqlConnection
+                                     .prepare(sql)
+                                     .compose(preparedStatement -> {
+                                         Cursor cursor = preparedStatement.cursor();
 
-                                                                                     return Keel.asyncCallRepeatedly(routineResult -> cursor.read(readWindowSize)
-                                                                                                                                            .compose(readWindowFunction)
-                                                                                                                                            .compose(v -> {
-                                                                                                                                                if (!cursor.hasMore()) {
-                                                                                                                                                    routineResult.stop();
-                                                                                                                                                    return Future.succeededFuture();
-                                                                                                                                                }
-                                                                                                                                                return Future.succeededFuture();
-                                                                                                                                            }))
-                                                                                                .eventually(cursor::close);
-                                                                                 })
-                                                                                 .eventually(sqlConnection::close))
-                                          .eventually(pool::close));
+                                         return KeelAsyncMixin.getInstance()
+                                                              .asyncCallRepeatedly(routineResult -> cursor
+                                                                      .read(readWindowSize)
+                                                                      .compose(readWindowFunction)
+                                                                      .compose(v -> {
+                                                                          if (!cursor.hasMore()) {
+                                                                              routineResult.stop();
+                                                                              return Future.succeededFuture();
+                                                                          }
+                                                                          return Future.succeededFuture();
+                                                                      }))
+                                                              .eventually(cursor::close);
+                                     })
+                                     .eventually(sqlConnection::close))
+                             .eventually(pool::close));
     }
 }

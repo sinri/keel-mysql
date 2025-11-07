@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql.result.matrix;
 
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
 import io.github.sinri.keel.integration.mysql.result.row.ResultRow;
+import io.github.sinri.keel.utils.time.TimeUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mysqlclient.MySQLClient;
@@ -14,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 1.8
@@ -117,7 +117,7 @@ class ResultMatrixImpl implements ResultMatrix {
      */
     @Override
     public String getOneColumnOfFirstRowAsDateTime(String columnName) throws KeelSQLResultRowIndexError {
-        return Keel.datetimeHelper().getMySQLFormatLocalDateTimeExpression(getFirstRow().getString(columnName));
+        return TimeUtils.getMySQLFormatLocalDateTimeExpression(getFirstRow().getString(columnName));
     }
 
     @Override
@@ -147,7 +147,7 @@ class ResultMatrixImpl implements ResultMatrix {
     public List<String> getOneColumnAsDateTime(String columnName) {
         List<String> x = new ArrayList<>();
         for (var row : rowList) {
-            x.add(Keel.datetimeHelper().getMySQLFormatLocalDateTimeExpression(row.getString(columnName)));
+            x.add(TimeUtils.getMySQLFormatLocalDateTimeExpression(row.getString(columnName)));
         }
         return x;
     }

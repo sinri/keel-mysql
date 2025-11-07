@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
-import io.github.sinri.keel.core.ValueBox;
 import io.github.sinri.keel.integration.mysql.condition.*;
+import io.github.sinri.keel.utils.ValueBox;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 1.9 all the callback function could return null safely. by Sinri 2020-02-07
@@ -278,6 +277,6 @@ public class ConditionsComponent {
     @Override
     public String toString() {
         if (conditions.isEmpty()) return "";
-        return Keel.stringHelper().joinStringArray(conditions, " and ");
+        return String.join(" and ", conditions.stream().map(MySQLCondition::toString).toList());
     }
 }

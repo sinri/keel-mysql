@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/create-view.html">CREATE VIEW Statement</a>
@@ -86,10 +85,7 @@ public class CreateViewStatement extends AbstractStatement {
 
         var columnsString = "";
         if (!columns.isEmpty()) {
-            columnsString = "(" + Keel.stringHelper().joinStringArray(
-                    columns.stream().map(x -> "`" + x + "`").collect(Collectors.toList()),
-                    ", "
-            ) + ")";
+            columnsString = "(" + columns.stream().map(x -> "`" + x + "`").collect(Collectors.joining(", ")) + ")";
         }
         return "CREATE "
                 + (createOrReplace ? "OR REPLACE" : "") + " "

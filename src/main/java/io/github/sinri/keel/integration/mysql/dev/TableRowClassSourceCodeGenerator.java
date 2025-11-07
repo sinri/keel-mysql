@@ -1,5 +1,7 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
+import io.github.sinri.keel.base.KeelBase;
+import io.github.sinri.keel.base.async.KeelAsyncMixin;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -14,7 +16,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.15
@@ -127,10 +128,10 @@ public class TableRowClassSourceCodeGenerator {
         getLogger().info("To generate class code for tables: " + String.join(", ", tables));
 
         Map<String, String> writeMap = new HashMap<>();
-        return Keel.asyncCallIteratively(
+        return KeelAsyncMixin.getInstance().asyncCallIteratively(
                            tables,
                            table -> {
-                               String className = Keel.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
+                               String className = TableRowClassBuilder.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
                                String classFile = packagePath + "/" + className + ".java";
 
                                getLogger().info(String.format("To generate class %s to file %s", className, classFile));
@@ -150,10 +151,12 @@ public class TableRowClassSourceCodeGenerator {
                                               return Future.succeededFuture();
                                           });
                            })
-                   .compose(v -> Keel.asyncCallIteratively(writeMap.entrySet(), entry -> {
+                             .compose(v -> KeelAsyncMixin.getInstance()
+                                                         .asyncCallIteratively(writeMap.entrySet(), entry -> {
                        var classFile = entry.getKey();
                        var code = entry.getValue();
-                       return Keel.getVertx().fileSystem().writeFile(classFile, Buffer.buffer(code));
+                                                             return KeelBase.getVertx().fileSystem()
+                                                                            .writeFile(classFile, Buffer.buffer(code));
                    }));
     }
 

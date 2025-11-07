@@ -4,9 +4,10 @@ import io.github.sinri.keel.integration.mysql.result.row.AbstractTableRow;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
-import java.util.Date;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.15
@@ -14,6 +15,15 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.1.7 Add deprecated table annotation.
  */
 class TableRowClassBuilder {
+
+    private static final Map<String, String> HttpEntityEscapeDictionary = new LinkedHashMap<>();
+
+    static {
+        HttpEntityEscapeDictionary.put("&", "&amp;");
+        HttpEntityEscapeDictionary.put("@", "&commat;");
+        HttpEntityEscapeDictionary.put("<", "&lt;");
+        HttpEntityEscapeDictionary.put(">", "&gt;");
+    }
 
     private final @Nonnull TableRowClassBuildOptions options;
     /**
@@ -23,6 +33,40 @@ class TableRowClassBuilder {
 
     public TableRowClassBuilder(@Nonnull TableRowClassBuildOptions options) {
         this.options = options;
+    }
+
+    static String escapeForHttpEntity(String raw) {
+        AtomicReference<String> x = new AtomicReference<>(raw);
+
+
+        HttpEntityEscapeDictionary.forEach((k, v) -> x.set(x.get().replace(k, v)));
+        return x.get();
+    }
+
+    @Nullable
+    static String fromUnderScoreCaseToCamelCase(@Nullable String underScoreCase, boolean firstCharLower) {
+        if (underScoreCase == null) {
+            return null;
+        }
+        if (underScoreCase.isEmpty()) {
+            return "";
+        }
+        String[] parts = underScoreCase.toLowerCase().split("[\\s_]");
+        List<String> camel = new ArrayList<>();
+
+        boolean isFirst = true;
+        for (var part : parts) {
+            if (part != null && !part.isBlank()) {
+                if (isFirst && firstCharLower) {
+                    camel.add(part);
+                    isFirst = false;
+                } else {
+                    camel.add(part.substring(0, 1).toUpperCase() + part.substring(1));
+                }
+            }
+        }
+
+        return String.join("", camel);
     }
 
     protected String parsedTableComment() {
@@ -35,15 +79,11 @@ class TableRowClassBuilder {
             if (split.length > 1) {
                 // this table is deprecated
                 this.tableDeprecated = true;
-                return Keel.stringHelper().escapeForHttpEntity(split[1]);
+                return escapeForHttpEntity(split[1]);
             } else {
-                return Keel.stringHelper().escapeForHttpEntity(tableComment);
+                return escapeForHttpEntity(tableComment);
             }
         }
-    }
-
-    public String getClassName() {
-        return Keel.stringHelper().fromUnderScoreCaseToCamelCase(options.getTable()) + "TableRow";
     }
 
     public String build() {
@@ -136,5 +176,9 @@ class TableRowClassBuilder {
     @Override
     public String toString() {
         return build();
+    }
+
+    public String getClassName() {
+        return fromUnderScoreCaseToCamelCase(options.getTable(), false) + "TableRow";
     }
 }

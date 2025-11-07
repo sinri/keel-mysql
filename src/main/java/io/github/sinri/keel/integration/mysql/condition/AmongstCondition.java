@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class AmongstCondition implements MySQLCondition {
     public static final String OP_IN = "IN";
@@ -134,7 +133,7 @@ public class AmongstCondition implements MySQLCondition {
         if (inverseOperator) {
             s += " NOT";
         }
-        s += " " + OP_IN + " (" + Keel.stringHelper().joinStringArray(targetSet, ",") + ")";
+        s += " " + OP_IN + " (" + String.join(",", targetSet) + ")";
         return s;
     }
 }

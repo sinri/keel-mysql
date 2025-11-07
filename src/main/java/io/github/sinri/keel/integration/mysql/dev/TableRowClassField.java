@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * As of 3.0.18 Finished Technical Preview.
@@ -141,9 +140,9 @@ class TableRowClassField {
             if (split.length > 1) {
                 // this table is deprecated
                 this.fieldDeprecated = true;
-                actualComment = Keel.stringHelper().escapeForHttpEntity(split[1]);
+                actualComment = TableRowClassBuilder.escapeForHttpEntity(split[1]);
             } else {
-                actualComment = Keel.stringHelper().escapeForHttpEntity(comment);
+                actualComment = TableRowClassBuilder.escapeForHttpEntity(comment);
             }
         } else {
             actualComment = "";
@@ -151,7 +150,7 @@ class TableRowClassField {
     }
 
     public String build() {
-        String getter = "get" + Keel.stringHelper().fromUnderScoreCaseToCamelCase(field);
+        String getter = "get" + TableRowClassBuilder.fromUnderScoreCaseToCamelCase(field, false);
 
         StringBuilder code = new StringBuilder();
         if (looseEnum != null) {

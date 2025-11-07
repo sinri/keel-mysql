@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class DeleteStatement extends AbstractStatement implements ModifyStatementMixin {
     final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
@@ -81,7 +80,7 @@ public class DeleteStatement extends AbstractStatement implements ModifyStatemen
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "WHERE " + whereConditionsComponent;
         }
         if (!sortRules.isEmpty()) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ORDER BY " + Keel.stringHelper().joinStringArray(sortRules, ",");
+            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ORDER BY " + String.join(",", sortRules);
         }
         if (limit > 0) {
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "limit " + limit;

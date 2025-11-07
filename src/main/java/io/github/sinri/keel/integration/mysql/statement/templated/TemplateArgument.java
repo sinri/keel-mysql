@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.8
@@ -43,9 +42,9 @@ public class TemplateArgument {
 
     public static TemplateArgument forString(@Nonnull String string) {
         String s1 = Quoter.escapeString(string);
-//        System.out.println("S1 | "+s1);
+        //        System.out.println("S1 | "+s1);
         String s2 = Quoter.quoteEscapedString(s1);
-//        System.out.println("S2 | "+s2);
+        //        System.out.println("S2 | "+s2);
         return forExpression(s2);
     }
 
@@ -75,7 +74,7 @@ public class TemplateArgument {
             }
             throw new RuntimeException();
         } else {
-            return "(" + Keel.stringHelper().joinStringArray(expressions, ",") + ")";
+            return "(" + String.join(",", expressions) + ")";
         }
     }
 }

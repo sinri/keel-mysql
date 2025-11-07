@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/alter-table.html">ALTER TABLE Statement</a>
@@ -44,7 +43,8 @@ public class AlterTableStatement extends AbstractStatement {
         //    [alter_option [, alter_option] ...]
         //    [partition_options]
         return "ALTER TABLE " + getTableExpression() + " " + SQL_COMPONENT_SEPARATOR
-                + Keel.stringHelper().joinStringArray(alterOptions, ",") + " " + SQL_COMPONENT_SEPARATOR
+                + alterOptions.stream().map(Object::toString)
+                              .reduce((a, b) -> a + "," + b) + " " + SQL_COMPONENT_SEPARATOR
                 + (partitionOptions == null ? "" : partitionOptions);
     }
 

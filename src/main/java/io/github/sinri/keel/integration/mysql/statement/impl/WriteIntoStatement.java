@@ -11,7 +11,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class WriteIntoStatement extends AbstractStatement implements WriteIntoStatementMixin {
     /**
@@ -222,7 +221,7 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
             sql += schema + ".";
         }
         sql += table;
-        sql += " (" + Keel.stringHelper().joinStringArray(columns, ",") + ")";
+        sql += " (" + String.join(",", columns) + ")";
         if (sourceTableName != null) {
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "TABLE " + sourceTableName;
         } else if (sourceSelectSQL != null) {
@@ -231,15 +230,15 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "VALUES" + AbstractStatement.SQL_COMPONENT_SEPARATOR;
             List<String> items = new ArrayList<>();
             for (List<String> row : batchValues) {
-                items.add("(" + Keel.stringHelper().joinStringArray(row, ",") + ")");
+                items.add("(" + String.join(",", row) + ")");
             }
-            sql += Keel.stringHelper().joinStringArray(items, "," + AbstractStatement.SQL_COMPONENT_SEPARATOR);
+            sql += String.join("," + AbstractStatement.SQL_COMPONENT_SEPARATOR, items);
         }
         if (!onDuplicateKeyUpdateAssignmentMap.isEmpty()) {
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ON DUPLICATE KEY UPDATE" + AbstractStatement.SQL_COMPONENT_SEPARATOR;
             List<String> items = new ArrayList<>();
             onDuplicateKeyUpdateAssignmentMap.forEach((key, value) -> items.add(key + " = " + value));
-            sql += Keel.stringHelper().joinStringArray(items, "," + AbstractStatement.SQL_COMPONENT_SEPARATOR);
+            sql += String.join("," + AbstractStatement.SQL_COMPONENT_SEPARATOR, items);
         }
         if (!getRemarkAsComment().isEmpty()) {
             sql += "\n-- " + getRemarkAsComment() + "\n";
@@ -298,8 +297,7 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
             Collection<RowToWrite> rows = new ArrayList<>();
             jsonArray.forEach(item -> {
                 Objects.requireNonNull(item);
-                if (item instanceof JsonObject) {
-                    JsonObject o = (JsonObject) item;
+                if (item instanceof JsonObject o) {
                     rows.add(fromJsonObject(o));
                 } else {
                     throw new IllegalArgumentException("JsonArray contains non JsonObject item.");

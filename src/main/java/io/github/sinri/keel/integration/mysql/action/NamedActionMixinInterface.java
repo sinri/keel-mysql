@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.action;
 
-import io.github.sinri.keel.core.SelfInterface;
+import io.github.sinri.keel.base.annotations.SelfInterface;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 
 import javax.annotation.Nonnull;

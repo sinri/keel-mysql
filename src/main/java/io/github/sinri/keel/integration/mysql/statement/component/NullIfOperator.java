@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
-import io.github.sinri.keel.core.TechnicalPreview;
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.integration.mysql.Quoter;
 
 import javax.annotation.Nonnull;

@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql;
 
+import io.github.sinri.keel.base.KeelBase;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
@@ -16,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * Pair data source to a named mysql connection.
@@ -66,7 +66,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
         this.pool = MySQLBuilder.pool()
                                 .with(configuration.getPoolOptions())
                                 .connectingTo(configuration.getConnectOptions())
-                                .using(Keel.getVertx())
+                                .using(KeelBase.getVertx())
                                 .withConnectHandler(sqlConnection -> initializeConnection(sqlConnection, connectionSetUpFunction))
                                 .build();
     }
@@ -84,7 +84,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
                                     String versionExp = firstRow.getString("v");
                                     return Future.succeededFuture(versionExp);
                                 } catch (Throwable e) {
-                                    Keel.getLogger().exception(e);
+                                    // Keel.getLogger().exception(e);
                                     return Future.succeededFuture(null);
                                 }
                             });

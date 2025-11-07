@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class UpdateStatement extends AbstractStatement implements ModifyStatementMixin {
     /**
@@ -127,13 +126,13 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
         // since 3.0.19
         List<String> setPairs = new ArrayList<>();
         assignments.forEach(assignment -> setPairs.add(assignment.toString()));
-        sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "SET " + Keel.stringHelper().joinStringArray(setPairs, ", ");
+        sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "SET " + String.join(", ", setPairs);
 
         if (!whereConditionsComponent.isEmpty()) {
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "WHERE " + whereConditionsComponent;
         }
         if (!sortRules.isEmpty()) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ORDER BY " + Keel.stringHelper().joinStringArray(sortRules, ",");
+            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ORDER BY " + String.join(",", sortRules);
         }
         if (limit > 0) {
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "LIMIT " + limit;
