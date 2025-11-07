@@ -6,6 +6,7 @@ import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.utils.StringUtils;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -131,7 +132,7 @@ public class TableRowClassSourceCodeGenerator {
         return KeelAsyncMixin.getInstance().asyncCallIteratively(
                            tables,
                            table -> {
-                               String className = TableRowClassBuilder.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
+                               String className = StringUtils.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
                                String classFile = packagePath + "/" + className + ".java";
 
                                getLogger().info(String.format("To generate class %s to file %s", className, classFile));

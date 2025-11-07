@@ -1,12 +1,11 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.integration.mysql.result.row.AbstractTableRow;
+import io.github.sinri.keel.utils.StringUtils;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Date;
 
 
 /**
@@ -16,14 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 class TableRowClassBuilder {
 
-    private static final Map<String, String> HttpEntityEscapeDictionary = new LinkedHashMap<>();
-
-    static {
-        HttpEntityEscapeDictionary.put("&", "&amp;");
-        HttpEntityEscapeDictionary.put("@", "&commat;");
-        HttpEntityEscapeDictionary.put("<", "&lt;");
-        HttpEntityEscapeDictionary.put(">", "&gt;");
-    }
 
     private final @Nonnull TableRowClassBuildOptions options;
     /**
@@ -33,40 +24,6 @@ class TableRowClassBuilder {
 
     public TableRowClassBuilder(@Nonnull TableRowClassBuildOptions options) {
         this.options = options;
-    }
-
-    static String escapeForHttpEntity(String raw) {
-        AtomicReference<String> x = new AtomicReference<>(raw);
-
-
-        HttpEntityEscapeDictionary.forEach((k, v) -> x.set(x.get().replace(k, v)));
-        return x.get();
-    }
-
-    @Nullable
-    static String fromUnderScoreCaseToCamelCase(@Nullable String underScoreCase, boolean firstCharLower) {
-        if (underScoreCase == null) {
-            return null;
-        }
-        if (underScoreCase.isEmpty()) {
-            return "";
-        }
-        String[] parts = underScoreCase.toLowerCase().split("[\\s_]");
-        List<String> camel = new ArrayList<>();
-
-        boolean isFirst = true;
-        for (var part : parts) {
-            if (part != null && !part.isBlank()) {
-                if (isFirst && firstCharLower) {
-                    camel.add(part);
-                    isFirst = false;
-                } else {
-                    camel.add(part.substring(0, 1).toUpperCase() + part.substring(1));
-                }
-            }
-        }
-
-        return String.join("", camel);
     }
 
     protected String parsedTableComment() {
@@ -79,9 +36,9 @@ class TableRowClassBuilder {
             if (split.length > 1) {
                 // this table is deprecated
                 this.tableDeprecated = true;
-                return escapeForHttpEntity(split[1]);
+                return StringUtils.escapeForHttpEntity(split[1]);
             } else {
-                return escapeForHttpEntity(tableComment);
+                return StringUtils.escapeForHttpEntity(tableComment);
             }
         }
     }
@@ -179,6 +136,6 @@ class TableRowClassBuilder {
     }
 
     public String getClassName() {
-        return fromUnderScoreCaseToCamelCase(options.getTable(), false) + "TableRow";
+        return StringUtils.fromUnderScoreCaseToCamelCase(options.getTable(), false) + "TableRow";
     }
 }

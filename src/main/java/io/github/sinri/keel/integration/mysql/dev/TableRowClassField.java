@@ -1,5 +1,7 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
+import io.github.sinri.keel.utils.StringUtils;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
@@ -140,9 +142,9 @@ class TableRowClassField {
             if (split.length > 1) {
                 // this table is deprecated
                 this.fieldDeprecated = true;
-                actualComment = TableRowClassBuilder.escapeForHttpEntity(split[1]);
+                actualComment = StringUtils.escapeForHttpEntity(split[1]);
             } else {
-                actualComment = TableRowClassBuilder.escapeForHttpEntity(comment);
+                actualComment = StringUtils.escapeForHttpEntity(comment);
             }
         } else {
             actualComment = "";
@@ -150,7 +152,7 @@ class TableRowClassField {
     }
 
     public String build() {
-        String getter = "get" + TableRowClassBuilder.fromUnderScoreCaseToCamelCase(field, false);
+        String getter = "get" + StringUtils.fromUnderScoreCaseToCamelCase(field, false);
 
         StringBuilder code = new StringBuilder();
         if (looseEnum != null) {

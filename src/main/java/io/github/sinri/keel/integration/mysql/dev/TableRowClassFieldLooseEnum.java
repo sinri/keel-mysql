@@ -1,5 +1,7 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
+import io.github.sinri.keel.utils.StringUtils;
+
 import java.util.Collection;
 
 
@@ -15,7 +17,7 @@ public class TableRowClassFieldLooseEnum {
     public TableRowClassFieldLooseEnum(String fieldName, Collection<String> enumElements) {
         this.fieldName = fieldName;
         this.enumElements = enumElements;
-        this.enumName = TableRowClassBuilder.fromUnderScoreCaseToCamelCase(fieldName, false) + "Enum";
+        this.enumName = StringUtils.fromUnderScoreCaseToCamelCase(fieldName, false) + "Enum";
     }
 
     public String looseEnumName() {
