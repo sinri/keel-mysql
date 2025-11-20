@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.action;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 
 /**
  * Abstract class that implements the NamedActionInterface for handling named MySQL connections.
@@ -12,14 +12,14 @@ import javax.annotation.Nonnull;
  * @since 3.2.11 Moved from `io.github.sinri.keel.mysql.AbstractNamedAction` and refined.
  */
 public abstract class AbstractNamedAction<C extends NamedMySQLConnection> implements NamedActionInterface<C> {
-    private final @Nonnull C namedSqlConnection;
+    private final @NotNull C namedSqlConnection;
 
     /**
      * Constructs an AbstractNamedAction with the specified named MySQL connection.
      *
      * @param namedSqlConnection the named MySQL connection instance to be associated with this action; must not be null
      */
-    public AbstractNamedAction(@Nonnull C namedSqlConnection) {
+    public AbstractNamedAction(@NotNull C namedSqlConnection) {
         this.namedSqlConnection = namedSqlConnection;
     }
 
@@ -28,7 +28,7 @@ public abstract class AbstractNamedAction<C extends NamedMySQLConnection> implem
      *
      * @return the instance of named MySQL connection associated with this action; never null
      */
-    @Nonnull
+    @NotNull
     @Override
     public C getNamedSqlConnection() {
         return namedSqlConnection;

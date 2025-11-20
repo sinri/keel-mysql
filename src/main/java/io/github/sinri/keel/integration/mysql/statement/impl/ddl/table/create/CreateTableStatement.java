@@ -3,9 +3,9 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.component.*;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
 import io.vertx.core.Handler;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,18 +39,18 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
     private @Nullable String asSourceType = null;
     private ReadStatementMixin readStatement = null;
 
-    public CreateTableStatement asReadStatement(@Nonnull ReadStatementMixin readStatement) {
+    public CreateTableStatement asReadStatement(@NotNull ReadStatementMixin readStatement) {
         this.readStatement = readStatement;
         return getImplementation();
     }
 
-    public CreateTableStatement asReadStatementWithIgnore(@Nonnull ReadStatementMixin readStatement) {
+    public CreateTableStatement asReadStatementWithIgnore(@NotNull ReadStatementMixin readStatement) {
         this.asSourceType = "IGNORE";
         this.readStatement = readStatement;
         return getImplementation();
     }
 
-    public CreateTableStatement asReadStatementWithReplace(@Nonnull ReadStatementMixin readStatement) {
+    public CreateTableStatement asReadStatementWithReplace(@NotNull ReadStatementMixin readStatement) {
         this.asSourceType = "REPLACE";
         this.readStatement = readStatement;
         return getImplementation();
@@ -80,7 +80,7 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
         return getImplementation();
     }
 
-    public CreateTableStatement handleTableOptions(@Nonnull Handler<CreateTableOptions> tableOptionHandler) {
+    public CreateTableStatement handleTableOptions(@NotNull Handler<CreateTableOptions> tableOptionHandler) {
         tableOptionHandler.handle(tableOptions);
         return getImplementation();
     }
@@ -90,31 +90,31 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
         return getImplementation();
     }
 
-    public CreateTableStatement addColumnDefinition(@Nonnull Handler<TableCreateDefinitionForColumn> columnDefinitionHandler) {
+    public CreateTableStatement addColumnDefinition(@NotNull Handler<TableCreateDefinitionForColumn> columnDefinitionHandler) {
         TableCreateDefinitionForColumn tableCreateDefinitionForColumn = new TableCreateDefinitionForColumn();
         columnDefinitionHandler.handle(tableCreateDefinitionForColumn);
         return this.addDefinition(tableCreateDefinitionForColumn);
     }
 
-    public CreateTableStatement addPrimaryKeyDefinition(@Nonnull Handler<TableCreateDefinitionForPrimaryKey> primaryKeyDefinitionHandler) {
+    public CreateTableStatement addPrimaryKeyDefinition(@NotNull Handler<TableCreateDefinitionForPrimaryKey> primaryKeyDefinitionHandler) {
         TableCreateDefinitionForPrimaryKey tableCreateDefinitionForPrimaryKey = new TableCreateDefinitionForPrimaryKey();
         primaryKeyDefinitionHandler.handle(tableCreateDefinitionForPrimaryKey);
         return this.addDefinition(tableCreateDefinitionForPrimaryKey);
     }
 
-    public CreateTableStatement addUniqueKeyDefinition(@Nonnull Handler<TableCreateDefinitionForUniqueKey> uniqueKeyDefinitionHandler) {
+    public CreateTableStatement addUniqueKeyDefinition(@NotNull Handler<TableCreateDefinitionForUniqueKey> uniqueKeyDefinitionHandler) {
         TableCreateDefinitionForUniqueKey tableCreateDefinitionForUniqueKey = new TableCreateDefinitionForUniqueKey();
         uniqueKeyDefinitionHandler.handle(tableCreateDefinitionForUniqueKey);
         return this.addDefinition(tableCreateDefinitionForUniqueKey);
     }
 
-    public CreateTableStatement addKeyDefinition(@Nonnull Handler<TableCreateDefinitionForKey> keyDefinitionHandler) {
+    public CreateTableStatement addKeyDefinition(@NotNull Handler<TableCreateDefinitionForKey> keyDefinitionHandler) {
         TableCreateDefinitionForKey tableCreateDefinitionForKey = new TableCreateDefinitionForKey();
         keyDefinitionHandler.handle(tableCreateDefinitionForKey);
         return this.addDefinition(tableCreateDefinitionForKey);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public CreateTableStatement getImplementation() {
         return this;

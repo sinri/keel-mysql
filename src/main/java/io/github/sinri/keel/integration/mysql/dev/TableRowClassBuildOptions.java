@@ -1,7 +1,8 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  * @since 4.1.0
  */
 class TableRowClassBuildOptions extends TableRowClassBuildStandard {
-    private final @Nonnull List<TableRowClassField> fields = new ArrayList<>();
+    private final @NotNull List<TableRowClassField> fields = new ArrayList<>();
     private String packageName;
     private @Nullable String schema;
     private String table;
@@ -28,7 +29,7 @@ class TableRowClassBuildOptions extends TableRowClassBuildStandard {
         return packageName;
     }
 
-    public TableRowClassBuildOptions setPackageName(@Nonnull String packageName) {
+    public TableRowClassBuildOptions setPackageName(@NotNull String packageName) {
         this.packageName = packageName;
         return this;
     }
@@ -47,7 +48,7 @@ class TableRowClassBuildOptions extends TableRowClassBuildStandard {
         return table;
     }
 
-    public TableRowClassBuildOptions setTable(@Nonnull String table) {
+    public TableRowClassBuildOptions setTable(@NotNull String table) {
         this.table = table;
         return this;
     }
@@ -78,12 +79,12 @@ class TableRowClassBuildOptions extends TableRowClassBuildStandard {
         return this;
     }
 
-    public TableRowClassBuildOptions addFields(@Nonnull List<TableRowClassField> fields) {
+    public TableRowClassBuildOptions addFields(@NotNull List<TableRowClassField> fields) {
         this.fields.addAll(fields);
         return this;
     }
 
-    @Nonnull
+    @NotNull
     public List<TableRowClassField> getFields() {
         return fields;
     }

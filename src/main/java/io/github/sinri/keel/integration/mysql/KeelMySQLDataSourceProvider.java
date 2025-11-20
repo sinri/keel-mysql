@@ -1,22 +1,23 @@
 package io.github.sinri.keel.integration.mysql;
 
-import io.github.sinri.keel.base.KeelBase;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.sqlclient.SqlConnection;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 public class KeelMySQLDataSourceProvider {
 
-    @Nonnull
+    @NotNull
     public static String defaultMySQLDataSourceName() {
-        return Objects.requireNonNull(KeelBase.getConfiguration()
+        return Objects.requireNonNull(Keel.getConfiguration()
                                               .readString(List.of("mysql", "default_data_source_name"), "default"));
     }
 
@@ -27,8 +28,8 @@ public class KeelMySQLDataSourceProvider {
      *
      */
     public static <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
-            @Nonnull String dataSourceName,
-            @Nonnull Function<SqlConnection, C> sqlConnectionWrapper
+            @NotNull String dataSourceName,
+            @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
         return initializeNamedMySQLDataSource(dataSourceName, sqlConnectionWrapper, null, Promise.promise());
     }
@@ -39,8 +40,8 @@ public class KeelMySQLDataSourceProvider {
      * @since 4.1.5
      */
     public static <C extends NamedMySQLConnection> Future<NamedMySQLDataSource<C>> loadNamedMySQLDataSource(
-            @Nonnull String dataSourceName,
-            @Nonnull Function<SqlConnection, C> sqlConnectionWrapper
+            @NotNull String dataSourceName,
+            @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
         Promise<Void> initializedPromise = Promise.promise();
         var dataSource = initializeNamedMySQLDataSource(dataSourceName, sqlConnectionWrapper, null, initializedPromise);
@@ -51,12 +52,12 @@ public class KeelMySQLDataSourceProvider {
      * @since 4.1.5
      */
     public static <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
-            @Nonnull String dataSourceName,
-            @Nonnull Function<SqlConnection, C> sqlConnectionWrapper,
+            @NotNull String dataSourceName,
+            @NotNull Function<SqlConnection, C> sqlConnectionWrapper,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
             Promise<Void> initializedPromise
     ) {
-        var configuration = KeelBase.getConfiguration().extract("mysql", dataSourceName);
+        var configuration = Keel.getConfiguration().extract("mysql", dataSourceName);
         Objects.requireNonNull(configuration);
         KeelMySQLConfiguration mySQLConfigure = new KeelMySQLConfiguration(configuration);
         if (connectionSetUpFunction == null) {
@@ -64,7 +65,7 @@ public class KeelMySQLDataSourceProvider {
         }
         var dataSource = new NamedMySQLDataSource<>(mySQLConfigure, connectionSetUpFunction, sqlConnectionWrapper);
 
-        KeelBase.getVertx().setTimer(
+        Keel.getVertx().setTimer(
                 mySQLConfigure.getPoolOptions().getConnectionTimeout() * 1000L,
                 x -> {
                     initializedPromise.tryFail("MySQL Pool Connection Timeout on testing, the configuration might need adjusting.");
@@ -81,7 +82,7 @@ public class KeelMySQLDataSourceProvider {
      * @since 3.0.11 Technical Preview.
      * @since 3.0.18 Finished Technical Preview.
      */
-    public static NamedMySQLDataSource<DynamicNamedMySQLConnection> initializeDynamicNamedMySQLDataSource(@Nonnull String dataSourceName) {
+    public static NamedMySQLDataSource<DynamicNamedMySQLConnection> initializeDynamicNamedMySQLDataSource(@NotNull String dataSourceName) {
         return initializeNamedMySQLDataSource(dataSourceName, sqlConnection -> new DynamicNamedMySQLConnection(sqlConnection, dataSourceName));
     }
 }

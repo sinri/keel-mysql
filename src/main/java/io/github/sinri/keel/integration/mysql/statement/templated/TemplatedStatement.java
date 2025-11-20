@@ -1,8 +1,9 @@
 package io.github.sinri.keel.integration.mysql.statement.templated;
 
-import io.github.sinri.keel.utils.io.FileUtils;
 
-import javax.annotation.Nonnull;
+import io.github.sinri.keel.core.utils.FileUtils;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -21,7 +22,7 @@ import java.util.regex.Matcher;
  * @since 3.0.8
  */
 public interface TemplatedStatement {
-    static TemplatedReadStatement loadTemplateToRead(@Nonnull String templatePath) {
+    static TemplatedReadStatement loadTemplateToRead(@NotNull String templatePath) {
         try {
             byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
             String sqlTemplate = new String(bytes);
@@ -31,7 +32,7 @@ public interface TemplatedStatement {
         }
     }
 
-    static TemplatedModifyStatement loadTemplateToModify(@Nonnull String templatePath) {
+    static TemplatedModifyStatement loadTemplateToModify(@NotNull String templatePath) {
         try {
             byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
             String sqlTemplate = new String(bytes);

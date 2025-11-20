@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.utils.StringUtils;
+
+import io.github.sinri.keel.core.utils.StringUtils;
 
 import java.util.Collection;
 

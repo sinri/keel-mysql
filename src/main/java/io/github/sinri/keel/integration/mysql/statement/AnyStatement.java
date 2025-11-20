@@ -20,8 +20,8 @@ import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedReadS
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedStatement;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 
 /**
  * @since 3.0.9
@@ -31,7 +31,7 @@ public interface AnyStatement {
     /**
      * @since 3.0.9
      */
-    static AbstractStatement raw(@Nonnull String sql) {
+    static AbstractStatement raw(@NotNull String sql) {
         return raw(sql, false);
     }
 
@@ -44,7 +44,7 @@ public interface AnyStatement {
      * @return an instance of AbstractStatement
      * @since 4.0.7
      */
-    static AbstractStatement raw(@Nonnull String sql, boolean withoutPrepare) {
+    static AbstractStatement raw(@NotNull String sql, boolean withoutPrepare) {
         return new AbstractStatement() {
             @Override
             public String toString() {
@@ -61,7 +61,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractReadStatement
      */
-    static SelectStatementMixin select(@Nonnull Handler<SelectStatement> statementHandler) {
+    static SelectStatementMixin select(@NotNull Handler<SelectStatement> statementHandler) {
         SelectStatement selectStatement = new SelectStatement();
         statementHandler.handle(selectStatement);
         return selectStatement;
@@ -70,7 +70,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractReadStatement
      */
-    static ReadStatementMixin union(@Nonnull Handler<UnionStatement> unionStatementHandler) {
+    static ReadStatementMixin union(@NotNull Handler<UnionStatement> unionStatementHandler) {
         UnionStatement unionStatement = new UnionStatement();
         unionStatementHandler.handle(unionStatement);
         return unionStatement;
@@ -79,7 +79,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractModifyStatement
      */
-    static ModifyStatementMixin update(@Nonnull Handler<UpdateStatement> updateStatementHandler) {
+    static ModifyStatementMixin update(@NotNull Handler<UpdateStatement> updateStatementHandler) {
         UpdateStatement updateStatement = new UpdateStatement();
         updateStatementHandler.handle(updateStatement);
         return updateStatement;
@@ -88,7 +88,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractModifyStatement
      */
-    static ModifyStatementMixin delete(@Nonnull Handler<DeleteStatement> deleteStatementHandler) {
+    static ModifyStatementMixin delete(@NotNull Handler<DeleteStatement> deleteStatementHandler) {
         DeleteStatement deleteStatement = new DeleteStatement();
         deleteStatementHandler.handle(deleteStatement);
         return deleteStatement;
@@ -106,7 +106,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractModifyStatement
      */
-    static WriteIntoStatementMixin replace(@Nonnull Handler<WriteIntoStatement> statementHandler) {
+    static WriteIntoStatementMixin replace(@NotNull Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.REPLACE);
         statementHandler.handle(writeIntoStatement);
         return writeIntoStatement;
@@ -116,7 +116,7 @@ public interface AnyStatement {
      * @since 3.2.19
      * @since 3.2.21 return AbstractStatement
      */
-    static AbstractStatement call(@Nonnull Handler<CallStatement> statementHandler) {
+    static AbstractStatement call(@NotNull Handler<CallStatement> statementHandler) {
         CallStatement callStatement = new CallStatement();
         statementHandler.handle(callStatement);
         return callStatement;
@@ -125,7 +125,7 @@ public interface AnyStatement {
     /**
      * @since 4.0.4
      */
-    static AbstractStatement truncateTable(@Nonnull Handler<TruncateTableStatement> statementHandler) {
+    static AbstractStatement truncateTable(@NotNull Handler<TruncateTableStatement> statementHandler) {
         TruncateTableStatement truncateTableStatement = new TruncateTableStatement();
         statementHandler.handle(truncateTableStatement);
         return truncateTableStatement;
@@ -134,7 +134,7 @@ public interface AnyStatement {
     /**
      * @since 4.0.4
      */
-    static AbstractStatement createTable(@Nonnull Handler<CreateTableStatement> statementHandler) {
+    static AbstractStatement createTable(@NotNull Handler<CreateTableStatement> statementHandler) {
         CreateTableStatement createTableStatement = new CreateTableStatement();
         statementHandler.handle(createTableStatement);
         return createTableStatement;
@@ -143,7 +143,7 @@ public interface AnyStatement {
     /**
      * @since 4.0.4
      */
-    static AbstractStatement createTableLikeTable(@Nonnull Handler<CreateTableLikeTableStatement> statementHandler) {
+    static AbstractStatement createTableLikeTable(@NotNull Handler<CreateTableLikeTableStatement> statementHandler) {
         CreateTableLikeTableStatement createTableStatement = new CreateTableLikeTableStatement();
         statementHandler.handle(createTableStatement);
         return createTableStatement;
@@ -152,7 +152,7 @@ public interface AnyStatement {
     /**
      * @since 4.0.4
      */
-    static AbstractStatement alterTable(@Nonnull Handler<AlterTableStatement> statementHandler) {
+    static AbstractStatement alterTable(@NotNull Handler<AlterTableStatement> statementHandler) {
         AlterTableStatement alterTableStatement = new AlterTableStatement();
         statementHandler.handle(alterTableStatement);
         return alterTableStatement;
@@ -161,7 +161,7 @@ public interface AnyStatement {
     /**
      * @since 4.0.4
      */
-    static AbstractStatement createView(@Nonnull Handler<CreateViewStatement> statementHandler) {
+    static AbstractStatement createView(@NotNull Handler<CreateViewStatement> statementHandler) {
         CreateViewStatement createViewStatement = new CreateViewStatement();
         statementHandler.handle(createViewStatement);
         return createViewStatement;
@@ -170,7 +170,7 @@ public interface AnyStatement {
     /**
      * @since 4.0.4
      */
-    static AbstractStatement alterView(@Nonnull Handler<AlterViewStatement> statementHandler) {
+    static AbstractStatement alterView(@NotNull Handler<AlterViewStatement> statementHandler) {
         AlterViewStatement alterViewStatement = new AlterViewStatement();
         statementHandler.handle(alterViewStatement);
         return alterViewStatement;
@@ -179,7 +179,7 @@ public interface AnyStatement {
     /**
      * @since 4.0.4
      */
-    static AbstractStatement dropView(@Nonnull Handler<DropViewStatement> statementHandler) {
+    static AbstractStatement dropView(@NotNull Handler<DropViewStatement> statementHandler) {
         DropViewStatement dropViewStatement = new DropViewStatement();
         statementHandler.handle(dropViewStatement);
         return dropViewStatement;
@@ -188,7 +188,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractReadStatement
      */
-    static ReadStatementMixin templatedRead(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
+    static ReadStatementMixin templatedRead(@NotNull String path, @NotNull Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
         TemplatedReadStatement readStatement = TemplatedStatement.loadTemplateToRead(path);
         TemplateArgumentMapping arguments = readStatement.getArguments();
         templatedReadStatementHandler.handle(arguments);
@@ -198,7 +198,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractModifyStatement
      */
-    static ModifyStatementMixin templatedModify(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
+    static ModifyStatementMixin templatedModify(@NotNull String path, @NotNull Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
         TemplatedModifyStatement templatedModifyStatement = TemplatedStatement.loadTemplateToModify(path);
         TemplateArgumentMapping arguments = templatedModifyStatement.getArguments();
         templatedModifyStatementHandler.handle(arguments);
@@ -214,7 +214,7 @@ public interface AnyStatement {
      * @since 3.0.11
      * @since 3.0.18 Finished Technical Preview.
      */
-    Future<ResultMatrix> execute(@Nonnull NamedMySQLConnection namedSqlConnection);
+    Future<ResultMatrix> execute(@NotNull NamedMySQLConnection namedSqlConnection);
 
     boolean isWithoutPrepare();
 }

@@ -1,21 +1,20 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.base.KeelBase;
-import io.github.sinri.keel.base.async.KeelAsyncMixin;
+import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
+import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
-import io.github.sinri.keel.logger.event.KeelEventLog;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
-import io.github.sinri.keel.utils.StringUtils;
+import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.sqlclient.SqlConnection;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
@@ -31,22 +30,21 @@ public class TableRowClassSourceCodeGenerator {
     @Nullable
     private Handler<TableRowClassBuildStandard> standardHandler;
 
-    private KeelIssueRecorder<KeelEventLog> logger;
+    private Logger logger;
 
     public TableRowClassSourceCodeGenerator(NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
         this.schema = null;
         this.tableSet = new HashSet<>();
         this.excludedTableSet = new HashSet<>();
-        this.logger = KeelIssueRecordCenter.outputCenter()
-                                           .generateIssueRecorder(getClass().getSimpleName(), KeelEventLog::new);
+        this.logger = StdoutLoggerFactory.getInstance().createLogger(getClass().getSimpleName());
     }
 
-    public KeelIssueRecorder<KeelEventLog> getLogger() {
+    public Logger getLogger() {
         return logger;
     }
 
-    public TableRowClassSourceCodeGenerator setLogger(KeelIssueRecorder<KeelEventLog> logger) {
+    public TableRowClassSourceCodeGenerator setLogger(Logger logger) {
         this.logger = logger;
         return this;
     }
@@ -129,7 +127,7 @@ public class TableRowClassSourceCodeGenerator {
         getLogger().info("To generate class code for tables: " + String.join(", ", tables));
 
         Map<String, String> writeMap = new HashMap<>();
-        return KeelAsyncMixin.getInstance().asyncCallIteratively(
+        return Keel.asyncCallIteratively(
                            tables,
                            table -> {
                                String className = StringUtils.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
@@ -152,12 +150,11 @@ public class TableRowClassSourceCodeGenerator {
                                               return Future.succeededFuture();
                                           });
                            })
-                             .compose(v -> KeelAsyncMixin.getInstance()
-                                                         .asyncCallIteratively(writeMap.entrySet(), entry -> {
+                   .compose(v -> Keel.asyncCallIteratively(writeMap.entrySet(), entry -> {
                        var classFile = entry.getKey();
                        var code = entry.getValue();
-                                                             return KeelBase.getVertx().fileSystem()
-                                                                            .writeFile(classFile, Buffer.buffer(code));
+                       return Keel.getVertx().fileSystem()
+                                  .writeFile(classFile, Buffer.buffer(code));
                    }));
     }
 
@@ -185,7 +182,7 @@ public class TableRowClassSourceCodeGenerator {
     /**
      * Fetch comment of a table (in schema).
      */
-    private Future<String> getCommentOfTable(@Nonnull String table, @Nullable String schema) {
+    private Future<String> getCommentOfTable(@NotNull String table, @Nullable String schema) {
         String sql_for_table_comment = "SELECT TABLE_COMMENT " +
                 "FROM INFORMATION_SCHEMA.TABLES " +
                 "WHERE TABLE_NAME = '" + table + "' " +
@@ -198,7 +195,7 @@ public class TableRowClassSourceCodeGenerator {
                             });
     }
 
-    private Future<List<TableRowClassField>> getFieldsOfTable(@Nonnull String table, @Nullable String schema, @Nullable String strictEnumPackage, @Nullable String envelopePackage) {
+    private Future<List<TableRowClassField>> getFieldsOfTable(@NotNull String table, @Nullable String schema, @Nullable String strictEnumPackage, @Nullable String envelopePackage) {
         String sql_for_columns = "show full columns in ";
         if (schema != null && !schema.isBlank()) {
             sql_for_columns += "`" + schema + "`.";
@@ -231,7 +228,7 @@ public class TableRowClassSourceCodeGenerator {
                             });
     }
 
-    private Future<String> getCreationOfTable(@Nonnull String table, @Nullable String schema) {
+    private Future<String> getCreationOfTable(@NotNull String table, @Nullable String schema) {
         String sql_sct = "show create table ";
         if (schema != null) {
             sql_sct += "`" + schema + "`.";

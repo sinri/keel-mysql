@@ -1,9 +1,9 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
+import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.github.sinri.keel.integration.mysql.condition.*;
-import io.github.sinri.keel.utils.ValueBox;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +20,7 @@ public class ConditionsComponent {
         conditions = new ArrayList<>();
     }
 
-    public ConditionsComponent(@Nonnull ConditionsComponent another) {
+    public ConditionsComponent(@NotNull ConditionsComponent another) {
         this.conditions = new ArrayList<>(another.conditions);
     }
 
@@ -33,7 +33,7 @@ public class ConditionsComponent {
      * @param value      Be quoted, number, string.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionEqualsLiteralValue(@Nonnull String expression, @Nonnull Object value) {
+    public ConditionsComponent expressionEqualsLiteralValue(@NotNull String expression, @NotNull Object value) {
         return this.comparison(compareCondition -> compareCondition
                 .compareExpression(expression)
                 .operator(CompareCondition.OP_EQ)
@@ -44,7 +44,7 @@ public class ConditionsComponent {
     /**
      * @since 4.1.0
      */
-    public ConditionsComponent expressionEqualsLiteralValueIfNonNull(@Nonnull String expression, @Nonnull ValueBox<Object> valueBox) {
+    public ConditionsComponent expressionEqualsLiteralValueIfNonNull(@NotNull String expression, @NotNull ValueBox<Object> valueBox) {
         if (valueBox.isValueSetAndNotNull()) {
             return expressionEqualsLiteralValue(expression, valueBox.getNonNullValue());
         } else {
@@ -57,7 +57,7 @@ public class ConditionsComponent {
      * @param value      Be quoted after stringify. BigDecimal would not be plain string.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionNotLiteralValue(@Nonnull String expression, @Nonnull Object value) {
+    public ConditionsComponent expressionNotLiteralValue(@NotNull String expression, @NotNull Object value) {
         return this.comparison(compareCondition -> compareCondition
                 .compareExpression(expression)
                 .operator(CompareCondition.OP_NEQ)
@@ -68,7 +68,7 @@ public class ConditionsComponent {
     /**
      * @since 4.1.0
      */
-    public ConditionsComponent expressionNotLiteralValueIfNonNull(@Nonnull String expression, @Nonnull ValueBox<Object> valueBox) {
+    public ConditionsComponent expressionNotLiteralValueIfNonNull(@NotNull String expression, @NotNull ValueBox<Object> valueBox) {
         if (valueBox.isValueSetAndNotNull()) {
             return expressionNotLiteralValue(expression, valueBox.getNonNullValue());
         } else {
@@ -81,7 +81,7 @@ public class ConditionsComponent {
      * @param value      Be quoted, numeric.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionEqualsNumericValue(@Nonnull String expression, @Nonnull Number value) {
+    public ConditionsComponent expressionEqualsNumericValue(@NotNull String expression, @NotNull Number value) {
         return this.comparison(compareCondition -> compareCondition
                 .compareExpression(expression)
                 .operator(CompareCondition.OP_EQ)
@@ -92,7 +92,7 @@ public class ConditionsComponent {
     /**
      * @since 4.1.0
      */
-    public ConditionsComponent expressionEqualsNumericValueIfNonNull(@Nonnull String expression, @Nonnull ValueBox<Number> valueBox) {
+    public ConditionsComponent expressionEqualsNumericValueIfNonNull(@NotNull String expression, @NotNull ValueBox<Number> valueBox) {
         if (valueBox.isValueSetAndNotNull()) {
             return expressionEqualsNumericValue(expression, valueBox.getNonNullValue());
         } else {
@@ -105,7 +105,7 @@ public class ConditionsComponent {
      * @param value      Be quoted, numeric. BigDecimal would not be plain string.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionNotNumericValue(@Nonnull String expression, @Nonnull Number value) {
+    public ConditionsComponent expressionNotNumericValue(@NotNull String expression, @NotNull Number value) {
         return this.comparison(compareCondition -> compareCondition
                 .compareExpression(expression)
                 .operator(CompareCondition.OP_NEQ)
@@ -113,7 +113,7 @@ public class ConditionsComponent {
         );
     }
 
-    public ConditionsComponent expressionNotNumericValueIfNonNull(@Nonnull String expression, @Nonnull ValueBox<Number> valueBox) {
+    public ConditionsComponent expressionNotNumericValueIfNonNull(@NotNull String expression, @NotNull ValueBox<Number> valueBox) {
         if (valueBox.isValueSetAndNotNull()) {
             return expressionNotNumericValue(expression, valueBox.getNonNullValue());
         } else {
@@ -125,7 +125,7 @@ public class ConditionsComponent {
      * @param expression Not be quoted, may be fields, functions, etc.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionIsNull(@Nonnull String expression) {
+    public ConditionsComponent expressionIsNull(@NotNull String expression) {
         return this.comparison(compareCondition -> compareCondition
                 .compareExpression(expression)
                 .isNull()
@@ -136,7 +136,7 @@ public class ConditionsComponent {
      * @param expression Not be quoted, may be fields, functions, etc.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionIsNotNull(@Nonnull String expression) {
+    public ConditionsComponent expressionIsNotNull(@NotNull String expression) {
         return this.comparison(compareCondition -> compareCondition
                 .compareExpression(expression)
                 .not()
@@ -145,7 +145,7 @@ public class ConditionsComponent {
     }
 
 
-    public ConditionsComponent comparison(@Nonnull Function<CompareCondition, CompareCondition> function) {
+    public ConditionsComponent comparison(@NotNull Function<CompareCondition, CompareCondition> function) {
         CompareCondition condition = function.apply(new CompareCondition());
         if (condition != null) {
             conditions.add(condition);
@@ -153,7 +153,7 @@ public class ConditionsComponent {
         return this;
     }
 
-    public ConditionsComponent comparison(@Nonnull String operator, @Nonnull Function<CompareCondition, CompareCondition> function) {
+    public ConditionsComponent comparison(@NotNull String operator, @NotNull Function<CompareCondition, CompareCondition> function) {
         CompareCondition condition = function.apply(new CompareCondition(operator));
         if (condition != null) {
             conditions.add(condition);
@@ -166,7 +166,7 @@ public class ConditionsComponent {
      * @param values     Be quoted each, as number or string.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionAmongLiteralValues(@Nonnull String expression, @Nonnull Collection<?> values) {
+    public ConditionsComponent expressionAmongLiteralValues(@NotNull String expression, @NotNull Collection<?> values) {
         return this.among(amongstCondition -> amongstCondition
                 .elementAsExpression(expression)
                 .amongstLiteralValueList(values)
@@ -176,7 +176,7 @@ public class ConditionsComponent {
     /**
      * @since 4.1.0
      */
-    public ConditionsComponent expressionAmongLiteralValuesIfNotEmpty(@Nonnull String expression, @Nonnull Collection<?> values) {
+    public ConditionsComponent expressionAmongLiteralValuesIfNotEmpty(@NotNull String expression, @NotNull Collection<?> values) {
         if (values.isEmpty()) return this;
         return expressionAmongLiteralValues(expression, values);
     }
@@ -186,7 +186,7 @@ public class ConditionsComponent {
      * @param values     Be quoted each, as number or string.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionAmongNumericValues(@Nonnull String expression, @Nonnull Collection<? extends Number> values) {
+    public ConditionsComponent expressionAmongNumericValues(@NotNull String expression, @NotNull Collection<? extends Number> values) {
         return this.among(amongstCondition -> amongstCondition
                 .elementAsExpression(expression)
                 .amongstNumericValueList(values)
@@ -196,7 +196,7 @@ public class ConditionsComponent {
     /**
      * @since 4.1.0
      */
-    public ConditionsComponent expressionAmongNumericValuesIfNotEmpty(@Nonnull String expression, @Nonnull Collection<? extends Number> values) {
+    public ConditionsComponent expressionAmongNumericValuesIfNotEmpty(@NotNull String expression, @NotNull Collection<? extends Number> values) {
         if (values.isEmpty()) return this;
         return expressionAmongNumericValues(expression, values);
     }
@@ -206,7 +206,7 @@ public class ConditionsComponent {
      * @param values     Be quoted each, as number or string.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionNotInLiteralValues(@Nonnull String expression, @Nonnull Collection<?> values) {
+    public ConditionsComponent expressionNotInLiteralValues(@NotNull String expression, @NotNull Collection<?> values) {
         return this.among(amongstCondition -> amongstCondition
                 .elementAsExpression(expression)
                 .not()
@@ -217,7 +217,7 @@ public class ConditionsComponent {
     /**
      * @since 4.1.0
      */
-    public ConditionsComponent expressionNotInLiteralValuesIfNotEmpty(@Nonnull String expression, @Nonnull Collection<?> values) {
+    public ConditionsComponent expressionNotInLiteralValuesIfNotEmpty(@NotNull String expression, @NotNull Collection<?> values) {
         if (values.isEmpty()) return this;
         return expressionNotInLiteralValues(expression, values);
     }
@@ -227,7 +227,7 @@ public class ConditionsComponent {
      * @param values     Be quoted each, as number or string.
      * @since 3.1.8
      */
-    public ConditionsComponent expressionNotInNumericValues(@Nonnull String expression, @Nonnull Collection<? extends Number> values) {
+    public ConditionsComponent expressionNotInNumericValues(@NotNull String expression, @NotNull Collection<? extends Number> values) {
         return this.among(amongstCondition -> amongstCondition
                 .elementAsExpression(expression)
                 .not()
@@ -238,12 +238,12 @@ public class ConditionsComponent {
     /**
      * @since 4.1.0
      */
-    public ConditionsComponent expressionNotInNumericValuesIfNotEmpty(@Nonnull String expression, @Nonnull Collection<? extends Number> values) {
+    public ConditionsComponent expressionNotInNumericValuesIfNotEmpty(@NotNull String expression, @NotNull Collection<? extends Number> values) {
         if (values.isEmpty()) return this;
         return expressionNotInNumericValues(expression, values);
     }
 
-    public ConditionsComponent among(@Nonnull Function<AmongstCondition, AmongstCondition> function) {
+    public ConditionsComponent among(@NotNull Function<AmongstCondition, AmongstCondition> function) {
         AmongstCondition condition = function.apply(new AmongstCondition());
         if (condition != null) {
             conditions.add(condition);
@@ -251,7 +251,7 @@ public class ConditionsComponent {
         return this;
     }
 
-    public ConditionsComponent intersection(@Nonnull Function<GroupCondition, GroupCondition> function) {
+    public ConditionsComponent intersection(@NotNull Function<GroupCondition, GroupCondition> function) {
         GroupCondition condition = function.apply(new GroupCondition(GroupCondition.JUNCTION_FOR_AND));
         if (condition != null) {
             conditions.add(condition);
@@ -259,7 +259,7 @@ public class ConditionsComponent {
         return this;
     }
 
-    public ConditionsComponent union(@Nonnull Function<GroupCondition, GroupCondition> function) {
+    public ConditionsComponent union(@NotNull Function<GroupCondition, GroupCondition> function) {
         GroupCondition condition = function.apply(new GroupCondition(GroupCondition.JUNCTION_FOR_OR));
         if (condition != null) {
             conditions.add(condition);
@@ -267,7 +267,7 @@ public class ConditionsComponent {
         return this;
     }
 
-    public ConditionsComponent raw(@Nonnull String raw) {
+    public ConditionsComponent raw(@NotNull String raw) {
         if (!raw.isBlank()) {
             conditions.add(new RawCondition(raw));
         }

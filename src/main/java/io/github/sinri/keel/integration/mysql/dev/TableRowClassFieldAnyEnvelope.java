@@ -1,21 +1,18 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
 
-import io.github.sinri.keel.base.annotations.TechnicalPreview;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-
-@TechnicalPreview(since = "4.1.1")
 public class TableRowClassFieldAnyEnvelope {
     private final String envelopePackage;
     private final String envelopeName;
 
-    public TableRowClassFieldAnyEnvelope(@Nonnull String envelopeName, @Nonnull String envelopePackage) {
+    public TableRowClassFieldAnyEnvelope(@NotNull String envelopeName, @NotNull String envelopePackage) {
         this.envelopePackage = envelopePackage;
         this.envelopeName = envelopeName;
     }
 
-    public String buildCallClassMethodCode(@Nonnull String parameter) {
+    public String buildCallClassMethodCode(@NotNull String parameter) {
         return "new " + envelopePackage + "." + envelopeName + "().decrypt(" + parameter + ");";
     }
 }

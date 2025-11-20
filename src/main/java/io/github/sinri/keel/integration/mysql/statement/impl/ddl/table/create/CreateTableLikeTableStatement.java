@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create;
 
-import javax.annotation.Nonnull;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Follow Pattern:
@@ -11,9 +12,9 @@ import javax.annotation.Nonnull;
  * @since 4.0.4
  */
 public final class CreateTableLikeTableStatement extends CreateTableStatementBase<CreateTableLikeTableStatement> {
-    private @Nonnull String anotherTableExpression = "";
+    private @NotNull String anotherTableExpression = "";
 
-    public CreateTableLikeTableStatement setAnotherTableExpression(@Nonnull String anotherTableExpression) {
+    public CreateTableLikeTableStatement setAnotherTableExpression(@NotNull String anotherTableExpression) {
         this.anotherTableExpression = anotherTableExpression;
         return this;
     }
@@ -26,7 +27,7 @@ public final class CreateTableLikeTableStatement extends CreateTableStatementBas
                 + " LIKE " + anotherTableExpression;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public CreateTableLikeTableStatement getImplementation() {
         return this;

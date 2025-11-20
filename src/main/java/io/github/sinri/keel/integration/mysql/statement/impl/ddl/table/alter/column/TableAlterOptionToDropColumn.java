@@ -1,8 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.column;
 
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.TableAlterOption;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@code DROP [COLUMN] col_name}
@@ -10,9 +9,9 @@ import javax.annotation.Nonnull;
  * @since 4.0.4
  */
 public final class TableAlterOptionToDropColumn extends TableAlterOption {
-    public @Nonnull String columnName = "";
+    public @NotNull String columnName = "";
 
-    public TableAlterOptionToDropColumn setColumnName(@Nonnull String columnName) {
+    public TableAlterOptionToDropColumn setColumnName(@NotNull String columnName) {
         this.columnName = columnName;
         return this;
     }

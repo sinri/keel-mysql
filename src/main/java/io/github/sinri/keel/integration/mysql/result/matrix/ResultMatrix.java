@@ -9,8 +9,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.data.Numeric;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -193,8 +193,8 @@ public interface ResultMatrix {
         return Future.succeededFuture(resultList);
     }
 
-    @Nonnull
-    private JsonObject getSortedJsonObject(@Nonnull JsonObject object) {
+    @NotNull
+    private JsonObject getSortedJsonObject(@NotNull JsonObject object) {
         JsonObject result = new JsonObject();
         List<String> keyList = new ArrayList<>(object.getMap().keySet());
         keyList.sort(Comparator.naturalOrder());
@@ -211,8 +211,8 @@ public interface ResultMatrix {
         return result;
     }
 
-    @Nonnull
-    private JsonArray getSortedJsonArray(@Nonnull JsonArray array) {
+    @NotNull
+    private JsonArray getSortedJsonArray(@NotNull JsonArray array) {
         List<Object> list = new ArrayList<>();
         array.forEach(list::add);
         list.sort(Comparator.comparing(Object::toString));

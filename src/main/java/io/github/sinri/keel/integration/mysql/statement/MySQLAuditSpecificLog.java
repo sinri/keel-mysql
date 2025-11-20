@@ -1,18 +1,18 @@
 package io.github.sinri.keel.integration.mysql.statement;
 
-import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
+import io.github.sinri.keel.logger.api.log.SpecificLog;
 import io.vertx.core.json.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 
 /**
- * A specialized implementation of {@link KeelIssueRecord} for recording MySQL audit issues.
+ * A specialized implementation of {@link SpecificLog} for recording MySQL audit issues.
  * This class provides methods to set the state of a MySQL query, including preparation, execution, and failure,
  * along with relevant attributes such as the SQL statement, statement UUID, and affected/fetched rows.
  *
  * @since 4.1.0
  */
-public final class MySQLAuditIssueRecord extends KeelIssueRecord<MySQLAuditIssueRecord> {
+public final class MySQLAuditSpecificLog extends SpecificLog<MySQLAuditSpecificLog> {
     public static final String TopicMysqlAudit = "MysqlAudit";
     public static final String AttributeMysqlAudit = "MysqlAudit";
     public static final String KeyStatementUuid = "statement_uuid";
@@ -20,14 +20,8 @@ public final class MySQLAuditIssueRecord extends KeelIssueRecord<MySQLAuditIssue
     public static final String KeyTotalAffectedRows = "TotalAffectedRows";
     public static final String KeyTotalFetchedRows = "TotalFetchedRows";
 
-    public MySQLAuditIssueRecord() {
+    public MySQLAuditSpecificLog() {
         super();
-    }
-
-    @Nonnull
-    @Override
-    public MySQLAuditIssueRecord getImplementation() {
-        return this;
     }
 
 
@@ -36,11 +30,11 @@ public final class MySQLAuditIssueRecord extends KeelIssueRecord<MySQLAuditIssue
      *
      * @param statement_uuid The unique identifier for the prepared statement.
      * @param sql            The SQL query that was prepared.
-     * @return The current instance of {@link MySQLAuditIssueRecord} for method chaining.
+     * @return The current instance of {@link MySQLAuditSpecificLog} for method chaining.
      */
-    public MySQLAuditIssueRecord setPreparation(@Nonnull String statement_uuid, @Nonnull String sql) {
+    public MySQLAuditSpecificLog setPreparation(@NotNull String statement_uuid, @NotNull String sql) {
         this.message("MySQL query prepared.")
-            .attribute(AttributeMysqlAudit, new JsonObject()
+            .extra(AttributeMysqlAudit, new JsonObject()
                     .put(KeyStatementUuid, statement_uuid)
                     .put(KeySql, sql)
             );
@@ -52,11 +46,11 @@ public final class MySQLAuditIssueRecord extends KeelIssueRecord<MySQLAuditIssue
      *
      * @param statement_uuid The unique identifier for the statement.
      * @param sql            The SQL query that was executed.
-     * @return The current instance of {@link MySQLAuditIssueRecord} for method chaining.
+     * @return The current instance of {@link MySQLAuditSpecificLog} for method chaining.
      */
-    public MySQLAuditIssueRecord setQuery(@Nonnull String statement_uuid, @Nonnull String sql) {
+    public MySQLAuditSpecificLog setQuery(@NotNull String statement_uuid, @NotNull String sql) {
         this.message("MySQL query without preparation.")
-            .attribute(AttributeMysqlAudit, new JsonObject()
+            .extra(AttributeMysqlAudit, new JsonObject()
                     .put(KeyStatementUuid, statement_uuid)
                     .put(KeySql, sql)
             );
@@ -72,16 +66,16 @@ public final class MySQLAuditIssueRecord extends KeelIssueRecord<MySQLAuditIssue
      * @param sql               The SQL query that was executed.
      * @param totalAffectedRows The number of rows affected by the query.
      * @param totalFetchedRows  The number of rows fetched by the query.
-     * @return The current instance of {@link MySQLAuditIssueRecord} for method chaining.
+     * @return The current instance of {@link MySQLAuditSpecificLog} for method chaining.
      */
-    public MySQLAuditIssueRecord setForDone(
-            @Nonnull String statement_uuid,
-            @Nonnull String sql,
+    public MySQLAuditSpecificLog setForDone(
+            @NotNull String statement_uuid,
+            @NotNull String sql,
             int totalAffectedRows,
             int totalFetchedRows
     ) {
         this.message("MySQL query executed.")
-            .attribute(AttributeMysqlAudit, new JsonObject()
+            .extra(AttributeMysqlAudit, new JsonObject()
                     .put(KeyStatementUuid, statement_uuid)
                     .put(KeySql, sql)
                     .put(KeyTotalFetchedRows, totalFetchedRows)
@@ -95,11 +89,11 @@ public final class MySQLAuditIssueRecord extends KeelIssueRecord<MySQLAuditIssue
      *
      * @param statement_uuid The unique identifier for the statement that failed.
      * @param sql            The SQL query that was executed and failed.
-     * @return The current instance of {@link MySQLAuditIssueRecord} for method chaining.
+     * @return The current instance of {@link MySQLAuditSpecificLog} for method chaining.
      */
-    public MySQLAuditIssueRecord setForFailed(@Nonnull String statement_uuid, @Nonnull String sql) {
+    public MySQLAuditSpecificLog setForFailed(@NotNull String statement_uuid, @NotNull String sql) {
         this.message("MySQL query failed.")
-            .attribute(AttributeMysqlAudit, new JsonObject()
+            .extra(AttributeMysqlAudit, new JsonObject()
                     .put(KeyStatementUuid, statement_uuid)
                     .put(KeySql, sql)
             );

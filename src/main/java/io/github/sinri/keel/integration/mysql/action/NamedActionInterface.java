@@ -1,8 +1,7 @@
 package io.github.sinri.keel.integration.mysql.action;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Class that defines the interface for named MySQL actions.
@@ -17,10 +16,9 @@ import javax.annotation.Nonnull;
  * This interface is designed to be used in a mixin style, so you can extend it
  * to add your own methods.
  *
+ * @param <C> a specific connection class that extends NamedMySQLConnection
  * @see AbstractNamedMixinAction
  * @see AbstractNamedAction
- *
- * @param <C> a specific connection class that extends NamedMySQLConnection
  * @since 3.2.11
  */
 public interface NamedActionInterface<C extends NamedMySQLConnection> {
@@ -29,6 +27,6 @@ public interface NamedActionInterface<C extends NamedMySQLConnection> {
      *
      * @return the instance of the named MySQL connection linked to the implementing action; never null
      */
-    @Nonnull
+    @NotNull
     C getNamedSqlConnection();
 }

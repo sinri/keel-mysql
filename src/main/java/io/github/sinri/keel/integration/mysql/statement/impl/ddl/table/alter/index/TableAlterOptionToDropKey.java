@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.index;
 
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.TableAlterOption;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 
 /**
  * {@code DROP {INDEX | KEY} index_name}
@@ -10,9 +10,9 @@ import javax.annotation.Nonnull;
  * @since 4.0.4
  */
 public final class TableAlterOptionToDropKey extends TableAlterOption {
-    private @Nonnull String indexName = "";
+    private @NotNull String indexName = "";
 
-    public TableAlterOptionToDropKey setIndexName(@Nonnull String indexName) {
+    public TableAlterOptionToDropKey setIndexName(@NotNull String indexName) {
         this.indexName = indexName;
         return this;
     }

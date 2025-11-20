@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@code RENAME [TO | AS] new_tbl_name}
@@ -8,9 +8,9 @@ import javax.annotation.Nonnull;
  * @since 4.0.4
  */
 public final class TableAlterOptionToRenameTable extends TableAlterOption {
-    private @Nonnull String newTableName = "";
+    private @NotNull String newTableName = "";
 
-    public TableAlterOptionToRenameTable setNewTableName(@Nonnull String newTableName) {
+    public TableAlterOptionToRenameTable setNewTableName(@NotNull String newTableName) {
         this.newTableName = newTableName;
         return this;
     }

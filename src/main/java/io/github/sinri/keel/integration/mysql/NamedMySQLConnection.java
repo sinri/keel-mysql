@@ -1,15 +1,10 @@
 package io.github.sinri.keel.integration.mysql;
 
-import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.vertx.sqlclient.SqlConnection;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-/**
- * @since 3.0.11 Technical Preview. To avoid mix in multi-data-sources.
- * @since 3.0.18 Finished Technical Preview.
- */
 abstract public class NamedMySQLConnection {
     private final SqlConnection sqlConnection;
 
@@ -24,7 +19,7 @@ abstract public class NamedMySQLConnection {
     /**
      * @return The data source which provided the sql connection.
      */
-    @Nonnull
+    @NotNull
     abstract public String getDataSourceName();
 
     private @Nullable String mysqlVersion;
@@ -59,7 +54,6 @@ abstract public class NamedMySQLConnection {
                 && mysqlVersion.startsWith("8.2.");
     }
 
-    @TechnicalPreview(since = "3.2.14")
     public boolean isForTransaction() {
         return null != sqlConnection.transaction();
     }

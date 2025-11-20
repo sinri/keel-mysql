@@ -1,9 +1,9 @@
 package io.github.sinri.keel.integration.mysql.statement.impl;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,20 +20,20 @@ public class CallStatement extends AbstractStatement {
         return this;
     }
 
-    protected CallStatement addParameterExpression(@Nonnull String parameter, @Nullable String parameterPrefix) {
+    protected CallStatement addParameterExpression(@NotNull String parameter, @Nullable String parameterPrefix) {
         this.parameters.add((parameterPrefix == null ? "" : (parameterPrefix + " ")) + parameter);
         return this;
     }
 
-    public CallStatement addParameterExpression(@Nonnull String parameter) {
+    public CallStatement addParameterExpression(@NotNull String parameter) {
         return addParameterExpression(parameter, null);
     }
 
-    public CallStatement addOutParameterExpression(@Nonnull String parameter) {
+    public CallStatement addOutParameterExpression(@NotNull String parameter) {
         return addParameterExpression(parameter, "OUT");
     }
 
-    public CallStatement addInOutParameterExpression(@Nonnull String parameter) {
+    public CallStatement addInOutParameterExpression(@NotNull String parameter) {
         return addParameterExpression(parameter, "INOUT");
     }
 

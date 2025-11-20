@@ -1,12 +1,12 @@
 package io.github.sinri.keel.integration.mysql.result.row;
 
-import io.github.sinri.keel.core.json.JsonifiableDataUnit;
+import io.github.sinri.keel.base.json.JsonifiableDataUnit;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,7 +23,7 @@ public interface ResultRow extends JsonifiableDataUnit {
     /**
      * @since 4.0.0
      */
-    static <R extends ResultRow> R of(@Nonnull JsonObject tableRow, Class<R> clazz) {
+    static <R extends ResultRow> R of(@NotNull JsonObject tableRow, Class<R> clazz) {
         try {
             Constructor<R> constructor = clazz.getConstructor(JsonObject.class);
             return constructor.newInstance(tableRow);
@@ -35,17 +35,17 @@ public interface ResultRow extends JsonifiableDataUnit {
     /**
      * @since 4.0.0
      */
-    static <R extends ResultRow> R of(@Nonnull Row tableRow, Class<R> clazz) {
+    static <R extends ResultRow> R of(@NotNull Row tableRow, Class<R> clazz) {
         return of(tableRow.toJson(), clazz);
     }
 
-    static JsonArray batchToJsonArray(@Nonnull Collection<? extends ResultRow> rows) {
+    static JsonArray batchToJsonArray(@NotNull Collection<? extends ResultRow> rows) {
         JsonArray array = new JsonArray();
         rows.forEach(row -> array.add(row.getRow()));
         return array;
     }
 
-    static JsonArray batchToJsonArray(@Nonnull Collection<? extends ResultRow> rows, @Nonnull Function<ResultRow, JsonObject> transformer) {
+    static JsonArray batchToJsonArray(@NotNull Collection<? extends ResultRow> rows, @NotNull Function<ResultRow, JsonObject> transformer) {
         JsonArray array = new JsonArray();
         rows.forEach(row -> array.add(transformer.apply(row)));
         return array;
@@ -60,7 +60,7 @@ public interface ResultRow extends JsonifiableDataUnit {
      * @since 2.9.4 fix null field error
      */
     @Nullable
-    default String readDateTime(@Nonnull String field) {
+    default String readDateTime(@NotNull String field) {
         String s = readString(field);
         if (s == null) return null;
         return LocalDateTime.parse(s)
@@ -68,7 +68,7 @@ public interface ResultRow extends JsonifiableDataUnit {
     }
 
     @Nullable
-    default String readDate(@Nonnull String field) {
+    default String readDate(@NotNull String field) {
         return readString(field);
     }
 
@@ -76,7 +76,7 @@ public interface ResultRow extends JsonifiableDataUnit {
      * @since 2.9.4 fix null field error
      */
     @Nullable
-    default String readTime(@Nonnull String field) {
+    default String readTime(@NotNull String field) {
         var s = readString(field);
         if (s == null) return null;
         return s
@@ -85,7 +85,7 @@ public interface ResultRow extends JsonifiableDataUnit {
     }
 
     @Nullable
-    default String readTimestamp(@Nonnull String field) {
+    default String readTimestamp(@NotNull String field) {
         return readDateTime(field);
     }
 }

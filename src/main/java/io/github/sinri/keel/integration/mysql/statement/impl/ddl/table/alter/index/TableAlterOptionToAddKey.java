@@ -1,9 +1,9 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.index;
 
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.TableAlterOption;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +35,7 @@ public final class TableAlterOptionToAddKey extends TableAlterOption {
         return this;
     }
 
-    public TableAlterOptionToAddKey addKeyPart(@Nonnull String keyPart) {
+    public TableAlterOptionToAddKey addKeyPart(@NotNull String keyPart) {
         this.keyParts.add(keyPart);
         return this;
     }

@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.component;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 
 /**
  * @since 4.0.4

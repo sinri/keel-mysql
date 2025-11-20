@@ -1,9 +1,9 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
 public class AlterTableStatement extends AbstractStatement {
     private final List<TableAlterOption> alterOptions = new ArrayList<>();
     private @Nullable String schemaName = null;
-    private @Nonnull String tableName = "";
+    private @NotNull String tableName = "";
     private @Nullable TableAlterPartitionOptions partitionOptions = null;
 
     public AlterTableStatement setSchemaName(@Nullable String schemaName) {
@@ -23,7 +23,7 @@ public class AlterTableStatement extends AbstractStatement {
         return this;
     }
 
-    public AlterTableStatement setTableName(@Nonnull String tableName) {
+    public AlterTableStatement setTableName(@NotNull String tableName) {
         this.tableName = tableName;
         return this;
     }

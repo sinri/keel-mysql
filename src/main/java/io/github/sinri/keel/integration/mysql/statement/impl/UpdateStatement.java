@@ -4,9 +4,9 @@ import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.component.ConditionsComponent;
 import io.github.sinri.keel.integration.mysql.statement.component.UpdateSetAssignmentComponent;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ModifyStatementMixin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,11 +29,11 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
      * [LIMIT row_count]
      */
 
-    @Nonnull
+    @NotNull
     String ignoreMark = "";
     @Nullable
     String schema;
-    @Nonnull
+    @NotNull
     String table = "TABLE-NOT-SET";
     long limit = 0;
 
@@ -45,13 +45,13 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
         return this;
     }
 
-    public UpdateStatement table(@Nonnull String table) {
+    public UpdateStatement table(@NotNull String table) {
         this.schema = null;
         this.table = table;
         return this;
     }
 
-    public UpdateStatement table(@Nullable String schema, @Nonnull String table) {
+    public UpdateStatement table(@Nullable String schema, @NotNull String table) {
         this.schema = schema;
         this.table = table;
         return this;
@@ -60,7 +60,7 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
     /**
      * @since 3.0.19 Technical Preview
      */
-    public UpdateStatement setWithAssignment(@Nonnull UpdateSetAssignmentComponent updateSetAssignmentComponent) {
+    public UpdateStatement setWithAssignment(@NotNull UpdateSetAssignmentComponent updateSetAssignmentComponent) {
         this.assignments.add(updateSetAssignmentComponent);
         return this;
     }
@@ -68,24 +68,24 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
     /**
      * @since 3.0.19
      */
-    public UpdateStatement setWithAssignments(@Nonnull Collection<UpdateSetAssignmentComponent> updateSetAssignmentComponents) {
+    public UpdateStatement setWithAssignments(@NotNull Collection<UpdateSetAssignmentComponent> updateSetAssignmentComponents) {
         this.assignments.addAll(updateSetAssignmentComponents);
         return this;
     }
 
-    public UpdateStatement setWithExpression(@Nonnull Map<String, String> columnExpressionMapping) {
+    public UpdateStatement setWithExpression(@NotNull Map<String, String> columnExpressionMapping) {
         columnExpressionMapping.forEach((k, v) -> assignments
                 .add(new UpdateSetAssignmentComponent(k)
                         .assignmentToExpression(v)));
         return this;
     }
 
-    public UpdateStatement setWithExpression(@Nonnull String column, @Nonnull String expression) {
+    public UpdateStatement setWithExpression(@NotNull String column, @NotNull String expression) {
         assignments.add(new UpdateSetAssignmentComponent(column).assignmentToExpression(expression));
         return this;
     }
 
-    public UpdateStatement setWithValue(@Nonnull String column, @Nullable Number value) {
+    public UpdateStatement setWithValue(@NotNull String column, @Nullable Number value) {
         assignments.add(new UpdateSetAssignmentComponent(column).assignmentToValue(value));
         return this;
     }

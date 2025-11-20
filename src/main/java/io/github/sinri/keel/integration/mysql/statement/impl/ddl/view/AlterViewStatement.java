@@ -2,9 +2,9 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.view;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.SelectStatement;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +22,7 @@ public class AlterViewStatement extends AbstractStatement {
     private @Nullable String algorithm = null;
     private @Nullable String definer = null;
     private @Nullable String sqlSecurity = null;
-    private @Nonnull String viewName = "";
+    private @NotNull String viewName = "";
     private SelectStatement selectStatement;
     /**
      * {@code [WITH [CASCADED | LOCAL] CHECK OPTION]}
@@ -49,7 +49,7 @@ public class AlterViewStatement extends AbstractStatement {
         return this;
     }
 
-    public AlterViewStatement setViewName(@Nonnull String viewName) {
+    public AlterViewStatement setViewName(@NotNull String viewName) {
         this.viewName = viewName;
         return this;
     }

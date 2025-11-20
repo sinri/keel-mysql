@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import javax.annotation.Nullable;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @since 4.1.0

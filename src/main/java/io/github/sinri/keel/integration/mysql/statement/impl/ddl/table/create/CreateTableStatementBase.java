@@ -2,9 +2,8 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create;
 
 import io.github.sinri.keel.base.annotations.SelfInterface;
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @since 4.0.4
@@ -13,7 +12,7 @@ public abstract class CreateTableStatementBase<T> extends AbstractStatement impl
     private boolean temporary = false;
     private boolean ifNotExists = false;
     private @Nullable String schemaName = null;
-    private @Nonnull String tableName = "";
+    private @NotNull String tableName = "";
 
     public T setTemporary(boolean temporary) {
         this.temporary = temporary;
@@ -43,12 +42,12 @@ public abstract class CreateTableStatementBase<T> extends AbstractStatement impl
         return getImplementation();
     }
 
-    @Nonnull
+    @NotNull
     protected String getTableName() {
         return tableName;
     }
 
-    public T setTableName(@Nonnull String tableName) {
+    public T setTableName(@NotNull String tableName) {
         this.tableName = tableName;
         return getImplementation();
     }

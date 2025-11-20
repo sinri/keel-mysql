@@ -1,9 +1,9 @@
 package io.github.sinri.keel.integration.mysql.condition;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 
 public class CompareCondition implements MySQLCondition {
@@ -28,7 +28,7 @@ public class CompareCondition implements MySQLCondition {
         this.inverseOperator = false;
     }
 
-    public CompareCondition(@Nonnull String operator) {
+    public CompareCondition(@NotNull String operator) {
         this.leftSide = null;
         this.operator = operator;
         this.rightSide = null;
@@ -96,7 +96,7 @@ public class CompareCondition implements MySQLCondition {
         return this;
     }
 
-    public CompareCondition compareExpression(@Nonnull Object leftSide) {
+    public CompareCondition compareExpression(@NotNull Object leftSide) {
         this.leftSide = leftSide.toString();
         return this;
     }
@@ -106,12 +106,12 @@ public class CompareCondition implements MySQLCondition {
         return this;
     }
 
-    public CompareCondition operator(@Nonnull String operator) {
+    public CompareCondition operator(@NotNull String operator) {
         this.operator = operator;
         return this;
     }
 
-    public CompareCondition againstExpression(@Nonnull String rightSide) {
+    public CompareCondition againstExpression(@NotNull String rightSide) {
         this.rightSide = rightSide;
         return this;
     }
@@ -127,7 +127,7 @@ public class CompareCondition implements MySQLCondition {
     /**
      * @since 3.1.8
      */
-    public CompareCondition againstNumericValue(@Nonnull Number rightSide) {
+    public CompareCondition againstNumericValue(@NotNull Number rightSide) {
         if (rightSide instanceof BigDecimal) {
             this.rightSide = ((BigDecimal) rightSide).toPlainString();
         } else {
@@ -160,21 +160,21 @@ public class CompareCondition implements MySQLCondition {
         return this;
     }
 
-    public CompareCondition contains(@Nonnull String rightSide) {
+    public CompareCondition contains(@NotNull String rightSide) {
         this.operator = OP_LIKE;
         String x = Quoter.escapeStringWithWildcards(rightSide);
         this.rightSide = "'%" + x + "%'";
         return this;
     }
 
-    public CompareCondition hasPrefix(@Nonnull String rightSide) {
+    public CompareCondition hasPrefix(@NotNull String rightSide) {
         this.operator = "like";
         String x = Quoter.escapeStringWithWildcards(rightSide);
         this.rightSide = "'" + x + "%'";
         return this;
     }
 
-    public CompareCondition hasSuffix(@Nonnull String rightSide) {
+    public CompareCondition hasSuffix(@NotNull String rightSide) {
         this.operator = "like";
         String x = Quoter.escapeStringWithWildcards(rightSide);
         this.rightSide = "'%" + x + "'";
@@ -184,7 +184,7 @@ public class CompareCondition implements MySQLCondition {
     /**
      * @since 3.1.8
      */
-    public CompareCondition expressionEqualsLiteralValue(@Nonnull String expression, @Nullable Object value) {
+    public CompareCondition expressionEqualsLiteralValue(@NotNull String expression, @Nullable Object value) {
         if (value == null) {
             return this.compareExpression(expression).isNull();
         }
@@ -197,7 +197,7 @@ public class CompareCondition implements MySQLCondition {
     /**
      * @since 3.1.8
      */
-    public CompareCondition expressionEqualsNumericValue(@Nonnull String expression, @Nonnull Number value) {
+    public CompareCondition expressionEqualsNumericValue(@NotNull String expression, @NotNull Number value) {
         return this
                 .compareExpression(expression)
                 .beEqual()

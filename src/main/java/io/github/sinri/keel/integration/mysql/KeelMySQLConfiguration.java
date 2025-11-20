@@ -1,21 +1,21 @@
 package io.github.sinri.keel.integration.mysql;
 
-import io.github.sinri.keel.base.KeelBase;
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
-import io.github.sinri.keel.base.async.KeelAsyncMixin;
-import io.github.sinri.keel.base.configuration.KeelConfigElement;
-import io.github.sinri.keel.base.configuration.KeelConfigPropertiesBuilder;
+import io.github.sinri.keel.base.configuration.ConfigElement;
+import io.github.sinri.keel.base.configuration.ConfigPropertiesBuilder;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.sqlclient.*;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+
+import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
@@ -28,22 +28,23 @@ import java.util.function.Function;
  * poolShared = false;
  * tcpKeepAlive=false;
  */
-public class KeelMySQLConfiguration extends KeelConfigElement {
+public class KeelMySQLConfiguration extends ConfigElement {
     //private final @Nonnull String dataSourceName;
 
-    public KeelMySQLConfiguration(@Nonnull KeelConfigElement base) {
+    public KeelMySQLConfiguration(@NotNull ConfigElement base) {
         super(base);
     }
 
 
-    @Nonnull
-    public static KeelMySQLConfiguration loadConfigurationForDataSource(@Nonnull KeelConfigElement configCenter, @Nonnull String dataSourceName) {
-        KeelConfigElement keelConfigElement = configCenter.extract("mysql", dataSourceName);
+    @Deprecated
+    @NotNull
+    public static KeelMySQLConfiguration loadConfigurationForDataSource(@NotNull ConfigElement configCenter, @NotNull String dataSourceName) {
+        ConfigElement keelConfigElement = configCenter.extract("mysql", dataSourceName);
         return new KeelMySQLConfiguration(Objects.requireNonNull(keelConfigElement));
     }
 
     public static String generatePropertiesForConfig(String dataSourceName, MySQLConnectOptions mySQLConnectOptions, PoolOptions poolOptions) {
-        KeelConfigPropertiesBuilder builder = new KeelConfigPropertiesBuilder();
+        var builder = new ConfigPropertiesBuilder();
         builder.setPrefix("mysql", dataSourceName);
 
         builder.add("host", mySQLConnectOptions.getHost());
@@ -59,7 +60,7 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
         return builder.writeToString();
     }
 
-    @Nonnull
+    @NotNull
     public MySQLConnectOptions getConnectOptions() {
         // mysql.XXX.connect::database,host,password,port,user,charset,useAffectedRows,connectionTimeout
         MySQLConnectOptions mySQLConnectOptions = new MySQLConnectOptions()
@@ -83,7 +84,7 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
         return mySQLConnectOptions;
     }
 
-    @Nonnull
+    @NotNull
     public PoolOptions getPoolOptions() {
         // mysql.XXX.pool::poolConnectionTimeout
         PoolOptions poolOptions = new PoolOptions();
@@ -114,23 +115,23 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
     }
 
     public String getUsername() {
-        var u = readString("username", null);
+        var u = readString(List.of("username"), null);
         if (u == null) {
-            u = readString("user", null);
+            u = readString(List.of("user"), null);
         }
         return u;
     }
 
     public String getDatabase() {
-        String schema = readString("schema", null);
+        String schema = readString(List.of("schema"), null);
         if (schema == null) {
-            schema = readString("database", null);
+            schema = readString(List.of("database"), null);
         }
         return Objects.requireNonNullElse(schema, "");
     }
 
     public String getCharset() {
-        return readString("charset", null);
+        return readString(List.of("charset"), null);
     }
 
     public Integer getPoolMaxSize() {
@@ -144,7 +145,7 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
      * Use different name for actually different data sources;
      * if you want to create a temporary data source to perform instant query, UUID is a good component.
      */
-    @Nonnull
+    @NotNull
     public String getDataSourceName() {
         return getName();
     }
@@ -172,7 +173,7 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
      *         href="https://vertx.io/docs/apidocs/io/vertx/sqlclient/PoolOptions.html#setConnectionTimeout-int-">...</a>
      */
     public Integer getPoolConnectionTimeout() {
-        KeelConfigElement keelConfigElement = extract("poolConnectionTimeout");
+        ConfigElement keelConfigElement = extract("poolConnectionTimeout");
         if (keelConfigElement == null) {
             return null;
         }
@@ -186,7 +187,7 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
      *         that created it is undeployed.
      */
     public boolean getPoolShared() {
-        return readBoolean("poolShared", true);
+        return readBoolean(List.of("poolShared"), true);
     }
 
 
@@ -203,7 +204,7 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
         var sqlClient = MySQLBuilder.client()
                                     .with(this.getPoolOptions())
                                     .connectingTo(this.getConnectOptions())
-                                    .using(KeelBase.getVertx())
+                                    .using(Keel.getVertx())
                                     .build();
         return Future.succeededFuture()
                      .compose(v -> sqlClient.preparedQuery(sql).execute()
@@ -227,7 +228,7 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
                          Pool pool = MySQLBuilder.pool()
                                                  .with(this.getPoolOptions())
                                                  .connectingTo(this.getConnectOptions())
-                                                 .using(KeelBase.getVertx())
+                                                 .using(Keel.getVertx())
                                                  .build();
                          return Future.succeededFuture(pool);
                      })
@@ -238,18 +239,17 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
                                      .compose(preparedStatement -> {
                                          Cursor cursor = preparedStatement.cursor();
 
-                                         return KeelAsyncMixin.getInstance()
-                                                              .asyncCallRepeatedly(routineResult -> cursor
-                                                                      .read(readWindowSize)
-                                                                      .compose(readWindowFunction)
-                                                                      .compose(v -> {
-                                                                          if (!cursor.hasMore()) {
-                                                                              routineResult.stop();
-                                                                              return Future.succeededFuture();
-                                                                          }
-                                                                          return Future.succeededFuture();
-                                                                      }))
-                                                              .eventually(cursor::close);
+                                         return Keel.asyncCallRepeatedly(routineResult -> cursor
+                                                            .read(readWindowSize)
+                                                            .compose(readWindowFunction)
+                                                            .compose(v -> {
+                                                                if (!cursor.hasMore()) {
+                                                                    routineResult.stop();
+                                                                    return Future.succeededFuture();
+                                                                }
+                                                                return Future.succeededFuture();
+                                                            }))
+                                                    .eventually(cursor::close);
                                      })
                                      .eventually(sqlConnection::close))
                              .eventually(pool::close));

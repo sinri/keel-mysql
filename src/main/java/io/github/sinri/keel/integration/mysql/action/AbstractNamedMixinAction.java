@@ -1,8 +1,7 @@
 package io.github.sinri.keel.integration.mysql.action;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -14,14 +13,14 @@ import javax.annotation.Nonnull;
  * @since 3.2.11 Refined for Mixin Style, extracted NamedActionInterface.
  */
 public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W> implements NamedActionMixinInterface<C, W> {
-    private final @Nonnull C namedSqlConnection;
+    private final @NotNull C namedSqlConnection;
 
     /**
      * Constructs an AbstractNamedMixinAction with the specified named MySQL connection.
      *
      * @param namedSqlConnection the named MySQL connection instance to be associated with this action; must not be null
      */
-    public AbstractNamedMixinAction(@Nonnull C namedSqlConnection) {
+    public AbstractNamedMixinAction(@NotNull C namedSqlConnection) {
         this.namedSqlConnection = namedSqlConnection;
     }
 
@@ -30,7 +29,7 @@ public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W
      *
      * @return the named MySQL connection instance tied to this action; never null
      */
-    @Nonnull
+    @NotNull
     @Override
     public final C getNamedSqlConnection() {
         return namedSqlConnection;

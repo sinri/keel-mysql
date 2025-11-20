@@ -1,10 +1,10 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
+import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.integration.mysql.result.row.AbstractTableRow;
-import io.github.sinri.keel.utils.StringUtils;
 import io.vertx.core.json.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Date;
 
 
@@ -16,13 +16,13 @@ import java.util.Date;
 class TableRowClassBuilder {
 
 
-    private final @Nonnull TableRowClassBuildOptions options;
+    private final @NotNull TableRowClassBuildOptions options;
     /**
      * @since 3.1.7
      */
     private boolean tableDeprecated = false;
 
-    public TableRowClassBuilder(@Nonnull TableRowClassBuildOptions options) {
+    public TableRowClassBuilder(@NotNull TableRowClassBuildOptions options) {
         this.options = options;
     }
 

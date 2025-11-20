@@ -2,11 +2,12 @@ package io.github.sinri.keel.integration.mysql.statement;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.factory.LoggerFactory;
+import io.github.sinri.keel.logger.api.factory.SilentLoggerFactory;
+import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -14,18 +15,18 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 1.7
  */
 abstract public class AbstractStatement implements AnyStatement {
-    protected static @Nonnull String SQL_COMPONENT_SEPARATOR = " ";//"\n";
+    protected static @NotNull String SQL_COMPONENT_SEPARATOR = " ";//"\n";
     /**
      * @since 3.2.0 replace original SQL Audit Logger
      */
-    protected static @Nonnull KeelIssueRecorder<MySQLAuditIssueRecord> sqlAuditIssueRecorder;
+    protected static @NotNull SpecificLogger<MySQLAuditSpecificLog> sqlAuditLogger;
 
     static {
-        sqlAuditIssueRecorder = buildSqlAuditIssueRecorder(KeelIssueRecordCenter.silentCenter());
+        sqlAuditLogger = buildSqlAuditLogger(SilentLoggerFactory.getInstance());
     }
 
-    protected final @Nonnull String statement_uuid;
-    private @Nonnull String remarkAsComment = "";
+    protected final @NotNull String statement_uuid;
+    private @NotNull String remarkAsComment = "";
     /**
      * @since 4.0.7
      */
@@ -35,16 +36,14 @@ abstract public class AbstractStatement implements AnyStatement {
         this.statement_uuid = UUID.randomUUID().toString();
     }
 
-    @Nonnull
-    public static KeelIssueRecorder<MySQLAuditIssueRecord> getSqlAuditIssueRecorder() {
-        return sqlAuditIssueRecorder;
+    @NotNull
+    public static SpecificLogger<MySQLAuditSpecificLog> getSqlAuditLogger() {
+        return sqlAuditLogger;
     }
 
-    /**
-     * @since 4.0.0
-     */
-    private static KeelIssueRecorder<MySQLAuditIssueRecord> buildSqlAuditIssueRecorder(@Nonnull KeelIssueRecordCenter issueRecordCenter) {
-        return issueRecordCenter.generateIssueRecorder(MySQLAuditIssueRecord.AttributeMysqlAudit, MySQLAuditIssueRecord::new);
+
+    private static SpecificLogger<MySQLAuditSpecificLog> buildSqlAuditLogger(@NotNull LoggerFactory loggerFactory) {
+        return loggerFactory.createLogger(MySQLAuditSpecificLog.AttributeMysqlAudit, MySQLAuditSpecificLog::new);
     }
 
     /**
@@ -53,20 +52,20 @@ abstract public class AbstractStatement implements AnyStatement {
      * @param issueRecordCenter with which issue record center the sql audit sent to.
      * @since 4.0.0
      */
-    public static synchronized void reloadSqlAuditIssueRecording(@Nonnull KeelIssueRecordCenter issueRecordCenter) {
-        sqlAuditIssueRecorder = buildSqlAuditIssueRecorder(issueRecordCenter);
+    public static synchronized void reloadSqlAuditIssueRecording(@NotNull LoggerFactory issueRecordCenter) {
+        sqlAuditLogger = buildSqlAuditLogger(issueRecordCenter);
     }
 
-    public static void setSqlComponentSeparator(@Nonnull String sqlComponentSeparator) {
+    public static void setSqlComponentSeparator(@NotNull String sqlComponentSeparator) {
         SQL_COMPONENT_SEPARATOR = sqlComponentSeparator;
     }
 
-    @Nonnull
+    @NotNull
     protected String getRemarkAsComment() {
         return remarkAsComment;
     }
 
-    public AbstractStatement setRemarkAsComment(@Nonnull String remarkAsComment) {
+    public AbstractStatement setRemarkAsComment(@NotNull String remarkAsComment) {
         remarkAsComment = remarkAsComment.replaceAll("[\\r\\n]+", "¦");
         this.remarkAsComment = remarkAsComment;
         return this;
@@ -82,17 +81,17 @@ abstract public class AbstractStatement implements AnyStatement {
      * @since 3.0.0 removed try-catch
      */
     @Override
-    public Future<ResultMatrix> execute(@Nonnull NamedMySQLConnection namedSqlConnection) {
+    public Future<ResultMatrix> execute(@NotNull NamedMySQLConnection namedSqlConnection) {
         AtomicReference<String> theSql = new AtomicReference<>();
         return Future.succeededFuture(this.toString())
                      .compose(sql -> {
                          theSql.set(sql);
 
                          if (isWithoutPrepare()) {
-                             getSqlAuditIssueRecorder().info(r -> r.setQuery(statement_uuid, sql));
+                             getSqlAuditLogger().info(r -> r.setQuery(statement_uuid, sql));
                              return namedSqlConnection.getSqlConnection().query(sql).execute();
                          } else {
-                             getSqlAuditIssueRecorder().info(r -> r.setPreparation(statement_uuid, sql));
+                             getSqlAuditLogger().info(r -> r.setPreparation(statement_uuid, sql));
                              return namedSqlConnection.getSqlConnection().preparedQuery(sql).execute();
                          }
                      })
@@ -101,10 +100,10 @@ abstract public class AbstractStatement implements AnyStatement {
                          return Future.succeededFuture(resultMatrix);
                      })
                      .compose(resultMatrix -> {
-                         getSqlAuditIssueRecorder().info(r -> r.setForDone(statement_uuid, theSql.get(), resultMatrix.getTotalAffectedRows(), resultMatrix.getTotalFetchedRows()));
+                         getSqlAuditLogger().info(r -> r.setForDone(statement_uuid, theSql.get(), resultMatrix.getTotalAffectedRows(), resultMatrix.getTotalFetchedRows()));
                          return Future.succeededFuture(resultMatrix);
                      }, throwable -> {
-                         getSqlAuditIssueRecorder().exception(throwable, r -> r.setForFailed(statement_uuid, theSql.get()));
+                         getSqlAuditLogger().exception(throwable, r -> r.setForFailed(statement_uuid, theSql.get()));
                          return Future.failedFuture(throwable);
                      });
     }

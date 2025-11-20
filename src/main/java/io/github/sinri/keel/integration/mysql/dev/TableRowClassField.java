@@ -1,9 +1,9 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.utils.StringUtils;
+import io.github.sinri.keel.core.utils.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -38,7 +38,7 @@ class TableRowClassField {
      * @since 3.1.10
      */
     private final boolean nullable;
-    private @Nonnull
+    private @NotNull
     final String tableExpression;
     private String returnType;
     private String readMethod;
@@ -55,9 +55,9 @@ class TableRowClassField {
     private String actualComment;
 
     public TableRowClassField(
-            @Nonnull String tableExpression,
-            @Nonnull String field,
-            @Nonnull String type,
+            @NotNull String tableExpression,
+            @NotNull String field,
+            @NotNull String type,
             boolean nullable,
             @Nullable String comment,
             @Nullable String strictEnumPackage,

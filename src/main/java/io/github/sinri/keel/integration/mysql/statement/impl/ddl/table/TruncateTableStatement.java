@@ -1,9 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/truncate-table.html">TRUNCATE TABLE Statement</a>
@@ -11,7 +10,7 @@ import javax.annotation.Nullable;
  */
 public class TruncateTableStatement extends AbstractStatement {
     private @Nullable String schemaName = null;
-    private @Nonnull String tableName = "";
+    private @NotNull String tableName = "";
 
     @Nullable
     protected String getSchemaName() {
@@ -23,12 +22,12 @@ public class TruncateTableStatement extends AbstractStatement {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     protected String getTableName() {
         return tableName;
     }
 
-    public TruncateTableStatement setTableName(@Nonnull String tableName) {
+    public TruncateTableStatement setTableName(@NotNull String tableName) {
         this.tableName = tableName;
         return this;
     }

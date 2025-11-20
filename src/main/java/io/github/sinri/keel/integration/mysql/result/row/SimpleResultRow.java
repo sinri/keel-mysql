@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.result.row;
 
 import io.vertx.core.json.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 
 /**
  * Designed for a wrapper of each row in ResultMatrix.
@@ -16,17 +16,17 @@ import javax.annotation.Nonnull;
 public class SimpleResultRow implements ResultRow {
     private JsonObject row;
 
-    public SimpleResultRow(@Nonnull JsonObject tableRow) {
+    public SimpleResultRow(@NotNull JsonObject tableRow) {
         this.reloadData(tableRow);
     }
 
     @Override
-    public final @Nonnull JsonObject toJsonObject() {
+    public final @NotNull JsonObject toJsonObject() {
         return row;
     }
 
     @Override
-    public final void reloadData(@Nonnull JsonObject jsonObject) {
+    public final void reloadData(@NotNull JsonObject jsonObject) {
         this.row = jsonObject;
     }
 }

@@ -1,6 +1,5 @@
 package io.github.sinri.keel.integration.mysql;
 
-import io.github.sinri.keel.base.KeelBase;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
@@ -10,12 +9,14 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.sqlclient.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+
+import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
@@ -49,8 +50,8 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     private final AtomicReference<String> fullVersionRef = new AtomicReference<>(null);
 
     public NamedMySQLDataSource(
-            @Nonnull KeelMySQLConfiguration configuration,
-            @Nonnull Function<SqlConnection, C> sqlConnectionWrapper) {
+            @NotNull KeelMySQLConfiguration configuration,
+            @NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
         this(configuration, sqlConnection -> Future.succeededFuture(), sqlConnectionWrapper);
     }
 
@@ -58,15 +59,15 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
      * @since 3.0.2
      */
     public NamedMySQLDataSource(
-            @Nonnull KeelMySQLConfiguration configuration,
+            @NotNull KeelMySQLConfiguration configuration,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
-            @Nonnull Function<SqlConnection, C> sqlConnectionWrapper) {
+            @NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
         this.configuration = configuration;
         this.sqlConnectionWrapper = sqlConnectionWrapper;
         this.pool = MySQLBuilder.pool()
                                 .with(configuration.getPoolOptions())
                                 .connectingTo(configuration.getConnectOptions())
-                                .using(KeelBase.getVertx())
+                                .using(Keel.getVertx())
                                 .withConnectHandler(sqlConnection -> initializeConnection(sqlConnection, connectionSetUpFunction))
                                 .build();
     }
@@ -74,7 +75,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     /**
      * @since 3.1.0
      */
-    private static Future<String> checkMySQLVersion(@Nonnull SqlConnection sqlConnection) {
+    private static Future<String> checkMySQLVersion(@NotNull SqlConnection sqlConnection) {
         return sqlConnection.preparedQuery("SELECT VERSION() as v; ")
                             .execute()
                             .compose(rows -> Future.succeededFuture(ResultMatrix.create(rows)))
@@ -99,7 +100,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
      * @since 4.1.5
      */
     private void initializeConnection(
-            @Nonnull SqlConnection sqlConnection,
+            @NotNull SqlConnection sqlConnection,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
     ) {
         Future.succeededFuture()
@@ -190,7 +191,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
         return fullVersionRef.get();
     }
 
-    public <T> Future<T> withConnection(@Nonnull Function<C, Future<T>> function) {
+    public <T> Future<T> withConnection(@NotNull Function<C, Future<T>> function) {
         return Future.succeededFuture()
                      .compose(v -> fetchMySQLConnection()
                              .compose(sqlConnectionWrapper -> {
@@ -209,7 +210,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
                              }));
     }
 
-    public <T> Future<T> withTransaction(@Nonnull Function<C, Future<T>> function) {
+    public <T> Future<T> withTransaction(@NotNull Function<C, Future<T>> function) {
         return withConnection(c -> {
             return Future.succeededFuture()
                          .compose(v -> {
@@ -254,7 +255,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     /**
      * @since 3.0.5
      */
-    public void close(@Nonnull Handler<AsyncResult<Void>> ar) {
+    public void close(@NotNull Handler<AsyncResult<Void>> ar) {
         this.pool.close().onComplete(ar);
     }
 

@@ -2,8 +2,8 @@ package io.github.sinri.keel.integration.mysql.statement.mixin;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.vertx.core.Future;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -15,7 +15,7 @@ public interface WriteIntoStatementMixin extends ModifyStatementMixin {
      * @since 3.0.11
      * @since 3.0.18 Finished Technical Preview.
      */
-    default Future<Long> executeForLastInsertedID(@Nonnull NamedMySQLConnection namedMySQLConnection) {
+    default Future<Long> executeForLastInsertedID(@NotNull NamedMySQLConnection namedMySQLConnection) {
         return execute(namedMySQLConnection)
                 .compose(resultMatrix -> Future.succeededFuture(resultMatrix.getLastInsertedID()));
     }

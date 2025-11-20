@@ -1,9 +1,8 @@
 package io.github.sinri.keel.integration.mysql.result.row;
 
 import io.vertx.core.json.JsonObject;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * As of 2.8 rename and remove.
@@ -11,7 +10,7 @@ import javax.annotation.Nullable;
  * @since 2.0
  */
 public abstract class AbstractTableRow extends SimpleResultRow {
-    public AbstractTableRow(@Nonnull JsonObject tableRow) {
+    public AbstractTableRow(@NotNull JsonObject tableRow) {
         super(tableRow);
     }
 
@@ -26,6 +25,6 @@ public abstract class AbstractTableRow extends SimpleResultRow {
     /**
      * @return table name
      */
-    @Nonnull
+    @NotNull
     abstract public String sourceTableName();
 }
