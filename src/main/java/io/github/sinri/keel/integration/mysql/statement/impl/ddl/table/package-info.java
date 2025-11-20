@@ -1,12 +1,27 @@
 /**
- * <p>The table package provides table-specific DDL statement implementations for MySQL in the Keel framework.</p>
- * <p>This package contains table DDL components, including:</p>
- * <p>- Table creation and modification statements</p>
- * <p>- Table alteration and structure changes</p>
- * <p>- Table component management (columns, indexes, constraints)</p>
- * <p>- Table truncation and cleanup operations</p>
- * <p>- Table schema validation and management</p>
- * <p>These components enable comprehensive table management</p>
- * <p>and schema modification through programmatic operations.</p>
+ * 表操作包，为Keel框架中的MySQL提供特定表的DDL语句实现
+ * <p>此包包含表DDL组件，包括：</p>
+ * <p>- 表创建和修改语句</p>
+ * <p>- 表变更和结构更改</p>
+ * <p>- 表组件管理（列、索引、约束）</p>
+ * <p>- 表截断和清理操作</p>
+ * <p>- 表模式验证和管理</p>
+ * <p>这些组件支持全面的表管理</p>
+ * <p>和通过程序化操作进行模式修改。</p>
+ *
+ * @since 5.0.0
+ */
+/**
+ * 表操作包，为Keel框架中的MySQL提供特定表的DDL语句实现
+ * <p>此包包含表DDL组件，包括：</p>
+ * <p>- 表创建和修改语句</p>
+ * <p>- 表变更和结构更改</p>
+ * <p>- 表组件管理（列、索引、约束）</p>
+ * <p>- 表截断和清理操作</p>
+ * <p>- 表模式验证和管理</p>
+ * <p>这些组件支持全面的表管理</p>
+ * <p>和通过程序化操作进行模式修改。</p>
+ *
+ * @since 5.0.0
  */
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table;

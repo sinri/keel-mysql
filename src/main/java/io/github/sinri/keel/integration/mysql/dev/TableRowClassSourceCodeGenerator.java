@@ -18,8 +18,9 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * @since 3.0.15
- * @since 3.0.18 Finished Technical Preview.
+ * 表行类源代码生成器，用于从数据库连接生成表行类的Java源代码
+ *
+ * @since 5.0.0
  */
 public class TableRowClassSourceCodeGenerator {
     private final SqlConnection sqlConnection;
@@ -32,6 +33,11 @@ public class TableRowClassSourceCodeGenerator {
 
     private Logger logger;
 
+    /**
+     * 构造表行类源代码生成器
+     *
+     * @param namedMySQLConnection 命名MySQL连接
+     */
     public TableRowClassSourceCodeGenerator(NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
         this.schema = null;
@@ -40,10 +46,19 @@ public class TableRowClassSourceCodeGenerator {
         this.logger = StdoutLoggerFactory.getInstance().createLogger(getClass().getSimpleName());
     }
 
+    /**
+     * 获取日志记录器
+     * @return 日志记录器
+     */
     public Logger getLogger() {
         return logger;
     }
 
+    /**
+     * 设置日志记录器
+     * @param logger 日志记录器
+     * @return 自身实例
+     */
     public TableRowClassSourceCodeGenerator setLogger(Logger logger) {
         this.logger = logger;
         return this;

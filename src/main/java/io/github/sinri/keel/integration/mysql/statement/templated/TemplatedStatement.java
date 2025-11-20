@@ -10,18 +10,24 @@ import java.util.regex.Matcher;
 
 
 /**
- * Represents a SQL statement that can be constructed from a template and arguments.
+ * 模板语句接口，用于构建基于模板的SQL语句
  * <p>
- * This interface provides methods to load SQL templates from a file, retrieve the SQL template,
- * get the argument mapping, and build the final SQL string by replacing placeholders in the template
- * with their corresponding values.
+ * 此接口提供从文件加载SQL模板、获取模板内容、
+ * 获取参数映射，以及通过将模板中的占位符
+ * 替换为相应值来构建最终SQL字符串的方法。
  * </p>
  *
  * @see TemplatedReadStatement
  * @see TemplatedModifyStatement
- * @since 3.0.8
+ * @since 5.0.0
  */
 public interface TemplatedStatement {
+    /**
+     * 从文件加载模板生成读取语句
+     *
+     * @param templatePath 模板文件路径
+     * @return 模板读取语句实例
+     */
     static TemplatedReadStatement loadTemplateToRead(@NotNull String templatePath) {
         try {
             byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
@@ -32,6 +38,11 @@ public interface TemplatedStatement {
         }
     }
 
+    /**
+     * 从文件加载模板生成修改语句
+     * @param templatePath 模板文件路径
+     * @return 模板修改语句实例
+     */
     static TemplatedModifyStatement loadTemplateToModify(@NotNull String templatePath) {
         try {
             byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
@@ -42,10 +53,22 @@ public interface TemplatedStatement {
         }
     }
 
+    /**
+     * 获取SQL模板字符串
+     * @return SQL模板字符串
+     */
     String getSqlTemplate();
 
+    /**
+     * 获取参数映射
+     * @return 参数映射实例
+     */
     TemplateArgumentMapping getArguments();
 
+    /**
+     * 构建最终的SQL字符串
+     * @return 构建后的SQL字符串
+     */
     default String build() {
         AtomicReference<String> sqlRef = new AtomicReference<>(getSqlTemplate());
 
@@ -58,3 +81,4 @@ public interface TemplatedStatement {
         return sqlRef.get();
     }
 }
+

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/create-view.html">CREATE VIEW Statement</a>
- * @since 4.0.4
+ * @since 5.0.0
  */
 public class CreateViewStatement extends AbstractStatement {
     private boolean createOrReplace = false;

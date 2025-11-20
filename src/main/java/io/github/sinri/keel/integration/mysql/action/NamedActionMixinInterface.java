@@ -5,25 +5,22 @@ import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Class that defines the interface for named MySQL actions in a mixin style.
- * <p>
- * This interface extends {@link SelfInterface} to provide a method to retrieve
- * the named MySQL connection associated with the action,
- * with this connection, you can execute SQL statements.
- * All your actions on MySQL connection should be wrapped in a transaction
- * managed by higher level;
- * i.e. do not manage transactions within any action.
+ * Mixin风格命名MySQL动作接口，定义了mixin风格的命名MySQL动作接口
  *
- * @param <C> a specific connection class that extends NamedMySQLConnection
- * @param <W> a generic type representing the mixin or additional context
- * @since 3.2.11
+ * 该接口扩展了{@link SelfInterface}，提供了获取与动作关联的命名MySQL连接的方法，
+ * 使用此连接可以执行SQL语句。
+ * 所有对MySQL连接的操作都应该包装在由高层管理的事务中；
+ * 即不要在任何动作内管理事务。
+ *
+ * @param <C> 扩展NamedMySQLConnection的特定连接类
+ * @param <W> 表示mixin或附加上下文的泛型类型
+ * @since 5.0.0
  */
 public interface NamedActionMixinInterface<C extends NamedMySQLConnection, W>
         extends SelfInterface<W> {
     /**
-     * Retrieves the associated named MySQL connection.
-     *
-     * @return the named MySQL connection instance associated with this action; never null
+     * 获取关联的命名MySQL连接
+     * @return 与此动作关联的命名MySQL连接实例，永不为null
      */
     @NotNull
     C getNamedSqlConnection();

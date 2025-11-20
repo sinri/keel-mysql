@@ -6,11 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 
 /**
- * A specialized implementation of {@link SpecificLog} for recording MySQL audit issues.
- * This class provides methods to set the state of a MySQL query, including preparation, execution, and failure,
- * along with relevant attributes such as the SQL statement, statement UUID, and affected/fetched rows.
+ * MySQL审计专用日志类，用于记录MySQL审计问题
+ * 该类提供了设置MySQL查询状态的方法，包括准备、执行和失败，
+ * 以及相关属性如SQL语句、语句UUID和受影响/获取的行数
  *
- * @since 4.1.0
+ * @since 5.0.0
  */
 public final class MySQLAuditSpecificLog extends SpecificLog<MySQLAuditSpecificLog> {
     public static final String TopicMysqlAudit = "MysqlAudit";
@@ -20,17 +20,19 @@ public final class MySQLAuditSpecificLog extends SpecificLog<MySQLAuditSpecificL
     public static final String KeyTotalAffectedRows = "TotalAffectedRows";
     public static final String KeyTotalFetchedRows = "TotalFetchedRows";
 
+    /**
+     * 构造MySQL审计日志对象
+     */
     public MySQLAuditSpecificLog() {
         super();
     }
 
 
     /**
-     * Sets the preparation state for a MySQL query, including the statement UUID and the SQL query.
-     *
-     * @param statement_uuid The unique identifier for the prepared statement.
-     * @param sql            The SQL query that was prepared.
-     * @return The current instance of {@link MySQLAuditSpecificLog} for method chaining.
+     * 设置MySQL查询的准备状态，包括语句UUID和SQL查询
+     * @param statement_uuid 预处理语句的唯一标识符
+     * @param sql 被准备的SQL查询
+     * @return 当前MySQLAuditSpecificLog实例，用于方法链式调用
      */
     public MySQLAuditSpecificLog setPreparation(@NotNull String statement_uuid, @NotNull String sql) {
         this.message("MySQL query prepared.")
@@ -42,11 +44,10 @@ public final class MySQLAuditSpecificLog extends SpecificLog<MySQLAuditSpecificL
     }
 
     /**
-     * Sets the query details for a MySQL audit issue, including the statement UUID and the SQL query.
-     *
-     * @param statement_uuid The unique identifier for the statement.
-     * @param sql            The SQL query that was executed.
-     * @return The current instance of {@link MySQLAuditSpecificLog} for method chaining.
+     * 设置MySQL审计问题的查询详情，包括语句UUID和SQL查询
+     * @param statement_uuid 语句的唯一标识符
+     * @param sql 被执行的SQL查询
+     * @return 当前MySQLAuditSpecificLog实例，用于方法链式调用
      */
     public MySQLAuditSpecificLog setQuery(@NotNull String statement_uuid, @NotNull String sql) {
         this.message("MySQL query without preparation.")
@@ -59,14 +60,12 @@ public final class MySQLAuditSpecificLog extends SpecificLog<MySQLAuditSpecificL
 
 
     /**
-     * Sets the completion state for a MySQL query, including the statement UUID, SQL query, total affected rows,
-     * and total fetched rows.
-     *
-     * @param statement_uuid    The unique identifier for the executed statement.
-     * @param sql               The SQL query that was executed.
-     * @param totalAffectedRows The number of rows affected by the query.
-     * @param totalFetchedRows  The number of rows fetched by the query.
-     * @return The current instance of {@link MySQLAuditSpecificLog} for method chaining.
+     * 设置MySQL查询的完成状态，包括语句UUID、SQL查询、总受影响行数和总获取行数
+     * @param statement_uuid 被执行语句的唯一标识符
+     * @param sql 被执行的SQL查询
+     * @param totalAffectedRows 查询受影响的行数
+     * @param totalFetchedRows 查询获取的行数
+     * @return 当前MySQLAuditSpecificLog实例，用于方法链式调用
      */
     public MySQLAuditSpecificLog setForDone(
             @NotNull String statement_uuid,
@@ -85,11 +84,10 @@ public final class MySQLAuditSpecificLog extends SpecificLog<MySQLAuditSpecificL
     }
 
     /**
-     * Sets the failed state for a MySQL query, including the statement UUID and the SQL query.
-     *
-     * @param statement_uuid The unique identifier for the statement that failed.
-     * @param sql            The SQL query that was executed and failed.
-     * @return The current instance of {@link MySQLAuditSpecificLog} for method chaining.
+     * 设置MySQL查询的失败状态，包括语句UUID和SQL查询
+     * @param statement_uuid 失败语句的唯一标识符
+     * @param sql 被执行且失败的SQL查询
+     * @return 当前MySQLAuditSpecificLog实例，用于方法链式调用
      */
     public MySQLAuditSpecificLog setForFailed(@NotNull String statement_uuid, @NotNull String sql) {
         this.message("MySQL query failed.")

@@ -1,12 +1,27 @@
 /**
- * <p>The mixin package provides statement enhancement mixins for MySQL operations in the Keel framework.</p>
- * <p>This package contains statement mixin components, including:</p>
- * <p>- Select statement enhancement mixins</p>
- * <p>- Read statement functionality mixins</p>
- * <p>- Modify statement operation mixins</p>
- * <p>- Write-into statement support mixins</p>
- * <p>- Statement composition and enhancement</p>
- * <p>These components enable modular statement enhancement</p>
- * <p>through mixin patterns for flexible SQL statement building.</p>
+ * 混合类包，为Keel框架中的MySQL操作提供语句增强混合类
+ * <p>此包包含语句混合类组件，包括：</p>
+ * <p>- SELECT语句增强混合类</p>
+ * <p>- 读取语句功能混合类</p>
+ * <p>- 修改语句操作混合类</p>
+ * <p>- 写入语句支持混合类</p>
+ * <p>- 语句组合和增强</p>
+ * <p>这些组件通过混合类模式实现模块化语句增强</p>
+ * <p>用于灵活的SQL语句构建。</p>
+ *
+ * @since 5.0.0
+ */
+/**
+ * 混合类包，为Keel框架中的MySQL操作提供语句增强混合类
+ * <p>此包包含语句混合类组件，包括：</p>
+ * <p>- SELECT语句增强混合类</p>
+ * <p>- 读取语句功能混合类</p>
+ * <p>- 修改语句操作混合类</p>
+ * <p>- 写入语句支持混合类</p>
+ * <p>- 语句组合和增强</p>
+ * <p>这些组件通过混合类模式实现模块化语句增强</p>
+ * <p>用于灵活的SQL语句构建。</p>
+ *
+ * @since 5.0.0
  */
 package io.github.sinri.keel.integration.mysql.statement.mixin;

@@ -8,7 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * UNION语句类，用于构建和执行UNION联合查询
+ *
+ * @since 5.0.0
+ */
 public class UnionStatement extends AbstractStatement implements ReadStatementMixin {
     final List<String> selections = new ArrayList<>();
 

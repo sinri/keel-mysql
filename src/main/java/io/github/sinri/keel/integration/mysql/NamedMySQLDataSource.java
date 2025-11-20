@@ -8,7 +8,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mysqlclient.MySQLBuilder;
-import io.vertx.sqlclient.*;
+import io.vertx.sqlclient.Pool;
+import io.vertx.sqlclient.SqlConnection;
+import io.vertx.sqlclient.TransactionRollbackException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,12 +22,10 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * Pair data source to a named mysql connection.
- * <p>
- * As of 3.0.18, Finished Technical Preview.
+ * 命名MySQL数据源类，将数据源与命名MySQL连接配对
  *
- * @param <C> the type of connection
- * @since 3.0.11
+ * @param <C> 连接类型
+ * @since 5.0.0
  */
 public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
@@ -33,15 +33,11 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     private final KeelMySQLConfiguration configuration;
 
     /**
-     * Hold the count of the connections initialized to pool.
-     *
-     * @since 4.1.5
+     * 记录初始化到池中的连接数
      */
     private final AtomicInteger initializedConnectionCounter = new AtomicInteger(0);
     /**
-     * Hold the count of the connections currently used.
-     *
-     * @since 4.1.5
+     * 记录当前正在使用的连接数
      */
     private final AtomicInteger borrowedConnectionCounter = new AtomicInteger(0);
 
@@ -49,6 +45,12 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     private final AtomicReference<String> fullVersionRef = new AtomicReference<>(null);
 
+    /**
+     * 构造命名MySQL数据源
+     *
+     * @param configuration        MySQL配置
+     * @param sqlConnectionWrapper SQL连接包装器
+     */
     public NamedMySQLDataSource(
             @NotNull KeelMySQLConfiguration configuration,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
@@ -56,7 +58,10 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     }
 
     /**
-     * @since 3.0.2
+     * 构造命名MySQL数据源，支持自定义连接设置函数
+     * @param configuration MySQL配置
+     * @param connectionSetUpFunction 连接设置函数
+     * @param sqlConnectionWrapper SQL连接包装器
      */
     public NamedMySQLDataSource(
             @NotNull KeelMySQLConfiguration configuration,
@@ -73,7 +78,9 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     }
 
     /**
-     * @since 3.1.0
+     * 检查MySQL版本
+     * @param sqlConnection SQL连接
+     * @return 包含版本信息的Future
      */
     private static Future<String> checkMySQLVersion(@NotNull SqlConnection sqlConnection) {
         return sqlConnection.preparedQuery("SELECT VERSION() as v; ")
@@ -92,12 +99,9 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     }
 
     /**
-     * Do initialization for a new established connection before releasing it into
-     * the pool with a
-     * {@link SqlClient#close()} call.
-     *
-     * @see ClientBuilder#withConnectHandler(Handler)
-     * @since 4.1.5
+     * 对新建立的连接进行初始化，然后将其释放到池中
+     * @param sqlConnection SQL连接
+     * @param connectionSetUpFunction 连接设置函数
      */
     private void initializeConnection(
             @NotNull SqlConnection sqlConnection,
@@ -132,19 +136,18 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
               });
     }
 
+    /**
+     * 获取MySQL配置
+     * @return MySQL配置对象
+     */
     public KeelMySQLConfiguration getConfiguration() {
         return configuration;
     }
 
     /**
-     * To get the connections initialized in the pool and not in use right now.
-     *
-     * @return the number of connections initialized in the pool and not in use
-     *         right now
-     * @since 3.0.2
-     * @deprecated As of 4.1.5, changed the implementation, use
-     *         {@link NamedMySQLDataSource#getCurrentIdleConnectionCount()}
-     *         instead.
+     * 获取池中初始化且当前未使用的连接数
+     * @return 空闲连接数
+     * @deprecated 已弃用，请使用getCurrentIdleConnectionCount()方法
      */
     @Deprecated(since = "4.1.5")
     public int getAvailableConnectionCount() {
@@ -152,45 +155,42 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     }
 
     /**
-     * To get the count of the connections initialized in the pool and not in use
-     * right now.
-     *
-     * @return the number of connections initialized in the pool and not in use
-     *         right now
-     * @since 4.1.5
+     * 获取池中初始化且当前未使用的连接数
+     * @return 空闲连接数
      */
     public int getCurrentIdleConnectionCount() {
         return getCurrentInitializedConnectionCount() - getCurrentActiveConnectionCount();
     }
 
     /**
-     * To get the count of the connections initialized in the pool.
-     *
-     * @return the number of connections initialized in the pool
-     * @since 4.1.5
+     * 获取池中初始化的连接总数
+     * @return 初始化连接数
      */
     public int getCurrentInitializedConnectionCount() {
         return initializedConnectionCounter.get();
     }
 
     /**
-     * To get the count of the connections currently used, i.e. borrowed from the
-     * pool.
-     *
-     * @return the number of connections currently used
-     * @since 4.1.5
+     * 获取当前正在使用的连接数（即从池中借出的连接）
+     * @return 活跃连接数
      */
     public int getCurrentActiveConnectionCount() {
         return borrowedConnectionCounter.get();
     }
 
     /**
-     * @since 3.1.0
+     * 获取MySQL完整版本信息
+     * @return MySQL版本信息，可能为null
      */
     public @Nullable String getFullVersionRef() {
         return fullVersionRef.get();
     }
 
+    /**
+     * 使用连接执行操作
+     * @param function 连接操作函数
+     * @return 操作结果Future
+     */
     public <T> Future<T> withConnection(@NotNull Function<C, Future<T>> function) {
         return Future.succeededFuture()
                      .compose(v -> fetchMySQLConnection()
@@ -210,6 +210,11 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
                              }));
     }
 
+    /**
+     * 在事务中使用连接执行操作
+     * @param function 事务操作函数
+     * @return 事务结果Future
+     */
     public <T> Future<T> withTransaction(@NotNull Function<C, Future<T>> function) {
         return withConnection(c -> {
             return Future.succeededFuture()
@@ -246,19 +251,25 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     }
 
     /**
-     * @since 3.0.5
+     * 关闭数据源
+     * @return 关闭操作Future
      */
     public Future<Void> close() {
         return this.pool.close();
     }
 
     /**
-     * @since 3.0.5
+     * 关闭数据源并处理结果
+     * @param ar 异步结果处理器
      */
     public void close(@NotNull Handler<AsyncResult<Void>> ar) {
         this.pool.close().onComplete(ar);
     }
 
+    /**
+     * 获取MySQL连接
+     * @return 连接Future
+     */
     private Future<C> fetchMySQLConnection() {
         return Future.succeededFuture()
                      .compose(v -> pool.getConnection())

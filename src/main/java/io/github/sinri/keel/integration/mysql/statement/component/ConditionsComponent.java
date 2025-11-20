@@ -11,27 +11,42 @@ import java.util.function.Function;
 
 
 /**
- * @since 1.9 all the callback function could return null safely. by Sinri 2020-02-07
+ * 条件组件类，用于构建复杂的SQL条件表达式
+ *
+ * @since 5.0.0
  */
 public class ConditionsComponent {
     protected final List<MySQLCondition> conditions;
 
+    /**
+     * 构造条件组件
+     */
     public ConditionsComponent() {
         conditions = new ArrayList<>();
     }
 
+    /**
+     * 复制构造条件组件
+     *
+     * @param another 另一个条件组件
+     */
     public ConditionsComponent(@NotNull ConditionsComponent another) {
         this.conditions = new ArrayList<>(another.conditions);
     }
 
+    /**
+     * 检查是否为空
+     * @return 是否为空
+     */
     public boolean isEmpty() {
         return this.conditions.isEmpty();
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @param value      Be quoted, number, string.
-     * @since 3.1.8
+     * 添加表达式等于字面值的条件
+     * @param expression 表达式（不会被引用，可能是字段、函数等）
+     * @param value 值（会被引用，数字或字符串）
+     * @return 自身实例
      */
     public ConditionsComponent expressionEqualsLiteralValue(@NotNull String expression, @NotNull Object value) {
         return this.comparison(compareCondition -> compareCondition
@@ -42,7 +57,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @since 4.1.0
+     * 添加表达式等于字面值的条件（仅在值不为空时）
+     * @param expression 表达式
+     * @param valueBox 值包装器
+     * @return 自身实例
      */
     public ConditionsComponent expressionEqualsLiteralValueIfNonNull(@NotNull String expression, @NotNull ValueBox<Object> valueBox) {
         if (valueBox.isValueSetAndNotNull()) {
@@ -53,9 +71,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @param value      Be quoted after stringify. BigDecimal would not be plain string.
-     * @since 3.1.8
+     * 添加表达式不等于字面值的条件
+     * @param expression 表达式
+     * @param value 值
+     * @return 自身实例
      */
     public ConditionsComponent expressionNotLiteralValue(@NotNull String expression, @NotNull Object value) {
         return this.comparison(compareCondition -> compareCondition
@@ -66,7 +85,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @since 4.1.0
+     * 添加表达式不等于字面值的条件（仅在值不为空时）
+     * @param expression 表达式
+     * @param valueBox 值包装器
+     * @return 自身实例
      */
     public ConditionsComponent expressionNotLiteralValueIfNonNull(@NotNull String expression, @NotNull ValueBox<Object> valueBox) {
         if (valueBox.isValueSetAndNotNull()) {
@@ -77,9 +99,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @param value      Be quoted, numeric.
-     * @since 3.1.8
+     * 添加表达式等于数值条件的条件
+     * @param expression 表达式
+     * @param value 数值
+     * @return 自身实例
      */
     public ConditionsComponent expressionEqualsNumericValue(@NotNull String expression, @NotNull Number value) {
         return this.comparison(compareCondition -> compareCondition
@@ -90,7 +113,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @since 4.1.0
+     * 添加表达式等于数值条件的条件（仅在值不为空时）
+     * @param expression 表达式
+     * @param valueBox 值包装器
+     * @return 自身实例
      */
     public ConditionsComponent expressionEqualsNumericValueIfNonNull(@NotNull String expression, @NotNull ValueBox<Number> valueBox) {
         if (valueBox.isValueSetAndNotNull()) {
@@ -101,9 +127,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @param value      Be quoted, numeric. BigDecimal would not be plain string.
-     * @since 3.1.8
+     * 添加表达式不等于数值条件的条件
+     * @param expression 表达式
+     * @param value 数值
+     * @return 自身实例
      */
     public ConditionsComponent expressionNotNumericValue(@NotNull String expression, @NotNull Number value) {
         return this.comparison(compareCondition -> compareCondition
@@ -113,6 +140,12 @@ public class ConditionsComponent {
         );
     }
 
+    /**
+     * 添加表达式不等于数值条件的条件（仅在值不为空时）
+     * @param expression 表达式
+     * @param valueBox 值包装器
+     * @return 自身实例
+     */
     public ConditionsComponent expressionNotNumericValueIfNonNull(@NotNull String expression, @NotNull ValueBox<Number> valueBox) {
         if (valueBox.isValueSetAndNotNull()) {
             return expressionNotNumericValue(expression, valueBox.getNonNullValue());
@@ -122,8 +155,9 @@ public class ConditionsComponent {
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @since 3.1.8
+     * 添加表达式为NULL的条件
+     * @param expression 表达式
+     * @return 自身实例
      */
     public ConditionsComponent expressionIsNull(@NotNull String expression) {
         return this.comparison(compareCondition -> compareCondition
@@ -133,8 +167,9 @@ public class ConditionsComponent {
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @since 3.1.8
+     * 添加表达式不为NULL的条件
+     * @param expression 表达式
+     * @return 自身实例
      */
     public ConditionsComponent expressionIsNotNull(@NotNull String expression) {
         return this.comparison(compareCondition -> compareCondition
@@ -144,7 +179,11 @@ public class ConditionsComponent {
         );
     }
 
-
+    /**
+     * 添加比较条件
+     * @param function 比较条件构建函数
+     * @return 自身实例
+     */
     public ConditionsComponent comparison(@NotNull Function<CompareCondition, CompareCondition> function) {
         CompareCondition condition = function.apply(new CompareCondition());
         if (condition != null) {
@@ -153,6 +192,12 @@ public class ConditionsComponent {
         return this;
     }
 
+    /**
+     * 添加带操作符的比较条件
+     * @param operator 操作符
+     * @param function 比较条件构建函数
+     * @return 自身实例
+     */
     public ConditionsComponent comparison(@NotNull String operator, @NotNull Function<CompareCondition, CompareCondition> function) {
         CompareCondition condition = function.apply(new CompareCondition(operator));
         if (condition != null) {
@@ -162,9 +207,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @param values     Be quoted each, as number or string.
-     * @since 3.1.8
+     * 添加表达式在字面值列表中的条件
+     * @param expression 表达式
+     * @param values 值列表
+     * @return 自身实例
      */
     public ConditionsComponent expressionAmongLiteralValues(@NotNull String expression, @NotNull Collection<?> values) {
         return this.among(amongstCondition -> amongstCondition
@@ -174,7 +220,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @since 4.1.0
+     * 添加表达式在字面值列表中的条件（非空检查）
+     * @param expression 表达式
+     * @param values 值列表
+     * @return 自身实例
      */
     public ConditionsComponent expressionAmongLiteralValuesIfNotEmpty(@NotNull String expression, @NotNull Collection<?> values) {
         if (values.isEmpty()) return this;
@@ -182,9 +231,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @param values     Be quoted each, as number or string.
-     * @since 3.1.8
+     * 添加表达式在数值列表中的条件
+     * @param expression 表达式
+     * @param values 数值列表
+     * @return 自身实例
      */
     public ConditionsComponent expressionAmongNumericValues(@NotNull String expression, @NotNull Collection<? extends Number> values) {
         return this.among(amongstCondition -> amongstCondition
@@ -194,7 +244,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @since 4.1.0
+     * 添加表达式在数值列表中的条件（非空检查）
+     * @param expression 表达式
+     * @param values 数值列表
+     * @return 自身实例
      */
     public ConditionsComponent expressionAmongNumericValuesIfNotEmpty(@NotNull String expression, @NotNull Collection<? extends Number> values) {
         if (values.isEmpty()) return this;
@@ -202,9 +255,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @param values     Be quoted each, as number or string.
-     * @since 3.1.8
+     * 添加表达式不在字面值列表中的条件
+     * @param expression 表达式
+     * @param values 值列表
+     * @return 自身实例
      */
     public ConditionsComponent expressionNotInLiteralValues(@NotNull String expression, @NotNull Collection<?> values) {
         return this.among(amongstCondition -> amongstCondition
@@ -215,7 +269,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @since 4.1.0
+     * 添加表达式不在字面值列表中的条件（非空检查）
+     * @param expression 表达式
+     * @param values 值列表
+     * @return 自身实例
      */
     public ConditionsComponent expressionNotInLiteralValuesIfNotEmpty(@NotNull String expression, @NotNull Collection<?> values) {
         if (values.isEmpty()) return this;
@@ -223,9 +280,10 @@ public class ConditionsComponent {
     }
 
     /**
-     * @param expression Not be quoted, may be fields, functions, etc.
-     * @param values     Be quoted each, as number or string.
-     * @since 3.1.8
+     * 添加表达式不在数值列表中的条件
+     * @param expression 表达式
+     * @param values 数值列表
+     * @return 自身实例
      */
     public ConditionsComponent expressionNotInNumericValues(@NotNull String expression, @NotNull Collection<? extends Number> values) {
         return this.among(amongstCondition -> amongstCondition
@@ -236,13 +294,21 @@ public class ConditionsComponent {
     }
 
     /**
-     * @since 4.1.0
+     * 添加表达式不在数值列表中的条件（非空检查）
+     * @param expression 表达式
+     * @param values 数值列表
+     * @return 自身实例
      */
     public ConditionsComponent expressionNotInNumericValuesIfNotEmpty(@NotNull String expression, @NotNull Collection<? extends Number> values) {
         if (values.isEmpty()) return this;
         return expressionNotInNumericValues(expression, values);
     }
 
+    /**
+     * 添加包含条件
+     * @param function 包含条件构建函数
+     * @return 自身实例
+     */
     public ConditionsComponent among(@NotNull Function<AmongstCondition, AmongstCondition> function) {
         AmongstCondition condition = function.apply(new AmongstCondition());
         if (condition != null) {
@@ -251,6 +317,11 @@ public class ConditionsComponent {
         return this;
     }
 
+    /**
+     * 添加交集条件（AND）
+     * @param function 组条件构建函数
+     * @return 自身实例
+     */
     public ConditionsComponent intersection(@NotNull Function<GroupCondition, GroupCondition> function) {
         GroupCondition condition = function.apply(new GroupCondition(GroupCondition.JUNCTION_FOR_AND));
         if (condition != null) {
@@ -259,6 +330,11 @@ public class ConditionsComponent {
         return this;
     }
 
+    /**
+     * 添加并集条件（OR）
+     * @param function 组条件构建函数
+     * @return 自身实例
+     */
     public ConditionsComponent union(@NotNull Function<GroupCondition, GroupCondition> function) {
         GroupCondition condition = function.apply(new GroupCondition(GroupCondition.JUNCTION_FOR_OR));
         if (condition != null) {
@@ -267,6 +343,11 @@ public class ConditionsComponent {
         return this;
     }
 
+    /**
+     * 添加原始条件
+     * @param raw 原始条件字符串
+     * @return 自身实例
+     */
     public ConditionsComponent raw(@NotNull String raw) {
         if (!raw.isBlank()) {
             conditions.add(new RawCondition(raw));

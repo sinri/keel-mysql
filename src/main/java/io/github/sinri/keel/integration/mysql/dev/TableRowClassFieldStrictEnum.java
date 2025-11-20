@@ -6,8 +6,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 /**
- * @since 3.0.15
- * @since 3.0.18 Finished Technical Preview.
+ * 表行类字段严格枚举类，用于处理字段的严格枚举定义
+ *
+ * @since 5.0.0
  */
 public class TableRowClassFieldStrictEnum {
     private final String fieldName;
@@ -15,6 +16,13 @@ public class TableRowClassFieldStrictEnum {
     private final String enumClass;
     private final String enumClassRef;
 
+    /**
+     * 构造表行类字段严格枚举
+     *
+     * @param fieldName   字段名
+     * @param enumPackage 枚举包名
+     * @param enumClass   枚举类名
+     */
     public TableRowClassFieldStrictEnum(@NotNull String fieldName, @Nullable String enumPackage, @NotNull String enumClass) {
         this.fieldName = fieldName;
         this.enumPackage = Objects.requireNonNullElse(enumPackage, "");

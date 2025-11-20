@@ -12,6 +12,11 @@ import java.util.List;
 import java.util.function.Function;
 
 
+/**
+ * DELETE语句实现类，用于构建和执行DELETE删除操作
+ *
+ * @since 5.0.0
+ */
 public class DeleteStatement extends AbstractStatement implements ModifyStatementMixin {
     final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
     final List<String> sortRules = new ArrayList<>();

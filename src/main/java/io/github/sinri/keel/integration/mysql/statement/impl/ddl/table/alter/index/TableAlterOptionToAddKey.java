@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 
 /**
- * {@code ADD {INDEX | KEY} [index_name] [index_type] (key_part,...) [index_option] ...}
+ * 添加索引选项类，用于构建ALTER TABLE ADD {INDEX | KEY}语句
  *
- * @since 4.0.4
+ * @since 5.0.0
  */
 public final class TableAlterOptionToAddKey extends TableAlterOption {
     private final List<String> keyParts = new ArrayList<>();
@@ -20,21 +20,42 @@ public final class TableAlterOptionToAddKey extends TableAlterOption {
     private @Nullable String indexType = null;
     private @Nullable String indexOption = null;
 
+    /**
+     * 设置索引名称
+     *
+     * @param indexName 索引名称
+     * @return 自身实例
+     */
     public TableAlterOptionToAddKey setIndexName(@Nullable String indexName) {
         this.indexName = indexName;
         return this;
     }
 
+    /**
+     * 设置索引类型
+     * @param indexType 索引类型
+     * @return 自身实例
+     */
     public TableAlterOptionToAddKey setIndexType(@Nullable String indexType) {
         this.indexType = indexType;
         return this;
     }
 
+    /**
+     * 设置索引选项
+     * @param indexOption 索引选项
+     * @return 自身实例
+     */
     public TableAlterOptionToAddKey setIndexOption(@Nullable String indexOption) {
         this.indexOption = indexOption;
         return this;
     }
 
+    /**
+     * 添加索引列
+     * @param keyPart 索引列名称
+     * @return 自身实例
+     */
     public TableAlterOptionToAddKey addKeyPart(@NotNull String keyPart) {
         this.keyParts.add(keyPart);
         return this;

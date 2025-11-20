@@ -8,8 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @since 3.2.19
- * The OUT and INOUT of Parameters for CALLed Stored Procedures are not supported.
+ * CALL语句类，用于构建和执行存储过程调用
+ * <p>不支持存储过程中CALL参数的OUT和INOUT模式。</p>
+ * @since 5.0.0
+ */
+ *CALL语句类，用于构建和执行存储过程调用
+ * <p>不支持存储过程中CALL参数的OUT和INOUT模式。</p>
+        *@since 5.0.0
  */
 public class CallStatement extends AbstractStatement {
     private final List<String> parameters = new ArrayList<>();

@@ -7,24 +7,39 @@ import java.util.Collection;
 
 
 /**
- * @since 3.0.15
- * @since 3.0.18 Finished Technical Preview.
+ * 表行类字段松散枚举类，用于处理字段的松散枚举定义
+ *
+ * @since 5.0.0
  */
 public class TableRowClassFieldLooseEnum {
     private final String fieldName;
     private final Collection<String> enumElements;
     private final String enumName;
 
+    /**
+     * 构造表行类字段松散枚举
+     *
+     * @param fieldName    字段名
+     * @param enumElements 枚举元素集合
+     */
     public TableRowClassFieldLooseEnum(String fieldName, Collection<String> enumElements) {
         this.fieldName = fieldName;
         this.enumElements = enumElements;
         this.enumName = StringUtils.fromUnderScoreCaseToCamelCase(fieldName, false) + "Enum";
     }
 
+    /**
+     * 获取松散枚举名称
+     * @return 松散枚举名称
+     */
     public String looseEnumName() {
         return this.enumName;
     }
 
+    /**
+     * 构建枚举源代码
+     * @return 枚举源代码
+     */
     public String build() {
         StringBuilder code = new StringBuilder();
         code

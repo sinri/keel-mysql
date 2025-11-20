@@ -1,16 +1,14 @@
 package io.github.sinri.keel.integration.mysql.condition;
 
-import io.github.sinri.keel.integration.mysql.exception.KeelSQLGenerateError;
-
 /**
- * @since 2.8 became interface
+ * MySQL条件接口，定义了SQL条件的通用接口
+ *
+ * @since 5.0.0
  */
 public interface MySQLCondition {
     /**
-     * 生成SQL的条件表达式文本。如果出错，则抛出 KeelSQLGenerateError 异常。
-     *
-     * @return The generated SQL component as String
-     * @throws KeelSQLGenerateError when the sql component could not be generated correctly
+     * 生成SQL的条件表达式文本
+     * @return 生成的SQL条件表达式字符串
      */
     String toString();
 }

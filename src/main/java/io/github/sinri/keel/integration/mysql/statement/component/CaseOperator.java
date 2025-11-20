@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 /**
+ * CASE操作符类，用于构建MySQL CASE表达式
  * <p>
  * {@code CASE value WHEN compare_value THEN result [WHEN compare_value THEN result ...] [ELSE result] END }
  * </p>
@@ -19,7 +20,7 @@ import java.util.Objects;
  *
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html#operator_case">
  * Case operator</a>
- * @since 3.0.19
+ * @since 5.0.0
  */
 @TechnicalPreview(since = "3.0.19")
 public class CaseOperator {

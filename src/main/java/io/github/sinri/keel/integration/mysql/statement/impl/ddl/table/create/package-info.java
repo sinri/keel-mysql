@@ -1,12 +1,14 @@
 /**
- * <p>The create package provides table creation DDL statement implementations for MySQL in the Keel framework.</p>
- * <p>This package contains table creation components, including:</p>
- * <p>- Standard table creation statements</p>
- * <p>- Table creation based on existing table structure</p>
- * <p>- Base table creation functionality</p>
- * <p>- Table creation with custom specifications</p>
- * <p>- Table creation validation and error handling</p>
- * <p>These components enable programmatic table creation</p>
- * <p>with full control over table structure and properties.</p>
+ * 表创建包，为Keel框架中的MySQL提供表创建DDL语句实现
+ * <p>此包包含表创建组件，包括：</p>
+ * <p>- 标准表创建语句</p>
+ * <p>- 基于现有表结构的表创建</p>
+ * <p>- 基础表创建功能</p>
+ * <p>- 自定义规格的表创建</p>
+ * <p>- 表创建验证和错误处理</p>
+ * <p>这些组件支持程序化表创建</p>
+ * <p>对表结构和属性进行全面控制。</p>
+ *
+ * @since 5.0.0
  */
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create;

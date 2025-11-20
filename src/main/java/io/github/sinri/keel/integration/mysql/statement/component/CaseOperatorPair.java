@@ -7,7 +7,9 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
- * @since 3.0.19
+ * CASE操作符配对类，用于定义CASE语句中的WHEN-THEN对
+ *
+ * @since 5.0.0
  */
 @TechnicalPreview(since = "3.0.19")
 public class CaseOperatorPair {

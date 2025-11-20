@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @since 4.1.0
+ * 表行类构建选项类，继承自TableRowClassBuildStandard，定义了构建表行类的具体选项
+ *
+ * @since 5.0.0
  */
 class TableRowClassBuildOptions extends TableRowClassBuildStandard {
     private final @NotNull List<TableRowClassField> fields = new ArrayList<>();

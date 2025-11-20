@@ -3,7 +3,7 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.componen
 /**
  * It is not standardized.
  *
- * @since 4.0.4
+ * @since 5.0.0
  */
 public class CreateTablePartitionOptions {
     private final String raw;

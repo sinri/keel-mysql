@@ -17,66 +17,164 @@ import java.util.function.Function;
 
 
 /**
- * @since 1.1
- * @since 1.8 becomes interface
- *         May overrides this class to get Customized Data Matrix
+ * 结果矩阵接口，用于处理和操作SQL查询结果
+ * 可继承此类以获取自定义数据矩阵
+ *
+ * @since 5.0.0
  */
 public interface ResultMatrix {
 
     /**
-     * @since 2.8
+     * 从RowSet创建结果矩阵
+     * @param rowSet SQL行集合
+     * @return 结果矩阵
      */
     static ResultMatrix create(RowSet<Row> rowSet) {
         return new ResultMatrixImpl(rowSet);
     }
 
+    /**
+     * 获取结果行列表
+     *
+     * @return 结果行列表
+     */
     List<JsonObject> getRowList();
 
+    /**
+     * 获取获取的总行数
+     * @return 总行数
+     */
     int getTotalFetchedRows();
 
+    /**
+     * 获取影响的总行数
+     * @return 影响的行数
+     */
     int getTotalAffectedRows();
 
+    /**
+     * 获取最后插入的ID
+     * @return 最后插入的ID
+     */
     long getLastInsertedID();
 
+    /**
+     * 转换为JSON数组
+     * @return JSON数组
+     */
     JsonArray toJsonArray();
 
+    /**
+     * 获取第一行数据
+     * @return 第一行数据
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
+     */
     JsonObject getFirstRow() throws KeelSQLResultRowIndexError;
 
+    /**
+     * 根据索引获取行数据
+     * @param index 行索引
+     * @return 指定行的数据
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
+     */
     JsonObject getRowByIndex(int index) throws KeelSQLResultRowIndexError;
 
     /**
-     * @since 1.10
+     * 根据索引构建表行对象
+     * @param index 行索引
+     * @param classOfTableRow 表行类
+     * @return 表行对象
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
     <T extends ResultRow> T buildTableRowByIndex(int index, Class<T> classOfTableRow) throws KeelSQLResultRowIndexError;
 
+    /**
+     * 获取第一行指定列的日期时间值
+     * @param columnName 列名
+     * @return 日期时间值
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
+     */
     String getOneColumnOfFirstRowAsDateTime(String columnName) throws KeelSQLResultRowIndexError;
 
+    /**
+     * 获取第一行指定列的字符串值
+     * @param columnName 列名
+     * @return 字符串值
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
+     */
     String getOneColumnOfFirstRowAsString(String columnName) throws KeelSQLResultRowIndexError;
 
+    /**
+     * 获取第一行指定列的数值对象
+     * @param columnName 列名
+     * @return 数值对象
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
+     */
     Numeric getOneColumnOfFirstRowAsNumeric(String columnName) throws KeelSQLResultRowIndexError;
 
+    /**
+     * 获取第一行指定列的整数值
+     * @param columnName 列名
+     * @return 整数值
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
+     */
     Integer getOneColumnOfFirstRowAsInteger(String columnName) throws KeelSQLResultRowIndexError;
 
+    /**
+     * 获取第一行指定列的长整数值
+     * @param columnName 列名
+     * @return 长整数值
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
+     */
     Long getOneColumnOfFirstRowAsLong(String columnName) throws KeelSQLResultRowIndexError;
 
+    /**
+     * 获取指定列的所有日期时间值
+     * @param columnName 列名
+     * @return 日期时间值列表
+     */
     List<String> getOneColumnAsDateTime(String columnName);
 
+    /**
+     * 获取指定列的所有字符串值
+     * @param columnName 列名
+     * @return 字符串值列表
+     */
     List<String> getOneColumnAsString(String columnName);
 
+    /**
+     * 获取指定列的所有数值对象
+     * @param columnName 列名
+     * @return 数值对象列表
+     */
     List<Numeric> getOneColumnAsNumeric(String columnName);
 
+    /**
+     * 获取指定列的所有长整数值
+     * @param columnName 列名
+     * @return 长整数值列表
+     */
     List<Long> getOneColumnAsLong(String columnName);
 
+    /**
+     * 获取指定列的所有整数值
+     * @param columnName 列名
+     * @return 整数值列表
+     */
     List<Integer> getOneColumnAsInteger(String columnName);
 
     /**
-     * @throws RuntimeException 封装类的时候可能会抛出异常
-     * @since 1.10
+     * 构建所有表行对象列表
+     * @param classOfTableRow 表行类
+     * @return 表行对象列表
+     * @throws RuntimeException 封装类时可能抛出异常
      */
     <T extends ResultRow> List<T> buildTableRowList(Class<T> classOfTableRow);
 
     /**
-     * @since 2.9.4
+     * 构建分类行映射图
+     * @param categoryGenerator 分类生成器
+     * @return 分类行映射图
      */
     default <K> Future<Map<K, List<JsonObject>>> buildCategorizedRowsMap(Function<JsonObject, K> categoryGenerator) {
         Map<K, List<JsonObject>> map = new HashMap<>();
@@ -89,7 +187,9 @@ public interface ResultMatrix {
     }
 
     /**
-     * @since 2.9.4
+     * 构建唯一键绑定行映射图
+     * @param uniqueKeyGenerator 唯一键生成器
+     * @return 唯一键绑定行映射图
      */
     default <K> Future<Map<K, JsonObject>> buildUniqueKeyBoundRowMap(Function<JsonObject, K> uniqueKeyGenerator) {
         Map<K, JsonObject> map = new HashMap<>();
@@ -102,9 +202,10 @@ public interface ResultMatrix {
     }
 
     /**
-     * Categorized Rows Map, i.e. category mapping to a list of rows.
-     *
-     * @since 2.9.4
+     * 构建分类表行映射图（分类映射到表行列表）
+     * @param classOfTableRow 表行类
+     * @param categoryGenerator 分类生成器
+     * @return 分类表行映射图
      */
     default <K, T extends ResultRow> Future<Map<K, List<T>>> buildCategorizedRowsMap(Class<T> classOfTableRow, Function<T, K> categoryGenerator) {
         Map<K, List<T>> map = new HashMap<>();
@@ -117,8 +218,11 @@ public interface ResultMatrix {
     }
 
     /**
-     * Unique key bound rows map, i.e. One unique Key mapping to one result row.
-     * WARNING: if the uniqueKeyGenerator provides duplicated key, the mapped value would be uncertainly single.
+     * 构建唯一键绑定表行映射图（一个唯一键映射到一个结果行）
+     * 警告：如果uniqueKeyGenerator提供重复键，映射值将不确定
+     * @param classOfTableRow 表行类
+     * @param uniqueKeyGenerator 唯一键生成器
+     * @return 唯一键绑定表行映射图
      */
     default <K, T extends ResultRow> Future<Map<K, T>> buildUniqueKeyBoundRowMap(Class<T> classOfTableRow, Function<T, K> uniqueKeyGenerator) {
         Map<K, T> map = new HashMap<>();
@@ -131,9 +235,9 @@ public interface ResultMatrix {
     }
 
     /**
-     * 类似矩阵转置的玩意。
-     *
-     * @since 2.9.4
+     * 构建自定义映射图（类似矩阵转置）
+     * @param rowToMapHandler 行到映射处理器
+     * @return 自定义映射图
      */
     default <K, V> Future<Map<K, V>> buildCustomizedMap(
             BiConsumer<Map<K, V>, JsonObject> rowToMapHandler
@@ -145,12 +249,10 @@ public interface ResultMatrix {
     }
 
     /**
-     * Shrink a result matrix of rows by a set of rows.
-     * Yang Rui needs it.
-     *
-     * @param shrinkByKeys      The keys of fields that would not be shrunk.
-     * @param shrinkBodyListKey The key of the shrunk body in result.
-     * @since 3.2.2
+     * 构建收缩列表（根据一组键收缩结果矩阵）
+     * @param shrinkByKeys 不收缩的字段键
+     * @param shrinkBodyListKey 结果中收缩主体的键
+     * @return 收缩后的列表
      */
     default Future<List<JsonObject>> buildShrinkList(
             Collection<String> shrinkByKeys,

@@ -6,7 +6,9 @@ import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @since 3.2.21
+ * 修改语句混合类，为修改操作提供受影响行数查询功能
+ *
+ * @since 5.0.0
  */
 public interface ModifyStatementMixin extends AnyStatement {
 

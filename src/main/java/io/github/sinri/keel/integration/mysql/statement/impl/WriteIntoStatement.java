@@ -12,6 +12,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 
+/**
+ * INSERT/REPLACE语句实现类，用于构建和执行数据写入操作
+ *
+ * @since 5.0.0
+ */
 public class WriteIntoStatement extends AbstractStatement implements WriteIntoStatementMixin {
     /**
      * insert [ignore] into schema.table (column...) values (value...),... ON DUPLICATE KEY UPDATE assignment_list

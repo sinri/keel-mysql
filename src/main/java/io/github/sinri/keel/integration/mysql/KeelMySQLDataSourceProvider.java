@@ -13,8 +13,18 @@ import java.util.function.Function;
 import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
+/**
+ * Keel MySQL数据源提供者类，用于创建和管理命名MySQL数据源
+ *
+ * @since 5.0.0
+ */
 public class KeelMySQLDataSourceProvider {
 
+    /**
+     * 获取默认MySQL数据源名称
+     *
+     * @return 默认数据源名称
+     */
     @NotNull
     public static String defaultMySQLDataSourceName() {
         return Objects.requireNonNull(Keel.getConfiguration()
@@ -22,10 +32,10 @@ public class KeelMySQLDataSourceProvider {
     }
 
     /**
-     * As of 3.0.18 Finished Technical Preview.
-     *
-     * @since 3.0.11 Technical Preview.
-     *
+     * 初始化命名MySQL数据源
+     * @param dataSourceName 数据源名称
+     * @param sqlConnectionWrapper SQL连接包装器
+     * @return 命名MySQL数据源
      */
     public static <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
             @NotNull String dataSourceName,
@@ -35,9 +45,10 @@ public class KeelMySQLDataSourceProvider {
     }
 
     /**
-     * Initialize a named MySQL Data Source and return the future after actual availability confirmed.
-     *
-     * @since 4.1.5
+     * 加载命名MySQL数据源并在实际可用性确认后返回Future
+     * @param dataSourceName 数据源名称
+     * @param sqlConnectionWrapper SQL连接包装器
+     * @return 包含命名MySQL数据源的Future
      */
     public static <C extends NamedMySQLConnection> Future<NamedMySQLDataSource<C>> loadNamedMySQLDataSource(
             @NotNull String dataSourceName,
@@ -49,7 +60,12 @@ public class KeelMySQLDataSourceProvider {
     }
 
     /**
-     * @since 4.1.5
+     * 初始化命名MySQL数据源，支持自定义连接设置函数
+     * @param dataSourceName 数据源名称
+     * @param sqlConnectionWrapper SQL连接包装器
+     * @param connectionSetUpFunction 连接设置函数
+     * @param initializedPromise 初始化完成Promise
+     * @return 命名MySQL数据源
      */
     public static <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
             @NotNull String dataSourceName,
@@ -79,8 +95,9 @@ public class KeelMySQLDataSourceProvider {
     }
 
     /**
-     * @since 3.0.11 Technical Preview.
-     * @since 3.0.18 Finished Technical Preview.
+     * 初始化动态命名MySQL数据源
+     * @param dataSourceName 数据源名称
+     * @return 动态命名MySQL数据源
      */
     public static NamedMySQLDataSource<DynamicNamedMySQLConnection> initializeDynamicNamedMySQLDataSource(@NotNull String dataSourceName) {
         return initializeNamedMySQLDataSource(dataSourceName, sqlConnection -> new DynamicNamedMySQLConnection(sqlConnection, dataSourceName));

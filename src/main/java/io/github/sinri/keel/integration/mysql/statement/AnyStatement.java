@@ -24,12 +24,16 @@ import org.jetbrains.annotations.NotNull;
 
 
 /**
- * @since 3.0.9
+ * SQL语句接口，定义了所有SQL语句的通用行为
+ *
+ * @since 5.0.0
  */
 public interface AnyStatement {
 
     /**
-     * @since 3.0.9
+     * 创建原始SQL语句
+     * @param sql 原始SQL语句
+     * @return SQL语句对象
      */
     static AbstractStatement raw(@NotNull String sql) {
         return raw(sql, false);
@@ -37,12 +41,10 @@ public interface AnyStatement {
 
 
     /**
-     * Creates an AbstractStatement with the provided SQL and a flag indicating whether to use prepared statements.
-     *
-     * @param sql            the raw SQL statement
-     * @param withoutPrepare a boolean value indicating whether to execute the statement without preparing it
-     * @return an instance of AbstractStatement
-     * @since 4.0.7
+     * 创建原始SQL语句，支持指定是否使用预处理语句
+     * @param sql 原始SQL语句
+     * @param withoutPrepare 是否不使用预处理语句
+     * @return SQL语句对象
      */
     static AbstractStatement raw(@NotNull String sql, boolean withoutPrepare) {
         return new AbstractStatement() {
@@ -59,7 +61,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 3.2.21 return AbstractReadStatement
+     * 创建SELECT语句
+     * @param statementHandler SELECT语句处理器
+     * @return SELECT语句对象
      */
     static SelectStatementMixin select(@NotNull Handler<SelectStatement> statementHandler) {
         SelectStatement selectStatement = new SelectStatement();
@@ -68,7 +72,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 3.2.21 return AbstractReadStatement
+     * 创建UNION语句
+     * @param unionStatementHandler UNION语句处理器
+     * @return UNION语句对象
      */
     static ReadStatementMixin union(@NotNull Handler<UnionStatement> unionStatementHandler) {
         UnionStatement unionStatement = new UnionStatement();
@@ -77,7 +83,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 3.2.21 return AbstractModifyStatement
+     * 创建UPDATE语句
+     * @param updateStatementHandler UPDATE语句处理器
+     * @return UPDATE语句对象
      */
     static ModifyStatementMixin update(@NotNull Handler<UpdateStatement> updateStatementHandler) {
         UpdateStatement updateStatement = new UpdateStatement();
@@ -86,7 +94,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 3.2.21 return AbstractModifyStatement
+     * 创建DELETE语句
+     * @param deleteStatementHandler DELETE语句处理器
+     * @return DELETE语句对象
      */
     static ModifyStatementMixin delete(@NotNull Handler<DeleteStatement> deleteStatementHandler) {
         DeleteStatement deleteStatement = new DeleteStatement();
@@ -95,7 +105,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 3.2.21 return AbstractWriteIntoStatement
+     * 创建INSERT语句
+     * @param statementHandler INSERT语句处理器
+     * @return INSERT语句对象
      */
     static WriteIntoStatementMixin insert(Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.INSERT);
@@ -104,7 +116,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 3.2.21 return AbstractModifyStatement
+     * 创建REPLACE语句
+     * @param statementHandler REPLACE语句处理器
+     * @return REPLACE语句对象
      */
     static WriteIntoStatementMixin replace(@NotNull Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.REPLACE);
@@ -113,8 +127,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 3.2.19
-     * @since 3.2.21 return AbstractStatement
+     * 创建CALL语句
+     * @param statementHandler CALL语句处理器
+     * @return CALL语句对象
      */
     static AbstractStatement call(@NotNull Handler<CallStatement> statementHandler) {
         CallStatement callStatement = new CallStatement();
@@ -123,7 +138,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 4.0.4
+     * 创建TRUNCATE TABLE语句
+     * @param statementHandler TRUNCATE TABLE语句处理器
+     * @return TRUNCATE TABLE语句对象
      */
     static AbstractStatement truncateTable(@NotNull Handler<TruncateTableStatement> statementHandler) {
         TruncateTableStatement truncateTableStatement = new TruncateTableStatement();
@@ -132,7 +149,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 4.0.4
+     * 创建CREATE TABLE语句
+     * @param statementHandler CREATE TABLE语句处理器
+     * @return CREATE TABLE语句对象
      */
     static AbstractStatement createTable(@NotNull Handler<CreateTableStatement> statementHandler) {
         CreateTableStatement createTableStatement = new CreateTableStatement();
@@ -141,7 +160,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 4.0.4
+     * 创建CREATE TABLE LIKE语句
+     * @param statementHandler CREATE TABLE LIKE语句处理器
+     * @return CREATE TABLE LIKE语句对象
      */
     static AbstractStatement createTableLikeTable(@NotNull Handler<CreateTableLikeTableStatement> statementHandler) {
         CreateTableLikeTableStatement createTableStatement = new CreateTableLikeTableStatement();
@@ -150,7 +171,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 4.0.4
+     * 创建ALTER TABLE语句
+     * @param statementHandler ALTER TABLE语句处理器
+     * @return ALTER TABLE语句对象
      */
     static AbstractStatement alterTable(@NotNull Handler<AlterTableStatement> statementHandler) {
         AlterTableStatement alterTableStatement = new AlterTableStatement();
@@ -159,7 +182,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 4.0.4
+     * 创建CREATE VIEW语句
+     * @param statementHandler CREATE VIEW语句处理器
+     * @return CREATE VIEW语句对象
      */
     static AbstractStatement createView(@NotNull Handler<CreateViewStatement> statementHandler) {
         CreateViewStatement createViewStatement = new CreateViewStatement();
@@ -168,7 +193,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 4.0.4
+     * 创建ALTER VIEW语句
+     * @param statementHandler ALTER VIEW语句处理器
+     * @return ALTER VIEW语句对象
      */
     static AbstractStatement alterView(@NotNull Handler<AlterViewStatement> statementHandler) {
         AlterViewStatement alterViewStatement = new AlterViewStatement();
@@ -177,7 +204,9 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 4.0.4
+     * 创建DROP VIEW语句
+     * @param statementHandler DROP VIEW语句处理器
+     * @return DROP VIEW语句对象
      */
     static AbstractStatement dropView(@NotNull Handler<DropViewStatement> statementHandler) {
         DropViewStatement dropViewStatement = new DropViewStatement();
@@ -186,7 +215,10 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 3.2.21 return AbstractReadStatement
+     * 创建模板化读取语句
+     * @param path 模板路径
+     * @param templatedReadStatementHandler 模板参数映射处理器
+     * @return 模板化读取语句对象
      */
     static ReadStatementMixin templatedRead(@NotNull String path, @NotNull Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
         TemplatedReadStatement readStatement = TemplatedStatement.loadTemplateToRead(path);
@@ -196,7 +228,10 @@ public interface AnyStatement {
     }
 
     /**
-     * @since 3.2.21 return AbstractModifyStatement
+     * 创建模板化修改语句
+     * @param path 模板路径
+     * @param templatedModifyStatementHandler 模板参数映射处理器
+     * @return 模板化修改语句对象
      */
     static ModifyStatementMixin templatedModify(@NotNull String path, @NotNull Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
         TemplatedModifyStatement templatedModifyStatement = TemplatedStatement.loadTemplateToModify(path);
@@ -206,15 +241,22 @@ public interface AnyStatement {
     }
 
     /**
-     * @return The SQL Generated
+     * 生成SQL字符串
+     * @return 生成的SQL语句
      */
     String toString();
 
     /**
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
+     * 在指定的MySQL连接上执行SQL语句
+     * @param namedSqlConnection MySQL命名连接
+     * @return 执行结果的Future
      */
     Future<ResultMatrix> execute(@NotNull NamedMySQLConnection namedSqlConnection);
 
+    /**
+     * 判断是否不使用预处理语句
+     *
+     * @return 是否不使用预处理语句
+     */
     boolean isWithoutPrepare();
 }

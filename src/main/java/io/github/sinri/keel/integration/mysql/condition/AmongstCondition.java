@@ -13,6 +13,11 @@ import java.util.List;
 import java.util.Objects;
 
 
+/**
+ * 范围条件类，用于构建IN/NOT IN类型的SQL条件表达式
+ *
+ * @since 5.0.0
+ */
 public class AmongstCondition implements MySQLCondition {
     public static final String OP_IN = "IN";
     protected final List<String> targetSet;

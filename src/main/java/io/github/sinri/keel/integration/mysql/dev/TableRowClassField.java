@@ -11,12 +11,9 @@ import java.util.regex.Pattern;
 
 
 /**
- * As of 3.0.18 Finished Technical Preview.
- * As of 3.1.0 Add support for AES encryption.
- * As of 3.1.7 Add deprecated field annotation.
- * As of 4.1.0 Add tableExpression.
+ * 表行类字段类，定义了表字段的信息和生成规则
  *
- * @since 3.0.15
+ * @since 5.0.0
  */
 class TableRowClassField {
     private static final Pattern patternForLooseEnum;

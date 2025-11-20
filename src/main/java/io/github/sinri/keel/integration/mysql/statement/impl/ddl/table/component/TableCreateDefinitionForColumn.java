@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
- * @since 4.0.4
+ * @since 5.0.0
  */
 public final class TableCreateDefinitionForColumn extends TableCreateDefinition {
     private String columnName;

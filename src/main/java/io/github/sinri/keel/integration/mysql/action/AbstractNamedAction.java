@@ -5,28 +5,26 @@ import org.jetbrains.annotations.NotNull;
 
 
 /**
- * Abstract class that implements the NamedActionInterface for handling named MySQL connections.
- * This class provides a constructor to initialize the named MySQL connection and implements the getNamedSqlConnection method to return the connection.
+ * 抽象命名动作基类，实现了NamedActionInterface接口用于处理命名MySQL连接
+ * 该类提供了构造函数来初始化命名MySQL连接，并实现了getNamedSqlConnection方法返回连接
  *
- * @param <C> a specific connection class that extends NamedMySQLConnection
- * @since 3.2.11 Moved from `io.github.sinri.keel.mysql.AbstractNamedAction` and refined.
+ * @param <C> 扩展NamedMySQLConnection的特定连接类
+ * @since 5.0.0
  */
 public abstract class AbstractNamedAction<C extends NamedMySQLConnection> implements NamedActionInterface<C> {
     private final @NotNull C namedSqlConnection;
 
     /**
-     * Constructs an AbstractNamedAction with the specified named MySQL connection.
-     *
-     * @param namedSqlConnection the named MySQL connection instance to be associated with this action; must not be null
+     * 构造具有指定命名MySQL连接的抽象命名动作
+     * @param namedSqlConnection 与此动作关联的命名MySQL连接实例，不能为null
      */
     public AbstractNamedAction(@NotNull C namedSqlConnection) {
         this.namedSqlConnection = namedSqlConnection;
     }
 
     /**
-     * Retrieves the named MySQL connection associated with this action.
-     *
-     * @return the instance of named MySQL connection associated with this action; never null
+     * 获取与此动作关联的命名MySQL连接
+     * @return 与此动作关联的命名MySQL连接实例，永不为null
      */
     @NotNull
     @Override

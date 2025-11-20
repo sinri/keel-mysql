@@ -6,6 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 组合条件类，用于将多个条件组合在一起（使用AND或OR连接）
+ *
+ * @since 5.0.0
+ */
 public class GroupCondition implements MySQLCondition {
     public static final String JUNCTION_FOR_AND = "AND";
     public static final String JUNCTION_FOR_OR = "OR";

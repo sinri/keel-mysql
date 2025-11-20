@@ -5,29 +5,27 @@ import org.jetbrains.annotations.NotNull;
 
 
 /**
- * Abstract class that implements the NamedActionMixinInterface for handling named MySQL connections in a mixin style.
- * This class provides a constructor to initialize the named MySQL connection and implements the getNamedSqlConnection method to return the connection.
+ * 抽象命名Mixin动作基类，实现了NamedActionMixinInterface接口用于处理mixin风格的命名MySQL连接
+ * 该类提供了构造函数来初始化命名MySQL连接，并实现了getNamedSqlConnection方法返回连接
  *
- * @param <C> a specific connection class that extends NamedMySQLConnection
- * @param <W> a generic type representing the mixin or additional context
- * @since 3.2.11 Refined for Mixin Style, extracted NamedActionInterface.
+ * @param <C> 扩展NamedMySQLConnection的特定连接类
+ * @param <W> 表示mixin或附加上下文的泛型类型
+ * @since 5.0.0
  */
 public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W> implements NamedActionMixinInterface<C, W> {
     private final @NotNull C namedSqlConnection;
 
     /**
-     * Constructs an AbstractNamedMixinAction with the specified named MySQL connection.
-     *
-     * @param namedSqlConnection the named MySQL connection instance to be associated with this action; must not be null
+     * 构造具有指定命名MySQL连接的抽象命名Mixin动作
+     * @param namedSqlConnection 与此动作关联的命名MySQL连接实例，不能为null
      */
     public AbstractNamedMixinAction(@NotNull C namedSqlConnection) {
         this.namedSqlConnection = namedSqlConnection;
     }
 
     /**
-     * Retrieves the named MySQL connection associated with this action.
-     *
-     * @return the named MySQL connection instance tied to this action; never null
+     * 获取与此动作关联的命名MySQL连接
+     * @return 与此动作关联的命名MySQL连接实例，永不为null
      */
     @NotNull
     @Override

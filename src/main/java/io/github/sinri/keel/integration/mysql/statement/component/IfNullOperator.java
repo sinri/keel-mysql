@@ -7,12 +7,13 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
+ * IFNULL函数操作符类，用于构建MySQL IFNULL函数
  * {@code IFNULL(expr1,expr2)}
  * <p>
  * If expr1 is not NULL, IFNULL() returns expr1; otherwise it returns expr2.
  * </p>
  *
- * @since 3.0.19
+ * @since 5.0.0
  */
 @TechnicalPreview(since = "3.0.19")
 public class IfNullOperator {

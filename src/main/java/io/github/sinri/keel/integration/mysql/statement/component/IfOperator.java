@@ -6,10 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
+ * IF函数操作符类，用于构建MySQL IF函数
  * If expr1 is TRUE (expr1 is not equal to 0 and expr1 IS NOT NULL), IF() returns expr2. Otherwise, it returns expr3.
  * {@code IF(expr1,expr2,expr3) }
  *
- * @since 3.0.19
+ * @since 5.0.0
  */
 @TechnicalPreview(since = "3.0.19")
 public class IfOperator {

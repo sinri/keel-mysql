@@ -12,12 +12,14 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * @since 1.7
+ * 抽象SQL语句基类，实现了通用的SQL执行和审计功能
+ *
+ * @since 5.0.0
  */
 abstract public class AbstractStatement implements AnyStatement {
     protected static @NotNull String SQL_COMPONENT_SEPARATOR = " ";//"\n";
     /**
-     * @since 3.2.0 replace original SQL Audit Logger
+     * SQL审计日志记录器
      */
     protected static @NotNull SpecificLogger<MySQLAuditSpecificLog> sqlAuditLogger;
 
@@ -32,39 +34,63 @@ abstract public class AbstractStatement implements AnyStatement {
      */
     private boolean withoutPrepare = false;
 
+    /**
+     * 构造抽象语句，生成唯一标识符
+     */
     public AbstractStatement() {
         this.statement_uuid = UUID.randomUUID().toString();
     }
 
+    /**
+     * 获取SQL审计日志记录器
+     *
+     * @return SQL审计日志记录器
+     */
     @NotNull
     public static SpecificLogger<MySQLAuditSpecificLog> getSqlAuditLogger() {
         return sqlAuditLogger;
     }
 
 
+    /**
+     * 构建SQL审计日志记录器
+     * @param loggerFactory 日志工厂
+     * @return SQL审计日志记录器
+     */
     private static SpecificLogger<MySQLAuditSpecificLog> buildSqlAuditLogger(@NotNull LoggerFactory loggerFactory) {
         return loggerFactory.createLogger(MySQLAuditSpecificLog.AttributeMysqlAudit, MySQLAuditSpecificLog::new);
     }
 
     /**
-     * Change the SQL Audit Issue Recorder.
-     *
-     * @param issueRecordCenter with which issue record center the sql audit sent to.
-     * @since 4.0.0
+     * 重新加载SQL审计问题记录器
+     * @param issueRecordCenter SQL审计发送到的记录中心
      */
     public static synchronized void reloadSqlAuditIssueRecording(@NotNull LoggerFactory issueRecordCenter) {
         sqlAuditLogger = buildSqlAuditLogger(issueRecordCenter);
     }
 
+    /**
+     * 设置SQL组件分隔符
+     * @param sqlComponentSeparator SQL组件分隔符
+     */
     public static void setSqlComponentSeparator(@NotNull String sqlComponentSeparator) {
         SQL_COMPONENT_SEPARATOR = sqlComponentSeparator;
     }
 
+    /**
+     * 获取备注注释
+     * @return 备注注释
+     */
     @NotNull
     protected String getRemarkAsComment() {
         return remarkAsComment;
     }
 
+    /**
+     * 设置备注注释
+     * @param remarkAsComment 备注注释
+     * @return 自身实例
+     */
     public AbstractStatement setRemarkAsComment(@NotNull String remarkAsComment) {
         remarkAsComment = remarkAsComment.replaceAll("[\\r\\n]+", "¦");
         this.remarkAsComment = remarkAsComment;
@@ -109,7 +135,8 @@ abstract public class AbstractStatement implements AnyStatement {
     }
 
     /**
-     * @since 4.0.7
+     * 判断是否不使用预处理语句
+     * @return 是否不使用预处理语句
      */
     @Override
     public boolean isWithoutPrepare() {
@@ -117,7 +144,9 @@ abstract public class AbstractStatement implements AnyStatement {
     }
 
     /**
-     * @since 4.0.7
+     * 设置是否不使用预处理语句
+     * @param withoutPrepare 是否不使用预处理语句
+     * @return 自身实例
      */
     public AbstractStatement setWithoutPrepare(boolean withoutPrepare) {
         this.withoutPrepare = withoutPrepare;

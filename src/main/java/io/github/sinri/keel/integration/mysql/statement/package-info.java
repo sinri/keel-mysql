@@ -1,12 +1,27 @@
 /**
- * <p>The statement package provides MySQL SQL statement building for the Keel framework.</p>
- * <p>This package contains MySQL statement components, including:</p>
- * <p>- Abstract statement base classes and implementations</p>
- * <p>- Statement mixins for enhanced functionality</p>
- * <p>- Templated statement support with parameter binding</p>
- * <p>- Statement component management and composition</p>
- * <p>- Statement execution and result processing</p>
- * <p>These components provide a comprehensive framework for building</p>
- * <p>complex MySQL SQL statements with type safety and validation.</p>
+ * 语句包，为Keel框架提供MySQL SQL语句构建功能
+ * <p>此包包含MySQL语句组件，包括：</p>
+ * <p>- 抽象语句基类和实现</p>
+ * <p>- 语句混合类增强功能</p>
+ * <p>- 带参数绑定的模板语句支持</p>
+ * <p>- 语句组件管理和组合</p>
+ * <p>- 语句执行和结果处理</p>
+ * <p>这些组件提供了一个全面的框架用于构建</p>
+ * <p>具有类型安全和验证的复杂MySQL SQL语句。</p>
+ *
+ * @since 5.0.0
+ */
+/**
+ * 语句包，为Keel框架提供MySQL SQL语句构建功能
+ * <p>此包包含MySQL语句组件，包括：</p>
+ * <p>- 抽象语句基类和实现</p>
+ * <p>- 语句混合类增强功能</p>
+ * <p>- 带参数绑定的模板语句支持</p>
+ * <p>- 语句组件管理和组合</p>
+ * <p>- 语句执行和结果处理</p>
+ * <p>这些组件提供了一个全面的框架用于构建</p>
+ * <p>具有类型安全和验证的复杂MySQL SQL语句。</p>
+ *
+ * @since 5.0.0
  */
 package io.github.sinri.keel.integration.mysql.statement;

@@ -22,6 +22,11 @@ import java.util.Objects;
 import java.util.function.Function;
 
 
+/**
+ * SELECT语句实现类，用于构建和执行SELECT查询
+ *
+ * @since 5.0.0
+ */
 public class SelectStatement extends AbstractStatement implements SelectStatementMixin {
     final ConditionsComponent whereConditionsComponent;
     final ConditionsComponent havingConditionsComponent;

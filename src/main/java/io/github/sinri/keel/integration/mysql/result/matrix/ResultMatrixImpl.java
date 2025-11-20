@@ -17,8 +17,9 @@ import java.util.Objects;
 
 
 /**
- * @since 1.8
- * @since 3.2.2 keep a list instance only, the row set instance would be ignored after extraction.
+ * 结果矩阵实现类，用于具体实现结果矩阵接口的功能
+ *
+ * @since 5.0.0
  */
 class ResultMatrixImpl implements ResultMatrix {
     //private final RowSet<Row> rowSet;
@@ -27,6 +28,11 @@ class ResultMatrixImpl implements ResultMatrix {
     private final int totalAffectedRows;
     private final @Nullable Long lastInsertedID;
 
+    /**
+     * 构造结果矩阵实现对象
+     *
+     * @param rowSet SQL行集合
+     */
     public ResultMatrixImpl(RowSet<Row> rowSet) {
         //this.rowSet = rowSet;
         for (var row : rowSet) {
@@ -80,7 +86,10 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     /**
-     * @throws KeelSQLResultRowIndexError 行号不正确时抛出异常
+     * 根据索引获取行数据
+     * @param index 行索引
+     * @return 指定行的数据
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
     @Override
     public JsonObject getRowByIndex(int index) throws KeelSQLResultRowIndexError {
@@ -92,8 +101,12 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     /**
-     * @throws KeelSQLResultRowIndexError 行号不正确时抛出异常
-     * @throws RuntimeException           封装类的时候可能会抛出异常
+     * 根据索引构建表行对象
+     * @param index 行索引
+     * @param classOfTableRow 表行类
+     * @return 表行对象
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
+     * @throws RuntimeException 封装类时可能抛出异常
      */
     @Override
     public <T extends ResultRow> T buildTableRowByIndex(int index, Class<T> classOfTableRow) throws KeelSQLResultRowIndexError {
@@ -101,7 +114,10 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     /**
-     * @throws RuntimeException 封装类的时候可能会抛出异常
+     * 构建所有表行对象列表
+     * @param classOfTableRow 表行类
+     * @return 表行对象列表
+     * @throws RuntimeException 封装类时可能抛出异常
      */
     @Override
     public <T extends ResultRow> List<T> buildTableRowList(Class<T> classOfTableRow) {
@@ -113,7 +129,10 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     /**
-     * @since 2.7
+     * 获取第一行指定列的日期时间值
+     * @param columnName 列名
+     * @return 日期时间值
+     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
     @Override
     public String getOneColumnOfFirstRowAsDateTime(String columnName) throws KeelSQLResultRowIndexError {
@@ -141,7 +160,9 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     /**
-     * @since 2.7
+     * 获取指定列的所有日期时间值
+     * @param columnName 列名
+     * @return 日期时间值列表
      */
     @Override
     public List<String> getOneColumnAsDateTime(String columnName) {

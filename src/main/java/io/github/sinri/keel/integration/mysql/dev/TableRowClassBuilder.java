@@ -9,9 +9,9 @@ import java.util.Date;
 
 
 /**
- * @since 3.0.15
- * @since 3.0.18 Finished Technical Preview.
- * @since 3.1.7 Add deprecated table annotation.
+ * 表行类构建器，用于根据数据库表结构生成对应的Java表行类
+ *
+ * @since 5.0.0
  */
 class TableRowClassBuilder {
 
@@ -22,10 +22,19 @@ class TableRowClassBuilder {
      */
     private boolean tableDeprecated = false;
 
+    /**
+     * 构造表行类构建器
+     *
+     * @param options 构建选项
+     */
     public TableRowClassBuilder(@NotNull TableRowClassBuildOptions options) {
         this.options = options;
     }
 
+    /**
+     * 解析表格注释
+     * @return 解析后的表格注释
+     */
     protected String parsedTableComment() {
         var tableComment = options.getTableComment();
         if (tableComment == null || tableComment.isBlank()) {
@@ -43,6 +52,10 @@ class TableRowClassBuilder {
         }
     }
 
+    /**
+     * 构建表行类源代码
+     * @return 生成的Java类源代码
+     */
     public String build() {
         var table = options.getTable();
         var schema = options.getSchema();

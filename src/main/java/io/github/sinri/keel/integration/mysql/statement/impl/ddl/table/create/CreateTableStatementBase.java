@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * @since 4.0.4
+ * @since 5.0.0
  */
 public abstract class CreateTableStatementBase<T> extends AbstractStatement implements SelfInterface<T> {
     private boolean temporary = false;

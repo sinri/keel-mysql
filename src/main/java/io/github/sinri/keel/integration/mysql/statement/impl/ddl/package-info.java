@@ -1,12 +1,27 @@
 /**
- * <p>The ddl package provides Data Definition Language statement implementations for MySQL in the Keel framework.</p>
- * <p>This package contains DDL statement components, including:</p>
- * <p>- Table creation and modification statements</p>
- * <p>- View definition and management statements</p>
- * <p>- Database schema manipulation</p>
- * <p>- Table structure and constraint management</p>
- * <p>- DDL statement execution and validation</p>
- * <p>These components enable comprehensive database schema</p>
- * <p>management and modification through programmatic DDL operations.</p>
+ * DDL包，为Keel框架中的MySQL提供数据定义语言语句实现
+ * <p>此包包含DDL语句组件，包括：</p>
+ * <p>- 表创建和修改语句</p>
+ * <p>- 视图定义和管理语句</p>
+ * <p>- 数据库模式操作</p>
+ * <p>- 表结构和约束管理</p>
+ * <p>- DDL语句执行和验证</p>
+ * <p>这些组件支持全面的数据库模式</p>
+ * <p>通过程序化DDL操作进行管理和修改。</p>
+ *
+ * @since 5.0.0
+ */
+/**
+ * DDL包，为Keel框架中的MySQL提供数据定义语言语句实现
+ * <p>此包包含DDL语句组件，包括：</p>
+ * <p>- 表创建和修改语句</p>
+ * <p>- 视图定义和管理语句</p>
+ * <p>- 数据库模式操作</p>
+ * <p>- 表结构和约束管理</p>
+ * <p>- DDL语句执行和验证</p>
+ * <p>这些组件支持全面的数据库模式</p>
+ * <p>通过程序化DDL操作进行管理和修改。</p>
+ *
+ * @since 5.0.0
  */
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl;

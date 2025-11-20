@@ -19,7 +19,9 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * @since 3.2.21
+ * 读取语句混合类，为读取操作提供各种查询功能
+ *
+ * @since 5.0.0
  */
 public interface ReadStatementMixin extends AnyStatement {
     /**

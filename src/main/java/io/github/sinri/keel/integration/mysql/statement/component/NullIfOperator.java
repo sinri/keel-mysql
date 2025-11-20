@@ -7,11 +7,12 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
+ * NULLIF函数操作符类，用于构建MySQL NULLIF函数
  * {@code NULLIF(expr1,expr2) }
  * <p>
  * Returns NULL if expr1 = expr2 is true, otherwise returns expr1. This is the same as CASE WHEN expr1 = expr2 THEN NULL ELSE expr1 END.
  *
- * @since 3.0.19
+ * @since 5.0.0
  */
 @TechnicalPreview(since = "3.0.19")
 public class NullIfOperator {

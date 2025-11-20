@@ -7,7 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * @since 3.2.21
+ * 写入语句混合类，为写入操作提供INSERT相关功能
+ *
+ * @since 5.0.0
  */
 public interface WriteIntoStatementMixin extends ModifyStatementMixin {
     /**

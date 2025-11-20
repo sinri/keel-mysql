@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/create-table.html">CREATE TABLE Statement</a> MySQL 8.0
  *         Docs
- * @since 4.0.4
+ * @since 5.0.0
  */
 public class CreateTableStatement extends CreateTableStatementBase<CreateTableStatement> {
     private final List<TableCreateDefinition> definitions = new ArrayList<>();

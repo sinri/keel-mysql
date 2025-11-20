@@ -4,7 +4,7 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.componen
 import org.jetbrains.annotations.Nullable;
 
 /**
- * @since 4.0.4
+ * @since 5.0.0
  */
 public final class TableCreateDefinitionForUniqueKey extends TableCreateIndexDefinition {
     private @Nullable String constraintSymbol;

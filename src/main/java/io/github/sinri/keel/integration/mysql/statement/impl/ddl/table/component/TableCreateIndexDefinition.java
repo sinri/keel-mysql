@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * @since 4.0.4
+ * @since 5.0.0
  */
 public abstract class TableCreateIndexDefinition extends TableCreateDefinition {
     /**

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/create-table.html">CREATE TABLE Statement</a> MySQL 8.0
  *         Docs
- * @since 4.0.4
+ * @since 5.0.0
  */
 public final class CreateTableLikeTableStatement extends CreateTableStatementBase<CreateTableLikeTableStatement> {
     private @NotNull String anotherTableExpression = "";

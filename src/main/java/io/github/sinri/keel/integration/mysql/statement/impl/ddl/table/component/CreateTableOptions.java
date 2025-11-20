@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * @since 4.0.4
+ * @since 5.0.0
  */
 public class CreateTableOptions {
     private final Map<String, String> options = new HashMap<>();

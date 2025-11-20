@@ -6,7 +6,9 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
 /**
- * @since 3.2.21
+ * SELECT语句混合类，为读取操作提供分页查询功能
+ *
+ * @since 5.0.0
  */
 public interface SelectStatementMixin extends ReadStatementMixin {
     /**

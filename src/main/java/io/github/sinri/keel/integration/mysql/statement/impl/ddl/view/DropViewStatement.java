@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 /**
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/drop-view.html">DROP VIEW Statement</a>
- * @since 4.0.4
+ * @since 5.0.0
  */
 public class DropViewStatement extends AbstractStatement {
     private final List<String> viewNames = new ArrayList<>();

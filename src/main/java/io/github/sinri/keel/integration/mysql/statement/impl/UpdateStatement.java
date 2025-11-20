@@ -14,6 +14,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 
+/**
+ * UPDATE语句实现类，用于构建和执行UPDATE更新操作
+ *
+ * @since 5.0.0
+ */
 public class UpdateStatement extends AbstractStatement implements ModifyStatementMixin {
     /**
      * @since 3.0.19 changed to use UpdateSetAssignmentComponent as item

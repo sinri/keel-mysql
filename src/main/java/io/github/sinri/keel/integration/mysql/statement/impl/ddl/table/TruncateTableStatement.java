@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/truncate-table.html">TRUNCATE TABLE Statement</a>
- * @since 4.0.4
+ * @since 5.0.0
  */
 public class TruncateTableStatement extends AbstractStatement {
     private @Nullable String schemaName = null;
