@@ -162,12 +162,12 @@ public class KeelMySQLConfiguration extends ConfigTree {
      *
      * @return 数据库名
      */
-    @NotNull
+    @Nullable
     public String getSchema() {
         try {
             return readString(List.of("schema"));
         } catch (NotConfiguredException e) {
-            return "";
+            return null;
         }
     }
 

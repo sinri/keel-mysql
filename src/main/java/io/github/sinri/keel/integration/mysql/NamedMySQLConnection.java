@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
  * @since 5.0.0
  */
 abstract public class NamedMySQLConnection {
+    @NotNull
     private final SqlConnection sqlConnection;
 
     /**
@@ -18,7 +19,7 @@ abstract public class NamedMySQLConnection {
      *
      * @param sqlConnection SQL连接对象
      */
-    public NamedMySQLConnection(SqlConnection sqlConnection) {
+    public NamedMySQLConnection(@NotNull SqlConnection sqlConnection) {
         this.sqlConnection = sqlConnection;
     }
 
@@ -26,7 +27,7 @@ abstract public class NamedMySQLConnection {
      * 获取SQL连接对象
      * @return SQL连接对象
      */
-    public SqlConnection getSqlConnection() {
+    public @NotNull SqlConnection getSqlConnection() {
         return sqlConnection;
     }
 
@@ -53,6 +54,7 @@ abstract public class NamedMySQLConnection {
      * @param mysqlVersion MySQL版本
      * @return 自身实例
      */
+    @NotNull
     public final NamedMySQLConnection setMysqlVersion(@Nullable String mysqlVersion) {
         this.mysqlVersion = mysqlVersion;
         return this;

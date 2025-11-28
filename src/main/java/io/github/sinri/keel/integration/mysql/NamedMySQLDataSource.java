@@ -29,20 +29,26 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  */
 public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
+    @NotNull
     private final Pool pool;
+    @NotNull
     private final KeelMySQLConfiguration configuration;
 
     /**
      * 记录初始化到池中的连接数
      */
+    @NotNull
     private final AtomicInteger initializedConnectionCounter = new AtomicInteger(0);
     /**
      * 记录当前正在使用的连接数
      */
+    @NotNull
     private final AtomicInteger borrowedConnectionCounter = new AtomicInteger(0);
 
+    @NotNull
     private final Function<SqlConnection, C> sqlConnectionWrapper;
 
+    @NotNull
     private final AtomicReference<String> fullVersionRef = new AtomicReference<>(null);
 
     /**
@@ -53,20 +59,23 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
      */
     public NamedMySQLDataSource(
             @NotNull KeelMySQLConfiguration configuration,
-            @NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
+            @NotNull Function<SqlConnection, C> sqlConnectionWrapper
+    ) {
         this(configuration, sqlConnection -> Future.succeededFuture(), sqlConnectionWrapper);
     }
 
     /**
      * 构造命名MySQL数据源，支持自定义连接设置函数
-     * @param configuration MySQL配置
+     *
+     * @param configuration           MySQL配置
      * @param connectionSetUpFunction 连接设置函数
-     * @param sqlConnectionWrapper SQL连接包装器
+     * @param sqlConnectionWrapper    SQL连接包装器
      */
     public NamedMySQLDataSource(
             @NotNull KeelMySQLConfiguration configuration,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
-            @NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
+            @NotNull Function<SqlConnection, C> sqlConnectionWrapper
+    ) {
         this.configuration = configuration;
         this.sqlConnectionWrapper = sqlConnectionWrapper;
         this.pool = MySQLBuilder.pool()
@@ -79,9 +88,11 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     /**
      * 检查MySQL版本
+     *
      * @param sqlConnection SQL连接
      * @return 包含版本信息的Future
      */
+    @NotNull
     private static Future<String> checkMySQLVersion(@NotNull SqlConnection sqlConnection) {
         return sqlConnection.preparedQuery("SELECT VERSION() as v; ")
                             .execute()
@@ -100,7 +111,8 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     /**
      * 对新建立的连接进行初始化，然后将其释放到池中
-     * @param sqlConnection SQL连接
+     *
+     * @param sqlConnection           SQL连接
      * @param connectionSetUpFunction 连接设置函数
      */
     private void initializeConnection(
@@ -138,24 +150,16 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     /**
      * 获取MySQL配置
+     *
      * @return MySQL配置对象
      */
-    public KeelMySQLConfiguration getConfiguration() {
+    public @NotNull KeelMySQLConfiguration getConfiguration() {
         return configuration;
     }
 
     /**
      * 获取池中初始化且当前未使用的连接数
-     * @return 空闲连接数
-     * @deprecated 已弃用，请使用getCurrentIdleConnectionCount()方法
-     */
-    @Deprecated(since = "4.1.5")
-    public int getAvailableConnectionCount() {
-        return getCurrentIdleConnectionCount();
-    }
-
-    /**
-     * 获取池中初始化且当前未使用的连接数
+     *
      * @return 空闲连接数
      */
     public int getCurrentIdleConnectionCount() {
@@ -164,6 +168,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     /**
      * 获取池中初始化的连接总数
+     *
      * @return 初始化连接数
      */
     public int getCurrentInitializedConnectionCount() {
@@ -172,6 +177,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     /**
      * 获取当前正在使用的连接数（即从池中借出的连接）
+     *
      * @return 活跃连接数
      */
     public int getCurrentActiveConnectionCount() {
@@ -180,6 +186,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     /**
      * 获取MySQL完整版本信息
+     *
      * @return MySQL版本信息，可能为null
      */
     public @Nullable String getFullVersionRef() {
@@ -188,78 +195,84 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     /**
      * 使用连接执行操作
+     *
      * @param function 连接操作函数
      * @return 操作结果Future
      */
+    @NotNull
     public <T> Future<T> withConnection(@NotNull Function<C, Future<T>> function) {
-        return Future.succeededFuture()
-                     .compose(v -> fetchMySQLConnection()
-                             .compose(sqlConnectionWrapper -> {
-                                 borrowedConnectionCounter.incrementAndGet();
-                                 return Future.succeededFuture()
-                                              .compose(vv -> function.apply(sqlConnectionWrapper))
-                                              .andThen(tAsyncResult -> Future.succeededFuture()
-                                                                             .compose(vv -> sqlConnectionWrapper.getSqlConnection()
-                                                                                                                .close())
-                                                                             .andThen(ar -> {
-                                                                                 borrowedConnectionCounter.decrementAndGet();
-                                                                             }))
-                                              .recover(throwable -> Future.failedFuture(new KeelMySQLException(
-                                                      "MySQLDataSource Failed Within SqlConnection: " + throwable,
-                                                      throwable)));
-                             }));
+        return Future.succeededFuture().compose(
+                v -> fetchMySQLConnection()
+                        .compose(sqlConnectionWrapper -> {
+                            borrowedConnectionCounter.incrementAndGet();
+                            return Future.succeededFuture()
+                                         .compose(vv -> function.apply(sqlConnectionWrapper))
+                                         .andThen(tAsyncResult -> Future.succeededFuture()
+                                                                        .compose(vv -> sqlConnectionWrapper.getSqlConnection()
+                                                                                                           .close())
+                                                                        .andThen(ar -> {
+                                                                            borrowedConnectionCounter.decrementAndGet();
+                                                                        }))
+                                         .recover(throwable -> Future.failedFuture(new KeelMySQLException(
+                                                 "MySQLDataSource Failed Within SqlConnection: " + throwable,
+                                                 throwable)));
+                        })
+        );
     }
 
     /**
      * 在事务中使用连接执行操作
+     *
      * @param function 事务操作函数
      * @return 事务结果Future
      */
+    @NotNull
     public <T> Future<T> withTransaction(@NotNull Function<C, Future<T>> function) {
         return withConnection(c -> {
             return Future.succeededFuture()
-                         .compose(v -> {
-                             return c.getSqlConnection().begin();
-                         })
-                         .compose(
-                                 transaction -> Future.succeededFuture()
-                                                      .compose(v -> {
-                                                          // execute and commit
-                                                          return function.apply(c)
-                                                                         .compose(t -> transaction.commit()
-                                                                                                  .compose(committed -> Future.succeededFuture(t)));
-                                                      })
-                                                      .compose(Future::succeededFuture, err -> {
-                                                          if (err instanceof TransactionRollbackException) {
-                                                              // already rollback
-                                                              String error = "MySQLDataSource ROLLBACK Done Manually.";
-                                                              return Future.failedFuture(new KeelMySQLException(error, err));
-                                                          } else {
-                                                              String error = "MySQLDataSource ROLLBACK Finished. Core Reason: "
-                                                                      + err.getMessage();
-                                                              // since 3.0.3 rollback failure would be thrown directly to downstream.
-                                                              return transaction.rollback()
-                                                                                .compose(rollbackDone -> Future
-                                                                                        .failedFuture(new KeelMySQLException(error, err)));
-                                                          }
-                                                      }),
+                         .compose(v -> c.getSqlConnection().begin())
+                         .compose(transaction -> Future.succeededFuture()
+                                                       .compose(v -> {
+                                                           // execute and commit
+                                                           return function.apply(c)
+                                                                          .compose(t -> transaction.commit()
+                                                                                                   .compose(committed -> Future.succeededFuture(t)));
+                                                       })
+                                                       .compose(Future::succeededFuture, err -> {
+                                                           if (err instanceof TransactionRollbackException) {
+                                                               // already rollback
+                                                               String error = "MySQLDataSource ROLLBACK Done Manually.";
+                                                               return Future.failedFuture(new KeelMySQLException(error, err));
+                                                           } else {
+                                                               String error = "MySQLDataSource ROLLBACK Finished. Core Reason: "
+                                                                       + err.getMessage();
+                                                               // since 3.0.3 rollback failure would be thrown directly to downstream.
+                                                               return transaction.rollback()
+                                                                                 .compose(rollbackDone -> Future
+                                                                                         .failedFuture(new KeelMySQLException(error, err)));
+                                                           }
+                                                       }),
                                  beginFailure -> Future.failedFuture(new KeelMySQLConnectionException(
                                          "MySQLDataSource Failed to get SqlConnection for transaction From Pool: "
                                                  + beginFailure,
-                                         beginFailure)));
+                                         beginFailure))
+                         );
         });
     }
 
     /**
      * 关闭数据源
+     *
      * @return 关闭操作Future
      */
+    @NotNull
     public Future<Void> close() {
         return this.pool.close();
     }
 
     /**
      * 关闭数据源并处理结果
+     *
      * @param ar 异步结果处理器
      */
     public void close(@NotNull Handler<AsyncResult<Void>> ar) {
@@ -268,8 +281,10 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     /**
      * 获取MySQL连接
+     *
      * @return 连接Future
      */
+    @NotNull
     private Future<C> fetchMySQLConnection() {
         return Future.succeededFuture()
                      .compose(v -> pool.getConnection())
@@ -289,6 +304,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
                                                      "(usage: " + borrowedConnectionCounter.get() + " of "
                                                      + initializedConnectionCounter.get() + "): " +
                                                      throwable,
-                                             throwable)));
+                                             throwable))
+                     );
     }
 }

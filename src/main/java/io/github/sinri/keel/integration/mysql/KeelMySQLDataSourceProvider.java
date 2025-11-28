@@ -42,6 +42,7 @@ public class KeelMySQLDataSourceProvider {
      * @param sqlConnectionWrapper SQL连接包装器
      * @return 命名MySQL数据源
      */
+    @NotNull
     public static <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
@@ -56,6 +57,7 @@ public class KeelMySQLDataSourceProvider {
      * @param sqlConnectionWrapper SQL连接包装器
      * @return 包含命名MySQL数据源的Future
      */
+    @NotNull
     public static <C extends NamedMySQLConnection> Future<NamedMySQLDataSource<C>> loadNamedMySQLDataSource(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
@@ -74,6 +76,7 @@ public class KeelMySQLDataSourceProvider {
      * @param initializedPromise      初始化完成Promise
      * @return 命名MySQL数据源
      */
+    @NotNull
     public static <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper,
@@ -107,6 +110,7 @@ public class KeelMySQLDataSourceProvider {
      * @param dataSourceName 数据源名称
      * @return 动态命名MySQL数据源
      */
+    @NotNull
     public static NamedMySQLDataSource<DynamicNamedMySQLConnection> initializeDynamicNamedMySQLDataSource(@NotNull String dataSourceName) {
         return initializeNamedMySQLDataSource(dataSourceName, sqlConnection -> new DynamicNamedMySQLConnection(sqlConnection, dataSourceName));
     }
