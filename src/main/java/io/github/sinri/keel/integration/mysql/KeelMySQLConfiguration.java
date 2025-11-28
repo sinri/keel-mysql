@@ -3,15 +3,16 @@ package io.github.sinri.keel.integration.mysql;
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.ConfigPropertiesBuilder;
+import io.github.sinri.keel.base.configuration.ConfigTree;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.sqlclient.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -21,47 +22,23 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 /**
  * Keel MySQL配置类，用于管理MySQL连接和连接池的配置信息。
  *
- * 常用配置：
- * charset = "utf8";
- * useAffectedRows = true;
- * allowPublicKeyRetrieval = false;
- * poolMaxSize = 128;
- * poolShared = false;
- * tcpKeepAlive=false;
- *
  * @since 5.0.0
  */
-public class KeelMySQLConfiguration extends ConfigElement {
-    //private final @Nonnull String dataSourceName;
-
+public class KeelMySQLConfiguration extends ConfigTree {
     public KeelMySQLConfiguration(@NotNull ConfigElement base) {
         super(base);
     }
 
-
-    /**
-     * 为指定数据源名称加载MySQL配置
-     *
-     * @param configCenter   配置中心
-     * @param dataSourceName 数据源名称
-     * @return MySQL配置对象
-     * @deprecated 已弃用，请使用新的配置加载方式
-     */
-    @Deprecated
-    @NotNull
-    public static KeelMySQLConfiguration loadConfigurationForDataSource(@NotNull ConfigElement configCenter, @NotNull String dataSourceName) {
-        ConfigElement keelConfigElement = configCenter.extract("mysql", dataSourceName);
-        return new KeelMySQLConfiguration(Objects.requireNonNull(keelConfigElement));
-    }
-
     /**
      * 生成MySQL配置的属性字符串
-     * @param dataSourceName 数据源名称
+     *
+     * @param dataSourceName      数据源名称
      * @param mySQLConnectOptions MySQL连接选项
-     * @param poolOptions 连接池选项
+     * @param poolOptions         连接池选项
      * @return 配置属性字符串
      */
-    public static String generatePropertiesForConfig(String dataSourceName, MySQLConnectOptions mySQLConnectOptions, PoolOptions poolOptions) {
+    @NotNull
+    public static String generatePropertiesForConfig(@NotNull String dataSourceName, @NotNull MySQLConnectOptions mySQLConnectOptions, @NotNull PoolOptions poolOptions) {
         var builder = new ConfigPropertiesBuilder();
         builder.setPrefix("mysql", dataSourceName);
 
@@ -80,6 +57,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
 
     /**
      * 获取MySQL连接选项
+     *
      * @return MySQL连接选项
      */
     @NotNull
@@ -93,21 +71,17 @@ public class KeelMySQLConfiguration extends ConfigElement {
                            .setPassword(getPassword());
         String charset = getCharset();
         if (charset != null) mySQLConnectOptions.setCharset(charset);
-        String schema = getDatabase();
+        String schema = getSchema();
         if (schema != null) {
             mySQLConnectOptions.setDatabase(schema);
         }
-
-        //        Integer connectionTimeout = getConnectionTimeout();
-        //        if (connectionTimeout != null) {
-        //            mySQLConnectOptions.setConnectTimeout(connectionTimeout);
-        //        }
 
         return mySQLConnectOptions;
     }
 
     /**
      * 获取连接池选项
+     *
      * @return 连接池选项
      */
     @NotNull
@@ -130,74 +104,106 @@ public class KeelMySQLConfiguration extends ConfigElement {
 
     /**
      * 获取MySQL主机地址
+     *
      * @return 主机地址
      */
+    @NotNull
     public String getHost() {
-        return readString(List.of("host"), null);
+        try {
+            return readString(List.of("host"));
+        } catch (NotConfiguredException e) {
+            return "127.0.0.1";
+        }
     }
 
     /**
      * 获取MySQL端口号
+     *
      * @return 端口号，默认3306
      */
-    public Integer getPort() {
-        return readInteger(List.of("port"), 3306);
+    public int getPort() {
+        try {
+            return readInteger(List.of("port"));
+        } catch (NotConfiguredException e) {
+            return 3306;
+        }
     }
 
     /**
      * 获取MySQL密码
+     *
      * @return 密码
      */
+    @Nullable
     public String getPassword() {
-        return readString(List.of("password"), null);
+        try {
+            return readString(List.of("password"));
+        } catch (NotConfiguredException e) {
+            return null;
+        }
     }
 
     /**
      * 获取MySQL用户名
+     *
      * @return 用户名
      */
+    @Nullable
     public String getUsername() {
-        var u = readString(List.of("username"), null);
-        if (u == null) {
-            u = readString(List.of("user"), null);
+        try {
+            return readString(List.of("username"));
+        } catch (NotConfiguredException e) {
+            return null;
         }
-        return u;
     }
 
     /**
      * 获取MySQL数据库名
+     *
      * @return 数据库名
      */
-    public String getDatabase() {
-        String schema = readString(List.of("schema"), null);
-        if (schema == null) {
-            schema = readString(List.of("database"), null);
+    @NotNull
+    public String getSchema() {
+        try {
+            return readString(List.of("schema"));
+        } catch (NotConfiguredException e) {
+            return "";
         }
-        return Objects.requireNonNullElse(schema, "");
     }
 
     /**
      * 获取MySQL字符集
+     *
      * @return 字符集
      */
+    @Nullable
     public String getCharset() {
-        return readString(List.of("charset"), null);
+        try {
+            return readString(List.of("charset"));
+        } catch (NotConfiguredException e) {
+            return null;
+        }
     }
 
     /**
      * 获取连接池最大大小
+     *
      * @return 连接池最大大小
      */
+    @Nullable
     public Integer getPoolMaxSize() {
-        var x = getChild("poolMaxSize");
-        if (x == null) return null;
-        return x.getValueAsInteger();
+        try {
+            return readInteger(List.of("poolMaxSize"));
+        } catch (NotConfiguredException e) {
+            return null;
+        }
     }
 
     /**
      * 获取数据源名称，用于MySQL客户端池名称
      * 为实际不同的数据源使用不同的名称；
      * 如果想创建临时数据源执行即时查询，UUID是很好的组件
+     *
      * @return 数据源名称
      */
     @NotNull
@@ -205,43 +211,39 @@ public class KeelMySQLConfiguration extends ConfigElement {
         return getName();
     }
 
-    //    /**
-    //     * The default value of connect timeout = 60000 ms
-    //     *
-    //     * @return connectTimeout - connect timeout, in ms
-    //     * @since 3.0.1 let it be its original setting!
-    //     */
-    //    private Integer getConnectionTimeout() {
-    //        var x = getChild("connectionTimeout");
-    //        if (x == null) {
-    //            return null;
-    //        }
-    //        return x.getValueAsInteger();
-    //    }
 
     /**
      * 设置客户端等待从池中获取连接的时间
      * 如果超过时间没有可用连接，将抛出异常
      * 时间单位通过`setConnectionTimeoutUnit`设置
+     *
      * @return 连接超时时间（秒）
-     * @see <a href="https://vertx.io/docs/apidocs/io/vertx/sqlclient/PoolOptions.html#setConnectionTimeout-int-">Vertx PoolOptions</a>
+     * @see <a
+     *         href="https://vertx.io/docs/apidocs/io/vertx/sqlclient/PoolOptions.html#setConnectionTimeout-int-">Vertx
+     *         PoolOptions</a>
      */
+    @Nullable
     public Integer getPoolConnectionTimeout() {
-        ConfigElement keelConfigElement = extract("poolConnectionTimeout");
-        if (keelConfigElement == null) {
+        try {
+            return readInteger(List.of("poolConnectionTimeout"));
+        } catch (NotConfiguredException e) {
             return null;
         }
-        return keelConfigElement.getValueAsInteger();
     }
 
     /**
      * 获取连接池是否共享
      * 可以在多个verticle或同一verticle的多个实例之间共享池
      * 这样的池应该在verticle外部创建，否则在创建它的verticle取消部署时会被关闭
+     *
      * @return 是否共享连接池
      */
     public boolean getPoolShared() {
-        return readBoolean(List.of("poolShared"), true);
+        try {
+            return readBoolean(List.of("poolShared"));
+        } catch (NotConfiguredException e) {
+            return true;
+        }
     }
 
 
@@ -249,11 +251,12 @@ public class KeelMySQLConfiguration extends ConfigElement {
      * 使用客户端对目标MySQL数据库执行一次性SQL查询
      * 客户端将被创建，然后在SQL查询后很快关闭
      * 为了安全使用此方法，请记住启用池共享并为池设置唯一名称
+     *
      * @param sql 确认已过滤的SQL语句
-     * @since 3.1.6
      */
-    @TechnicalPreview(since = "3.1.6")
-    public Future<ResultMatrix> instantQuery(String sql) {
+    @TechnicalPreview(since = "5.0.0")
+    @NotNull
+    public Future<ResultMatrix> instantQuery(@NotNull String sql) {
         var sqlClient = MySQLBuilder.client()
                                     .with(this.getPoolOptions())
                                     .connectingTo(this.getConnectOptions())
@@ -273,9 +276,9 @@ public class KeelMySQLConfiguration extends ConfigElement {
      *                           this method.
      * @param readWindowSize     how many rows read once
      * @param readWindowFunction the async handler of the read rows
-     * @since 4.0.13
      */
-    public Future<Void> instantQueryForStream(String sql, int readWindowSize, Function<RowSet<Row>, Future<Void>> readWindowFunction) {
+    @NotNull
+    public Future<Void> instantQueryForStream(@NotNull String sql, int readWindowSize, @NotNull Function<RowSet<Row>, Future<Void>> readWindowFunction) {
         return Future.succeededFuture()
                      .compose(v -> {
                          Pool pool = MySQLBuilder.pool()

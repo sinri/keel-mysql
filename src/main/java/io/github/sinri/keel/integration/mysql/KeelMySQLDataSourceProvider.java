@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql;
 
+import io.github.sinri.keel.base.configuration.ConfigTree;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.sqlclient.SqlConnection;
@@ -27,13 +28,17 @@ public class KeelMySQLDataSourceProvider {
      */
     @NotNull
     public static String defaultMySQLDataSourceName() {
-        return Objects.requireNonNull(Keel.getConfiguration()
-                                              .readString(List.of("mysql", "default_data_source_name"), "default"));
+        try {
+            return Keel.getConfiguration().readString(List.of("mysql", "default_data_source_name"));
+        } catch (ConfigTree.NotConfiguredException e) {
+            return "default";
+        }
     }
 
     /**
      * 初始化命名MySQL数据源
-     * @param dataSourceName 数据源名称
+     *
+     * @param dataSourceName       数据源名称
      * @param sqlConnectionWrapper SQL连接包装器
      * @return 命名MySQL数据源
      */
@@ -46,7 +51,8 @@ public class KeelMySQLDataSourceProvider {
 
     /**
      * 加载命名MySQL数据源并在实际可用性确认后返回Future
-     * @param dataSourceName 数据源名称
+     *
+     * @param dataSourceName       数据源名称
      * @param sqlConnectionWrapper SQL连接包装器
      * @return 包含命名MySQL数据源的Future
      */
@@ -61,10 +67,11 @@ public class KeelMySQLDataSourceProvider {
 
     /**
      * 初始化命名MySQL数据源，支持自定义连接设置函数
-     * @param dataSourceName 数据源名称
-     * @param sqlConnectionWrapper SQL连接包装器
+     *
+     * @param dataSourceName          数据源名称
+     * @param sqlConnectionWrapper    SQL连接包装器
      * @param connectionSetUpFunction 连接设置函数
-     * @param initializedPromise 初始化完成Promise
+     * @param initializedPromise      初始化完成Promise
      * @return 命名MySQL数据源
      */
     public static <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
@@ -96,6 +103,7 @@ public class KeelMySQLDataSourceProvider {
 
     /**
      * 初始化动态命名MySQL数据源
+     *
      * @param dataSourceName 数据源名称
      * @return 动态命名MySQL数据源
      */
