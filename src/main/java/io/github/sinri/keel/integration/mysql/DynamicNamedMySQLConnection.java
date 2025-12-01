@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql;
 
+import io.github.sinri.keel.base.Keel;
 import io.vertx.sqlclient.SqlConnection;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,13 +19,14 @@ public class DynamicNamedMySQLConnection extends NamedMySQLConnection {
      * @param sqlConnection  SQL连接对象
      * @param dataSourceName 数据源名称
      */
-    public DynamicNamedMySQLConnection(@NotNull SqlConnection sqlConnection, @NotNull String dataSourceName) {
-        super(sqlConnection);
+    public DynamicNamedMySQLConnection(@NotNull Keel keel, @NotNull SqlConnection sqlConnection, @NotNull String dataSourceName) {
+        super(keel, sqlConnection);
         this.dataSourceName = dataSourceName;
     }
 
     /**
      * 获取数据源名称
+     *
      * @return 数据源名称
      */
     @NotNull

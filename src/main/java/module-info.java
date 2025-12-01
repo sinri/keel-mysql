@@ -30,4 +30,6 @@ module io.github.sinri.keel.integration.mysql {
     exports io.github.sinri.keel.integration.mysql.statement.impl.ddl.view;
     exports io.github.sinri.keel.integration.mysql.statement.mixin;
     exports io.github.sinri.keel.integration.mysql.statement.templated;
+
+    opens io.github.sinri.keel.integration.mysql.dev;
 }

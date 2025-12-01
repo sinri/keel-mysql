@@ -17,9 +17,6 @@ class TableRowClassBuilder {
 
 
     private final @NotNull TableRowClassBuildOptions options;
-    /**
-     * @since 3.1.7
-     */
     private boolean tableDeprecated = false;
 
     /**
@@ -33,6 +30,7 @@ class TableRowClassBuilder {
 
     /**
      * 解析表格注释
+     *
      * @return 解析后的表格注释
      */
     protected String parsedTableComment() {
@@ -40,7 +38,6 @@ class TableRowClassBuilder {
         if (tableComment == null || tableComment.isBlank()) {
             return "Table comment is empty.";
         } else {
-            // since 3.1.7
             String[] split = tableComment.split("@[Dd]eprecated", 2);
             if (split.length > 1) {
                 // this table is deprecated
@@ -54,6 +51,7 @@ class TableRowClassBuilder {
 
     /**
      * 构建表行类源代码
+     *
      * @return 生成的Java类源代码
      */
     public String build() {
@@ -67,8 +65,8 @@ class TableRowClassBuilder {
             .append("import ").append(AbstractTableRow.class.getName()).append(";\n")
             .append("import ").append(JsonObject.class.getName()).append(";\n")
             .append("\n")
-            .append("import javax.annotation.Nonnull;\n")
-            .append("import javax.annotation.Nullable;\n")
+            .append("import org.jetbrains.annotations.NotNull;\n")
+            .append("import org.jetbrains.annotations.Nullable;")
             .append("import java.util.Objects;\n")
             .append("\n")
             .append("/**\n")
@@ -112,7 +110,7 @@ class TableRowClassBuilder {
                 .append("\t}\n")
                 .append("\n")
                 .append("\t@Override\n")
-                .append("\t@Nonnull\n")
+                .append("\t@NotNull\n")
                 .append("\tpublic String sourceTableName() {\n")
                 .append("\t\treturn ").append(this.options.isProvideConstTable() ? "TABLE" : "\"" + table + "\"")
                 .append(";\n")

@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
@@ -18,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
@@ -50,6 +50,8 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
     @NotNull
     private final AtomicReference<String> fullVersionRef = new AtomicReference<>(null);
+    @NotNull
+    private final Keel keel;
 
     /**
      * 构造命名MySQL数据源
@@ -58,10 +60,11 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
      * @param sqlConnectionWrapper SQL连接包装器
      */
     public NamedMySQLDataSource(
+            @NotNull Keel keel,
             @NotNull KeelMySQLConfiguration configuration,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
-        this(configuration, sqlConnection -> Future.succeededFuture(), sqlConnectionWrapper);
+        this(keel, configuration, sqlConnection -> Future.succeededFuture(), sqlConnectionWrapper);
     }
 
     /**
@@ -72,16 +75,18 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
      * @param sqlConnectionWrapper    SQL连接包装器
      */
     public NamedMySQLDataSource(
+            @NotNull Keel keel,
             @NotNull KeelMySQLConfiguration configuration,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
+        this.keel = keel;
         this.configuration = configuration;
         this.sqlConnectionWrapper = sqlConnectionWrapper;
         this.pool = MySQLBuilder.pool()
                                 .with(configuration.getPoolOptions())
                                 .connectingTo(configuration.getConnectOptions())
-                                .using(Keel.getVertx())
+                                .using(keel.getVertx())
                                 .withConnectHandler(sqlConnection -> initializeConnection(sqlConnection, connectionSetUpFunction))
                                 .build();
     }

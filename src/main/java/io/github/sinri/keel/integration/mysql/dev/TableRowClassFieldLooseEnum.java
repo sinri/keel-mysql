@@ -11,7 +11,7 @@ import java.util.Collection;
  *
  * @since 5.0.0
  */
-public class TableRowClassFieldLooseEnum {
+class TableRowClassFieldLooseEnum {
     private final String fieldName;
     private final Collection<String> enumElements;
     private final String enumName;
@@ -30,6 +30,7 @@ public class TableRowClassFieldLooseEnum {
 
     /**
      * 获取松散枚举名称
+     *
      * @return 松散枚举名称
      */
     public String looseEnumName() {
@@ -38,6 +39,7 @@ public class TableRowClassFieldLooseEnum {
 
     /**
      * 构建枚举源代码
+     *
      * @return 枚举源代码
      */
     public String build() {

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
-public class TableRowClassFieldAnyEnvelope {
+class TableRowClassFieldAnyEnvelope {
     private final String envelopePackage;
     private final String envelopeName;
 
@@ -25,6 +25,7 @@ public class TableRowClassFieldAnyEnvelope {
 
     /**
      * 构建调用类方法代码
+     *
      * @param parameter 参数
      * @return 生成的代码
      */

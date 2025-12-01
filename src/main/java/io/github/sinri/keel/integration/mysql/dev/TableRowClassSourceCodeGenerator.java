@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
@@ -14,8 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * 表行类源代码生成器，用于从数据库连接生成表行类的Java源代码
@@ -23,6 +22,7 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  * @since 5.0.0
  */
 public class TableRowClassSourceCodeGenerator {
+    private final Keel keel;
     private final SqlConnection sqlConnection;
     private final Set<String> tableSet;
     private final Set<String> excludedTableSet;
@@ -38,8 +38,9 @@ public class TableRowClassSourceCodeGenerator {
      *
      * @param namedMySQLConnection 命名MySQL连接
      */
-    public TableRowClassSourceCodeGenerator(NamedMySQLConnection namedMySQLConnection) {
+    public TableRowClassSourceCodeGenerator(@NotNull NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
+        this.keel = namedMySQLConnection.getKeel();
         this.schema = null;
         this.tableSet = new HashSet<>();
         this.excludedTableSet = new HashSet<>();
@@ -48,6 +49,7 @@ public class TableRowClassSourceCodeGenerator {
 
     /**
      * 获取日志记录器
+     *
      * @return 日志记录器
      */
     public Logger getLogger() {
@@ -56,12 +58,17 @@ public class TableRowClassSourceCodeGenerator {
 
     /**
      * 设置日志记录器
+     *
      * @param logger 日志记录器
      * @return 自身实例
      */
     public TableRowClassSourceCodeGenerator setLogger(Logger logger) {
         this.logger = logger;
         return this;
+    }
+
+    public Keel getKeel() {
+        return keel;
     }
 
     public TableRowClassSourceCodeGenerator forSchema(String schema) {
@@ -142,35 +149,35 @@ public class TableRowClassSourceCodeGenerator {
         getLogger().info("To generate class code for tables: " + String.join(", ", tables));
 
         Map<String, String> writeMap = new HashMap<>();
-        return Keel.asyncCallIteratively(
-                           tables,
-                           table -> {
-                               String className = StringUtils.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
-                               String classFile = packagePath + "/" + className + ".java";
+        return getKeel().asyncCallIteratively(
+                                tables,
+                                table -> {
+                                    String className = StringUtils.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
+                                    String classFile = packagePath + "/" + className + ".java";
 
-                               getLogger().info(String.format("To generate class %s to file %s", className, classFile));
+                                    getLogger().info(String.format("To generate class %s to file %s", className, classFile));
 
-                               TableRowClassBuildStandard standard = new TableRowClassBuildStandard();
-                               if (standardHandler != null) {
-                                   standardHandler.handle(standard);
-                               }
-                               var options = new TableRowClassBuildOptions(standard)
-                                       .setSchema(schema)
-                                       .setTable(table)
-                                       .setPackageName(packageName);
+                                    TableRowClassBuildStandard standard = new TableRowClassBuildStandard();
+                                    if (standardHandler != null) {
+                                        standardHandler.handle(standard);
+                                    }
+                                    var options = new TableRowClassBuildOptions(standard)
+                                            .setSchema(schema)
+                                            .setTable(table)
+                                            .setPackageName(packageName);
 
-                               return this.generateClassCodeForOneTable(options)
-                                          .compose(code -> {
-                                              writeMap.put(classFile, code);
-                                              return Future.succeededFuture();
-                                          });
-                           })
-                   .compose(v -> Keel.asyncCallIteratively(writeMap.entrySet(), entry -> {
-                       var classFile = entry.getKey();
-                       var code = entry.getValue();
-                       return Keel.getVertx().fileSystem()
-                                  .writeFile(classFile, Buffer.buffer(code));
-                   }));
+                                    return this.generateClassCodeForOneTable(options)
+                                               .compose(code -> {
+                                                   writeMap.put(classFile, code);
+                                                   return Future.succeededFuture();
+                                               });
+                                })
+                        .compose(v -> getKeel().asyncCallIteratively(writeMap.entrySet(), entry -> {
+                            var classFile = entry.getKey();
+                            var code = entry.getValue();
+                            return getKeel().getVertx().fileSystem()
+                                            .writeFile(classFile, Buffer.buffer(code));
+                        }));
     }
 
     private Future<String> generateClassCodeForOneTable(TableRowClassBuildOptions options) {

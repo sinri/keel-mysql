@@ -40,3 +40,4 @@ build/
 
 .idea
 config.properties
+/src/test/java/io/github/sinri/keel/integration/mysql/dev/runtime/

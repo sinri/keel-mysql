@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
+import io.github.sinri.keel.core.utils.value.ValueEnveloping;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,9 +9,10 @@ import java.util.Objects;
 /**
  * 表行类字段严格枚举类，用于处理字段的严格枚举定义
  *
+ * @see ValueEnveloping
  * @since 5.0.0
  */
-public class TableRowClassFieldStrictEnum {
+class TableRowClassFieldStrictEnum {
     private final String fieldName;
     private final String enumPackage;
     private final String enumClass;

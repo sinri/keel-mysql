@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
 import io.github.sinri.keel.integration.mysql.result.row.ResultRow;
@@ -15,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * 读取语句混合类，为读取操作提供各种查询功能
@@ -25,13 +24,10 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  */
 public interface ReadStatementMixin extends AnyStatement {
     /**
-     * As of 3.0.18 Finished Technical Preview.
-     *
      * @param namedMySQLConnection NamedMySQLConnection
      * @param classT               class of type of result object
      * @param <T>                  type of result object
      * @return 查询到数据，异步返回第一行数据封装的指定类实例；查询不到时异步返回null。
-     * @since 3.0.11
      */
     default <T extends ResultRow> Future<T> queryForOneRow(@NotNull NamedMySQLConnection namedMySQLConnection, @NotNull Class<T> classT) {
         return execute(namedMySQLConnection)
@@ -49,8 +45,6 @@ public interface ReadStatementMixin extends AnyStatement {
      * @param classT class of type of result object
      * @param <T>    type of result object
      * @return 查询到数据，异步返回所有行数据封装的指定类实例；查询不到时异步返回null。
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
      */
     default <T extends ResultRow> Future<List<T>> queryForRowList(@NotNull NamedMySQLConnection namedMySQLConnection, @NotNull Class<T> classT) {
         return execute(namedMySQLConnection)
@@ -60,10 +54,6 @@ public interface ReadStatementMixin extends AnyStatement {
                 });
     }
 
-    /**
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
-     */
     default <K, T extends ResultRow> Future<Map<K, List<T>>> queryForCategorizedMap(
             @NotNull NamedMySQLConnection namedMySQLConnection,
             @NotNull Class<T> classT,
@@ -81,10 +71,6 @@ public interface ReadStatementMixin extends AnyStatement {
     }
 
 
-    /**
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
-     */
     default <K, T extends ResultRow> Future<Map<K, T>> queryForUniqueKeyBoundMap(
             @NotNull NamedMySQLConnection namedMySQLConnection,
             @NotNull Class<T> classT,
@@ -102,9 +88,7 @@ public interface ReadStatementMixin extends AnyStatement {
                 });
     }
 
-    /**
-     * @since 4.0.0
-     */
+
     default Future<Void> stream(
             @NotNull NamedMySQLConnection namedMySQLConnection,
             @NotNull ResultStreamReader resultStreamReader
@@ -114,14 +98,15 @@ public interface ReadStatementMixin extends AnyStatement {
                                    .compose(preparedStatement -> {
                                        Cursor cursor = preparedStatement.cursor();
 
-                                       return Keel.asyncCallRepeatedly(routineResult -> {
+                                       Keel keel = namedMySQLConnection.getKeel();
+                                       return keel.asyncCallRepeatedly(routineResult -> {
                                                       if (!cursor.hasMore()) {
                                                           routineResult.stop();
                                                           return Future.succeededFuture();
                                                       }
 
                                                       return cursor.read(1)
-                                                                   .compose(rows -> Keel.asyncCallIteratively(rows, resultStreamReader::read));
+                                                                   .compose(rows -> keel.asyncCallIteratively(rows, resultStreamReader::read));
                                                   })
                                                   .eventually(cursor::close)
                                                   .eventually(preparedStatement::close);

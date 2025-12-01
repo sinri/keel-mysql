@@ -89,7 +89,7 @@ public class TableRowClassBuildStandard {
     }
 
     /**
-     * @param strictEnumPackage empty or a package path. No dot in tail.
+     * @param strictEnumPackage empty or a package path. No dot in the tail.
      */
     public TableRowClassBuildStandard setStrictEnumPackage(@Nullable String strictEnumPackage) {
         this.strictEnumPackage = strictEnumPackage;

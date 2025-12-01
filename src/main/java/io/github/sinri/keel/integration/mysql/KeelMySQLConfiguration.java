@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.ConfigPropertiesBuilder;
@@ -15,8 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-
-import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
@@ -256,11 +255,11 @@ public class KeelMySQLConfiguration extends ConfigTree {
      */
     @TechnicalPreview(since = "5.0.0")
     @NotNull
-    public Future<ResultMatrix> instantQuery(@NotNull String sql) {
+    public Future<ResultMatrix> instantQuery(@NotNull Keel keel, @NotNull String sql) {
         var sqlClient = MySQLBuilder.client()
                                     .with(this.getPoolOptions())
                                     .connectingTo(this.getConnectOptions())
-                                    .using(Keel.getVertx())
+                                    .using(keel.getVertx())
                                     .build();
         return Future.succeededFuture()
                      .compose(v -> sqlClient.preparedQuery(sql).execute()
@@ -278,13 +277,13 @@ public class KeelMySQLConfiguration extends ConfigTree {
      * @param readWindowFunction the async handler of the read rows
      */
     @NotNull
-    public Future<Void> instantQueryForStream(@NotNull String sql, int readWindowSize, @NotNull Function<RowSet<Row>, Future<Void>> readWindowFunction) {
+    public Future<Void> instantQueryForStream(@NotNull Keel keel, @NotNull String sql, int readWindowSize, @NotNull Function<RowSet<Row>, Future<Void>> readWindowFunction) {
         return Future.succeededFuture()
                      .compose(v -> {
                          Pool pool = MySQLBuilder.pool()
                                                  .with(this.getPoolOptions())
                                                  .connectingTo(this.getConnectOptions())
-                                                 .using(Keel.getVertx())
+                                                 .using(keel.getVertx())
                                                  .build();
                          return Future.succeededFuture(pool);
                      })
@@ -295,7 +294,7 @@ public class KeelMySQLConfiguration extends ConfigTree {
                                      .compose(preparedStatement -> {
                                          Cursor cursor = preparedStatement.cursor();
 
-                                         return Keel.asyncCallRepeatedly(routineResult -> cursor
+                                         return keel.asyncCallRepeatedly(routineResult -> cursor
                                                             .read(readWindowSize)
                                                             .compose(readWindowFunction)
                                                             .compose(v -> {
