@@ -166,7 +166,7 @@ class TableRowClassField {
             if (nullable) {
                 code.append("\t@Nullable\n");
             } else {
-                code.append("\t@Nonnull\n");
+                code.append("\t@NotNull\n");
             }
             code.append("\tpublic ").append(looseEnum.looseEnumName()).append(" ").append(getter).append("() {\n")
                 .append("\t\t@Nullable String enumExpression=").append(readMethod).append("(\"").append(field)
@@ -192,7 +192,7 @@ class TableRowClassField {
             if (nullable) {
                 code.append("\t@Nullable\n");
             } else {
-                code.append("\t@Nonnull\n");
+                code.append("\t@NotNull\n");
             }
             code.append("\tpublic ").append(strictEnum.fullEnumRef()).append(" ").append(getter).append("() {\n")
                 .append("\t\t@Nullable String enumExpression=").append(readMethod).append("(\"").append(field)
@@ -220,7 +220,7 @@ class TableRowClassField {
             if (nullable) {
                 code.append("\t@Nullable\n");
             } else {
-                code.append("\t@Nonnull\n");
+                code.append("\t@NotNull\n");
             }
             code.append("\tpublic ").append(returnType).append(" ").append(getter).append("() {\n")
                 .append("\t\treturn ")
