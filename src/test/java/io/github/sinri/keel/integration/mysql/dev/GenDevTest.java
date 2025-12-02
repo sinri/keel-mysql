@@ -8,26 +8,30 @@ import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;
 import org.jetbrains.annotations.NotNull;
 
-public class GenDevTest extends KeelInstantRunner {
+public class GenDevTest extends KeelInstantRunner implements KeelMySQLDataSourceProvider {
     @Override
     protected @NotNull Future<Void> run() throws Exception {
-        KeelMySQLDataSourceProvider keelMySQLDataSourceProvider = new KeelMySQLDataSourceProvider(this);
-        return keelMySQLDataSourceProvider.loadNamedMySQLDataSource(
-                                                  keelMySQLDataSourceProvider.defaultMySQLDataSourceName(),
-                                                  sqlConnection -> new SampleMySQLConnection(this, sqlConnection)
-                                          )
-                                          .compose(namedMySQLDataSource -> {
-                                              return namedMySQLDataSource.withConnection(sampleMySQLConnection -> {
-                                                  TableRowClassSourceCodeGenerator tableRowClassSourceCodeGenerator = new TableRowClassSourceCodeGenerator(sampleMySQLConnection);
-                                                  return tableRowClassSourceCodeGenerator
-                                                          .generate(
-                                                                  "io.github.sinri.keel.integration.mysql.dev.runtime",
-                                                                  this.config("test-dev-package-path")
-                                                          );
-                                              });
+        return this.loadNamedMySQLDataSource(
+                           this.defaultMySQLDataSourceName(),
+                           sqlConnection -> new SampleMySQLConnection(this, sqlConnection)
+                   )
+                   .compose(namedMySQLDataSource -> {
+                       return namedMySQLDataSource.withConnection(sampleMySQLConnection -> {
+                           TableRowClassSourceCodeGenerator tableRowClassSourceCodeGenerator = new TableRowClassSourceCodeGenerator(sampleMySQLConnection);
+                           return tableRowClassSourceCodeGenerator
+                                   .generate(
+                                           "io.github.sinri.keel.integration.mysql.dev.runtime",
+                                           this.config("test-dev-package-path")
+                                   );
+                       });
 
-                                          });
+                   });
 
+    }
+
+    @Override
+    public @NotNull Keel getKeel() {
+        return this;
     }
 
     static class SampleMySQLConnection extends NamedMySQLConnection {

@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql;
 
 import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.KeelHolder;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
@@ -27,7 +28,7 @@ import java.util.function.Function;
  * @param <C> 连接类型
  * @since 5.0.0
  */
-public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
+public final class NamedMySQLDataSource<C extends NamedMySQLConnection> implements KeelHolder {
 
     @NotNull
     private final Pool pool;
@@ -311,5 +312,10 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
                                                      throwable,
                                              throwable))
                      );
+    }
+
+    @Override
+    public @NotNull Keel getKeel() {
+        return keel;
     }
 }

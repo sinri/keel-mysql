@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql;
 
-import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.KeelHolder;
 import io.github.sinri.keel.base.configuration.ConfigTree;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -18,17 +18,7 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
-public class KeelMySQLDataSourceProvider {
-    @NotNull
-    private final Keel keel;
-
-    public KeelMySQLDataSourceProvider(@NotNull Keel keel) {
-        this.keel = keel;
-    }
-
-    protected final @NotNull Keel getKeel() {
-        return keel;
-    }
+public interface KeelMySQLDataSourceProvider extends KeelHolder {
 
     /**
      * 获取默认MySQL数据源名称
@@ -36,7 +26,7 @@ public class KeelMySQLDataSourceProvider {
      * @return 默认数据源名称
      */
     @NotNull
-    public String defaultMySQLDataSourceName() {
+    default String defaultMySQLDataSourceName() {
         try {
             return getKeel().getConfiguration().readString(List.of("mysql", "default_data_source_name"));
         } catch (ConfigTree.NotConfiguredException e) {
@@ -52,7 +42,7 @@ public class KeelMySQLDataSourceProvider {
      * @return 命名MySQL数据源
      */
     @NotNull
-    public <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
+    default <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
@@ -67,7 +57,7 @@ public class KeelMySQLDataSourceProvider {
      * @return 包含命名MySQL数据源的Future
      */
     @NotNull
-    public <C extends NamedMySQLConnection> Future<NamedMySQLDataSource<C>> loadNamedMySQLDataSource(
+    default <C extends NamedMySQLConnection> Future<NamedMySQLDataSource<C>> loadNamedMySQLDataSource(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
@@ -86,7 +76,7 @@ public class KeelMySQLDataSourceProvider {
      * @return 命名MySQL数据源
      */
     @NotNull
-    public <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
+    default <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
@@ -100,7 +90,7 @@ public class KeelMySQLDataSourceProvider {
         }
         var dataSource = new NamedMySQLDataSource<>(getKeel(), mySQLConfigure, connectionSetUpFunction, sqlConnectionWrapper);
 
-        getKeel().getVertx().setTimer(
+        getVertx().setTimer(
                 mySQLConfigure.getPoolOptions().getConnectionTimeout() * 1000L,
                 x -> {
                     initializedPromise.tryFail("MySQL Pool Connection Timeout on testing, the configuration might need adjusting.");
@@ -120,7 +110,9 @@ public class KeelMySQLDataSourceProvider {
      * @return 动态命名MySQL数据源
      */
     @NotNull
-    public NamedMySQLDataSource<DynamicNamedMySQLConnection> initializeDynamicNamedMySQLDataSource(@NotNull String dataSourceName) {
-        return initializeNamedMySQLDataSource(dataSourceName, sqlConnection -> new DynamicNamedMySQLConnection(getKeel(), sqlConnection, dataSourceName));
+    default NamedMySQLDataSource<DynamicNamedMySQLConnection> initializeDynamicNamedMySQLDataSource(@NotNull String dataSourceName) {
+        return initializeNamedMySQLDataSource(
+                dataSourceName,
+                sqlConnection -> new DynamicNamedMySQLConnection(getKeel(), sqlConnection, dataSourceName));
     }
 }
