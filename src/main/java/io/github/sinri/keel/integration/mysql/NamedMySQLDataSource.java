@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql;
 
 import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.KeelHolder;
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
@@ -19,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
 
 
 /**
@@ -226,6 +226,15 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> implemen
         );
     }
 
+    @TechnicalPreview(since = "5.0.0")
+    @NotNull
+    public <T> T withConnectionInVirtualThread(@NotNull Function<C, T> function) {
+        return withConnection(c -> {
+            T t = function.apply(c);
+            return Future.succeededFuture(t);
+        }).await();
+    }
+
     /**
      * 在事务中使用连接执行操作
      *
@@ -264,6 +273,15 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> implemen
                                          beginFailure))
                          );
         });
+    }
+
+    @TechnicalPreview(since = "5.0.0")
+    @NotNull
+    public <T> T withTransactionInVirtualThread(@NotNull Function<C, T> function) {
+        return withTransaction(c -> {
+            T t = function.apply(c);
+            return Future.succeededFuture(t);
+        }).await();
     }
 
     /**
