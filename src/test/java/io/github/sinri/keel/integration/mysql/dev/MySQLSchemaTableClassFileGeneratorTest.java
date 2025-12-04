@@ -1,6 +1,5 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.tesuto.KeelInstantRunner;
 import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
@@ -20,11 +19,6 @@ public class MySQLSchemaTableClassFileGeneratorTest extends KeelInstantRunner im
     @Override
     public @Nullable String getEnvelopePackage() {
         return null;
-    }
-
-    @Override
-    public @NotNull Keel getKeel() {
-        return this;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.integration.mysql.KeelMySQLDataSourceProvider;
 import io.github.sinri.keel.tesuto.KeelInstantRunner;
 import io.vertx.core.Future;
@@ -25,11 +24,6 @@ public class GenDevTest extends KeelInstantRunner implements KeelMySQLDataSource
 
                    });
 
-    }
-
-    @Override
-    public @NotNull Keel getKeel() {
-        return this;
     }
 
 }
