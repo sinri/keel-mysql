@@ -1,12 +1,8 @@
 package io.github.sinri.keel.integration.mysql;
 
-import io.github.sinri.keel.base.Keel;
 import io.vertx.sqlclient.SqlConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.lang.ref.SoftReference;
-import java.util.Objects;
 
 
 /**
@@ -17,8 +13,6 @@ import java.util.Objects;
 abstract public class NamedMySQLConnection {
     @NotNull
     private final SqlConnection sqlConnection;
-    @NotNull
-    private final SoftReference<Keel> keel;
     private @Nullable String mysqlVersion;
 
     /**
@@ -26,13 +20,8 @@ abstract public class NamedMySQLConnection {
      *
      * @param sqlConnection SQL连接对象
      */
-    public NamedMySQLConnection(@NotNull Keel keel, @NotNull SqlConnection sqlConnection) {
-        this.keel = new SoftReference<>(keel);
+    public NamedMySQLConnection(@NotNull SqlConnection sqlConnection) {
         this.sqlConnection = sqlConnection;
-    }
-
-    public final @NotNull Keel getKeel() {
-        return Objects.requireNonNull(keel.get());
     }
 
     /**

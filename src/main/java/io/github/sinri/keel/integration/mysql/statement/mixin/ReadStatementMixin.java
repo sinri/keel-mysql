@@ -90,6 +90,7 @@ public interface ReadStatementMixin extends AnyStatement {
 
 
     default Future<Void> stream(
+            @NotNull Keel keel,
             @NotNull NamedMySQLConnection namedMySQLConnection,
             @NotNull ResultStreamReader resultStreamReader
     ) {
@@ -98,7 +99,6 @@ public interface ReadStatementMixin extends AnyStatement {
                                    .compose(preparedStatement -> {
                                        Cursor cursor = preparedStatement.cursor();
 
-                                       Keel keel = namedMySQLConnection.getKeel();
                                        return keel.asyncCallRepeatedly(routineResult -> {
                                                       if (!cursor.hasMore()) {
                                                           routineResult.stop();

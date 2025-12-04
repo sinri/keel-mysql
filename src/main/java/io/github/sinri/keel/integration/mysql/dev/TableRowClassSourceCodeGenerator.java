@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.KeelHolder;
 import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
@@ -21,8 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @since 5.0.0
  */
-public class TableRowClassSourceCodeGenerator {
-    private final Keel keel;
+public class TableRowClassSourceCodeGenerator implements KeelHolder {
     private final SqlConnection sqlConnection;
     private final Set<String> tableSet;
     private final Set<String> excludedTableSet;
@@ -31,6 +31,9 @@ public class TableRowClassSourceCodeGenerator {
     @Nullable
     private Handler<TableRowClassBuildStandard> standardHandler;
 
+    @NotNull
+    private final Keel keel;
+    @NotNull
     private Logger logger;
 
     /**
@@ -38,13 +41,13 @@ public class TableRowClassSourceCodeGenerator {
      *
      * @param namedMySQLConnection 命名MySQL连接
      */
-    public TableRowClassSourceCodeGenerator(@NotNull NamedMySQLConnection namedMySQLConnection) {
+    public TableRowClassSourceCodeGenerator(@NotNull Keel keel, @NotNull NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
-        this.keel = namedMySQLConnection.getKeel();
         this.schema = null;
         this.tableSet = new HashSet<>();
         this.excludedTableSet = new HashSet<>();
         this.logger = StdoutLoggerFactory.getInstance().createLogger(getClass().getSimpleName());
+        this.keel = keel;
     }
 
     /**
@@ -65,10 +68,6 @@ public class TableRowClassSourceCodeGenerator {
     public TableRowClassSourceCodeGenerator setLogger(Logger logger) {
         this.logger = logger;
         return this;
-    }
-
-    public Keel getKeel() {
-        return keel;
     }
 
     public TableRowClassSourceCodeGenerator forSchema(String schema) {
@@ -263,5 +262,10 @@ public class TableRowClassSourceCodeGenerator {
                                 rows.forEach(row -> creation.set(row.getString(1)));
                                 return Future.succeededFuture(creation.get());
                             });
+    }
+
+    @Override
+    public final @NotNull Keel getKeel() {
+        return keel;
     }
 }

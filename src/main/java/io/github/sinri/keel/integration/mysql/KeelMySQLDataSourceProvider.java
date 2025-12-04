@@ -113,6 +113,6 @@ public interface KeelMySQLDataSourceProvider extends KeelHolder {
     default NamedMySQLDataSource<DynamicNamedMySQLConnection> initializeDynamicNamedMySQLDataSource(@NotNull String dataSourceName) {
         return initializeNamedMySQLDataSource(
                 dataSourceName,
-                sqlConnection -> new DynamicNamedMySQLConnection(getKeel(), sqlConnection, dataSourceName));
+                sqlConnection -> new DynamicNamedMySQLConnection(sqlConnection, dataSourceName));
     }
 }
