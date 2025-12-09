@@ -1,10 +1,10 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.connection.AbstractNamedMySQLConnection;
 import io.vertx.sqlclient.SqlConnection;
 import org.jetbrains.annotations.NotNull;
 
-class SampleMySQLConnection extends NamedMySQLConnection {
+class SampleMySQLConnection extends AbstractNamedMySQLConnection {
 
     /**
      * 构造命名MySQL连接

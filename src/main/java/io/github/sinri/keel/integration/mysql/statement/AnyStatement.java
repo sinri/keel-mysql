@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement;
 
-import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.github.sinri.keel.integration.mysql.statement.impl.*;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.TruncateTableStatement;

@@ -4,7 +4,7 @@ import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.KeelHolder;
 import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.github.sinri.keel.core.utils.StringUtils;
-import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
-import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
 

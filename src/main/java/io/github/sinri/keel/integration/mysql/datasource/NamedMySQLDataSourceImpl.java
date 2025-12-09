@@ -1,8 +1,8 @@
-package io.github.sinri.keel.integration.mysql;
+package io.github.sinri.keel.integration.mysql.datasource;
 
 import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.KeelHolder;
-import io.github.sinri.keel.base.annotations.TechnicalPreview;
+import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
+import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
@@ -28,7 +28,7 @@ import java.util.function.Function;
  * @param <C> 连接类型
  * @since 5.0.0
  */
-public final class NamedMySQLDataSource<C extends NamedMySQLConnection> implements KeelHolder {
+class NamedMySQLDataSourceImpl<C extends NamedMySQLConnection> implements NamedMySQLDataSource<C> {
 
     @NotNull
     private final Pool pool;
@@ -60,7 +60,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> implemen
      * @param configuration        MySQL配置
      * @param sqlConnectionWrapper SQL连接包装器
      */
-    public NamedMySQLDataSource(
+    public NamedMySQLDataSourceImpl(
             @NotNull Keel keel,
             @NotNull KeelMySQLConfiguration configuration,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
@@ -75,7 +75,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> implemen
      * @param connectionSetUpFunction 连接设置函数
      * @param sqlConnectionWrapper    SQL连接包装器
      */
-    public NamedMySQLDataSource(
+    public NamedMySQLDataSourceImpl(
             @NotNull Keel keel,
             @NotNull KeelMySQLConfiguration configuration,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
@@ -226,15 +226,6 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> implemen
         );
     }
 
-    @TechnicalPreview(since = "5.0.0")
-    @NotNull
-    public <T> T withConnectionInVirtualThread(@NotNull Function<C, T> function) {
-        return withConnection(c -> {
-            T t = function.apply(c);
-            return Future.succeededFuture(t);
-        }).await();
-    }
-
     /**
      * 在事务中使用连接执行操作
      *
@@ -275,14 +266,6 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> implemen
         });
     }
 
-    @TechnicalPreview(since = "5.0.0")
-    @NotNull
-    public <T> T withTransactionInVirtualThread(@NotNull Function<C, T> function) {
-        return withTransaction(c -> {
-            T t = function.apply(c);
-            return Future.succeededFuture(t);
-        }).await();
-    }
 
     /**
      * 关闭数据源
@@ -332,8 +315,17 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> implemen
                      );
     }
 
+
     @Override
     public @NotNull Keel getKeel() {
         return keel;
+    }
+
+    protected @NotNull Pool getPool() {
+        return pool;
+    }
+
+    protected @NotNull Function<SqlConnection, C> getSqlConnectionWrapper() {
+        return sqlConnectionWrapper;
     }
 }

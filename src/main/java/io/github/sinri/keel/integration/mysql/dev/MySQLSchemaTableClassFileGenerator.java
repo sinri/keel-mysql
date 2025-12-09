@@ -2,9 +2,9 @@ package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.base.KeelHolder;
 import io.github.sinri.keel.base.logger.logger.StdoutLogger;
-import io.github.sinri.keel.integration.mysql.KeelMySQLDataSourceProvider;
-import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
-import io.github.sinri.keel.integration.mysql.NamedMySQLDataSource;
+import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.datasource.NamedMySQLDataSource;
+import io.github.sinri.keel.integration.mysql.provider.KeelMySQLDataSourceProvider;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;

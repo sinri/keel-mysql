@@ -1,10 +1,10 @@
 package io.github.sinri.keel.integration.mysql.statement.impl;
 
-import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.condition.CompareCondition;
 import io.github.sinri.keel.integration.mysql.condition.GroupCondition;
 import io.github.sinri.keel.integration.mysql.condition.MySQLCondition;
 import io.github.sinri.keel.integration.mysql.condition.RawCondition;
+import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLGenerateError;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;

@@ -1,5 +1,6 @@
-package io.github.sinri.keel.integration.mysql;
+package io.github.sinri.keel.integration.mysql.connection;
 
+import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,28 +11,9 @@ import org.jetbrains.annotations.Nullable;
  *
  * @since 5.0.0
  */
-abstract public class NamedMySQLConnection {
-    @NotNull
-    private final SqlConnection sqlConnection;
-    private @Nullable String mysqlVersion;
+public interface NamedMySQLConnection {
 
-    /**
-     * 构造命名MySQL连接
-     *
-     * @param sqlConnection SQL连接对象
-     */
-    public NamedMySQLConnection(@NotNull SqlConnection sqlConnection) {
-        this.sqlConnection = sqlConnection;
-    }
-
-    /**
-     * 获取SQL连接对象
-     *
-     * @return SQL连接对象
-     */
-    public @NotNull SqlConnection getSqlConnection() {
-        return sqlConnection;
-    }
+    @NotNull SqlConnection getSqlConnection();
 
     /**
      * 获取提供SQL连接的数据源名称
@@ -39,7 +21,7 @@ abstract public class NamedMySQLConnection {
      * @return 数据源名称
      */
     @NotNull
-    abstract public String getDataSourceName();
+    String getDataSourceName();
 
     /**
      * 获取MySQL版本信息
@@ -47,28 +29,17 @@ abstract public class NamedMySQLConnection {
      * @return MySQL版本，可能为null
      */
     @Nullable
-    public final String getMysqlVersion() {
-        return mysqlVersion;
-    }
+    String getMysqlVersion();
 
-    /**
-     * 设置MySQL版本信息
-     *
-     * @param mysqlVersion MySQL版本
-     * @return 自身实例
-     */
-    @NotNull
-    public final NamedMySQLConnection setMysqlVersion(@Nullable String mysqlVersion) {
-        this.mysqlVersion = mysqlVersion;
-        return this;
-    }
+    void setMysqlVersion(@Nullable String mysqlVersion);
 
     /**
      * 判断是否为MySQL 5.6.x版本
      *
      * @return 是否为MySQL 5.6.x
      */
-    public final boolean isMySQLVersion5dot6() {
+    default boolean isMySQLVersion5dot6() {
+        var mysqlVersion = getMysqlVersion();
         return mysqlVersion != null
                 && mysqlVersion.startsWith("5.6.");
     }
@@ -78,7 +49,8 @@ abstract public class NamedMySQLConnection {
      *
      * @return 是否为MySQL 5.7.x
      */
-    public final boolean isMySQLVersion5dot7() {
+    default boolean isMySQLVersion5dot7() {
+        var mysqlVersion = getMysqlVersion();
         return mysqlVersion != null
                 && mysqlVersion.startsWith("5.7.");
     }
@@ -88,7 +60,8 @@ abstract public class NamedMySQLConnection {
      *
      * @return 是否为MySQL 8.0.x
      */
-    public final boolean isMySQLVersion8dot0() {
+    default boolean isMySQLVersion8dot0() {
+        var mysqlVersion = getMysqlVersion();
         return mysqlVersion != null
                 && mysqlVersion.startsWith("8.0.");
     }
@@ -98,7 +71,8 @@ abstract public class NamedMySQLConnection {
      *
      * @return 是否为MySQL 8.2.x
      */
-    public final boolean isMySQLVersion8dot2() {
+    default boolean isMySQLVersion8dot2() {
+        var mysqlVersion = getMysqlVersion();
         return mysqlVersion != null
                 && mysqlVersion.startsWith("8.2.");
     }
@@ -108,7 +82,14 @@ abstract public class NamedMySQLConnection {
      *
      * @return 是否用于事务
      */
-    public boolean isForTransaction() {
+    default boolean isForTransaction() {
+        var sqlConnection = getSqlConnection();
         return null != sqlConnection.transaction();
+    }
+
+
+    @NotNull
+    default Future<Void> closeSqlConnection() {
+        return getSqlConnection().close();
     }
 }

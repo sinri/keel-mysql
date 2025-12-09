@@ -1,4 +1,4 @@
-package io.github.sinri.keel.integration.mysql;
+package io.github.sinri.keel.integration.mysql.connection;
 
 import io.vertx.sqlclient.SqlConnection;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
-public class DynamicNamedMySQLConnection extends NamedMySQLConnection {
+public class DynamicClosableNamedMySQLConnection extends AbstractClosableNamedMySQLConnection {
     private final @NotNull String dataSourceName;
 
     /**
@@ -18,7 +18,7 @@ public class DynamicNamedMySQLConnection extends NamedMySQLConnection {
      * @param sqlConnection  SQL连接对象
      * @param dataSourceName 数据源名称
      */
-    public DynamicNamedMySQLConnection(@NotNull SqlConnection sqlConnection, @NotNull String dataSourceName) {
+    public DynamicClosableNamedMySQLConnection(@NotNull SqlConnection sqlConnection, @NotNull String dataSourceName) {
         super(sqlConnection);
         this.dataSourceName = dataSourceName;
     }

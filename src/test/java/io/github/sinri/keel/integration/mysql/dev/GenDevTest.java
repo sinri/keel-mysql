@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.integration.mysql.KeelMySQLDataSourceProvider;
+import io.github.sinri.keel.integration.mysql.provider.KeelMySQLDataSourceProvider;
 import io.github.sinri.keel.tesuto.KeelInstantRunner;
 import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;

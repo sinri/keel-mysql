@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.action;
 
 import io.github.sinri.keel.base.annotations.SelfInterface;
-import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import org.jetbrains.annotations.NotNull;
 
 /**

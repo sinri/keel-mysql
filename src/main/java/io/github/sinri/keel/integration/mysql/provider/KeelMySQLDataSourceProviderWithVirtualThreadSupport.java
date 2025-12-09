@@ -1,7 +1,12 @@
-package io.github.sinri.keel.integration.mysql;
+package io.github.sinri.keel.integration.mysql.provider;
 
 import io.github.sinri.keel.base.KeelHolder;
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.base.configuration.ConfigTree;
+import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
+import io.github.sinri.keel.integration.mysql.connection.ClosableNamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.connection.DynamicClosableNamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.datasource.NamedMySQLDataSourceWithVirtualThreadSupport;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.sqlclient.SqlConnection;
@@ -18,7 +23,8 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
-public interface KeelMySQLDataSourceProvider extends KeelHolder {
+@TechnicalPreview(since = "5.0.0")
+public interface KeelMySQLDataSourceProviderWithVirtualThreadSupport extends KeelHolder {
 
     /**
      * 获取默认MySQL数据源名称
@@ -41,12 +47,11 @@ public interface KeelMySQLDataSourceProvider extends KeelHolder {
      * @param sqlConnectionWrapper SQL连接包装器
      * @return 命名MySQL数据源
      */
-    @NotNull
-    default <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
+    default @NotNull <C extends ClosableNamedMySQLConnection> NamedMySQLDataSourceWithVirtualThreadSupport<C> initializeNamedMySQLDataSourceWithVirtualThreadSupport(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
-        return initializeNamedMySQLDataSource(dataSourceName, sqlConnectionWrapper, null, Promise.promise());
+        return initializeNamedMySQLDataSourceWithVirtualThreadSupport(dataSourceName, sqlConnectionWrapper, null, Promise.promise());
     }
 
     /**
@@ -56,13 +61,12 @@ public interface KeelMySQLDataSourceProvider extends KeelHolder {
      * @param sqlConnectionWrapper SQL连接包装器
      * @return 包含命名MySQL数据源的Future
      */
-    @NotNull
-    default <C extends NamedMySQLConnection> Future<NamedMySQLDataSource<C>> loadNamedMySQLDataSource(
+    default <C extends ClosableNamedMySQLConnection> Future<NamedMySQLDataSourceWithVirtualThreadSupport<C>> loadNamedMySQLDataSource(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
         Promise<Void> initializedPromise = Promise.promise();
-        var dataSource = initializeNamedMySQLDataSource(dataSourceName, sqlConnectionWrapper, null, initializedPromise);
+        var dataSource = initializeNamedMySQLDataSourceWithVirtualThreadSupport(dataSourceName, sqlConnectionWrapper, null, initializedPromise);
         return initializedPromise.future().map(v -> dataSource);
     }
 
@@ -76,7 +80,7 @@ public interface KeelMySQLDataSourceProvider extends KeelHolder {
      * @return 命名MySQL数据源
      */
     @NotNull
-    default <C extends NamedMySQLConnection> NamedMySQLDataSource<C> initializeNamedMySQLDataSource(
+    default <C extends ClosableNamedMySQLConnection> NamedMySQLDataSourceWithVirtualThreadSupport<C> initializeNamedMySQLDataSourceWithVirtualThreadSupport(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
@@ -88,7 +92,7 @@ public interface KeelMySQLDataSourceProvider extends KeelHolder {
         if (connectionSetUpFunction == null) {
             connectionSetUpFunction = sqlConnection -> Future.succeededFuture();
         }
-        var dataSource = new NamedMySQLDataSource<>(getKeel(), mySQLConfigure, connectionSetUpFunction, sqlConnectionWrapper);
+        var dataSource = NamedMySQLDataSourceWithVirtualThreadSupport.create(getKeel(), mySQLConfigure, connectionSetUpFunction, sqlConnectionWrapper);
 
         getVertx().setTimer(
                 mySQLConfigure.getPoolOptions().getConnectionTimeout() * 1000L,
@@ -109,10 +113,9 @@ public interface KeelMySQLDataSourceProvider extends KeelHolder {
      * @param dataSourceName 数据源名称
      * @return 动态命名MySQL数据源
      */
-    @NotNull
-    default NamedMySQLDataSource<DynamicNamedMySQLConnection> initializeDynamicNamedMySQLDataSource(@NotNull String dataSourceName) {
-        return initializeNamedMySQLDataSource(
+    default @NotNull NamedMySQLDataSourceWithVirtualThreadSupport<DynamicClosableNamedMySQLConnection> initializeDynamicNamedMySQLDataSource(@NotNull String dataSourceName) {
+        return initializeNamedMySQLDataSourceWithVirtualThreadSupport(
                 dataSourceName,
-                sqlConnection -> new DynamicNamedMySQLConnection(sqlConnection, dataSourceName));
+                sqlConnection -> new DynamicClosableNamedMySQLConnection(sqlConnection, dataSourceName));
     }
 }

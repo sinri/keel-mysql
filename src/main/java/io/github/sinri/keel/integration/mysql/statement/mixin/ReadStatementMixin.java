@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
 import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
 import io.github.sinri.keel.integration.mysql.result.row.ResultRow;
 import io.github.sinri.keel.integration.mysql.result.stream.ResultStreamReader;
