@@ -17,8 +17,10 @@ import java.util.function.Function;
  * Keel MySQL数据源提供者类，特别提供了在虚拟线程模式下运行并创建和管理命名MySQL数据源。
  *
  * @since 5.0.0
+ * @deprecated use {@link KeelMySQLDataSourceProvider} with {@link ClosableNamedMySQLConnection}
  */
 @TechnicalPreview(since = "5.0.0")
+@Deprecated(since = "5.0.0", forRemoval = true)
 public class KeelMySQLDataSourceProviderWithVirtualThreadSupport extends KeelMySQLDataSourceProvider {
 
     public KeelMySQLDataSourceProviderWithVirtualThreadSupport(@NotNull Keel keel) {
