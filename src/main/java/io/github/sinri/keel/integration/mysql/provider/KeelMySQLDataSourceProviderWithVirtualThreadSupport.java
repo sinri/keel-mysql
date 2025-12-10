@@ -2,9 +2,10 @@ package io.github.sinri.keel.integration.mysql.provider;
 
 import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
+import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
 import io.github.sinri.keel.integration.mysql.connection.ClosableNamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.connection.DynamicClosableNamedMySQLConnection;
-import io.github.sinri.keel.integration.mysql.datasource.NamedMySQLDataSource;
+import io.github.sinri.keel.integration.mysql.datasource.NamedMySQLDataSourceWithVirtualThreadSupport;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;
 import org.jetbrains.annotations.NotNull;
@@ -17,10 +18,8 @@ import java.util.function.Function;
  * Keel MySQL数据源提供者类，特别提供了在虚拟线程模式下运行并创建和管理命名MySQL数据源。
  *
  * @since 5.0.0
- * @deprecated use {@link KeelMySQLDataSourceProvider} with {@link ClosableNamedMySQLConnection}
  */
 @TechnicalPreview(since = "5.0.0")
-@Deprecated(since = "5.0.0", forRemoval = true)
 public class KeelMySQLDataSourceProviderWithVirtualThreadSupport extends KeelMySQLDataSourceProvider {
 
     public KeelMySQLDataSourceProviderWithVirtualThreadSupport(@NotNull Keel keel) {
@@ -28,16 +27,23 @@ public class KeelMySQLDataSourceProviderWithVirtualThreadSupport extends KeelMyS
     }
 
     @NotNull
-    public <C extends ClosableNamedMySQLConnection> Future<@NotNull NamedMySQLDataSource<C>> loadInVirtualThread(
+    public <C extends ClosableNamedMySQLConnection> Future<@NotNull NamedMySQLDataSourceWithVirtualThreadSupport<C>> loadInVirtualThread(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
     ) {
-        return load(dataSourceName, sqlConnectionWrapper, connectionSetUpFunction);
+        KeelMySQLConfiguration mySQLConfiguration = getMySQLConfiguration(getKeel(), dataSourceName);
+        var dataSource = NamedMySQLDataSourceWithVirtualThreadSupport.create(
+                getKeel(),
+                mySQLConfiguration,
+                connectionSetUpFunction,
+                sqlConnectionWrapper
+        );
+        return waitForLoading(dataSource).map(v -> dataSource);
     }
 
     @NotNull
-    public <C extends ClosableNamedMySQLConnection> Future<@NotNull NamedMySQLDataSource<C>> loadInVirtualThread(
+    public <C extends ClosableNamedMySQLConnection> Future<@NotNull NamedMySQLDataSourceWithVirtualThreadSupport<C>> loadInVirtualThread(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
@@ -45,12 +51,12 @@ public class KeelMySQLDataSourceProviderWithVirtualThreadSupport extends KeelMyS
     }
 
     @NotNull
-    public <C extends ClosableNamedMySQLConnection> Future<@NotNull NamedMySQLDataSource<C>> loadDefaultInVirtualThread(@NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
+    public <C extends ClosableNamedMySQLConnection> Future<@NotNull NamedMySQLDataSourceWithVirtualThreadSupport<C>> loadDefaultInVirtualThread(@NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
         return loadInVirtualThread(defaultMySQLDataSourceName(getKeel()), sqlConnectionWrapper, null);
     }
 
     @NotNull
-    public Future<@NotNull NamedMySQLDataSource<DynamicClosableNamedMySQLConnection>> loadDynamicInVirtualThread(@NotNull String dataSourceName) {
+    public Future<@NotNull NamedMySQLDataSourceWithVirtualThreadSupport<DynamicClosableNamedMySQLConnection>> loadDynamicInVirtualThread(@NotNull String dataSourceName) {
         return loadInVirtualThread(dataSourceName, sqlConnection -> new DynamicClosableNamedMySQLConnection(sqlConnection, dataSourceName));
     }
 }

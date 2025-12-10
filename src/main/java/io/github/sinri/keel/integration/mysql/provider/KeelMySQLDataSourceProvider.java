@@ -64,15 +64,18 @@ public class KeelMySQLDataSourceProvider implements KeelHolder {
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
     ) {
         KeelMySQLConfiguration mySQLConfiguration = getMySQLConfiguration(getKeel(), dataSourceName);
-        if (connectionSetUpFunction == null) {
-            connectionSetUpFunction = sqlConnection -> Future.succeededFuture();
-        }
         var dataSource = NamedMySQLDataSource.create(
                 getKeel(),
                 mySQLConfiguration,
                 connectionSetUpFunction,
                 sqlConnectionWrapper
         );
+        return waitForLoading(dataSource).map(v -> dataSource);
+    }
+
+    @NotNull
+    protected Future<Void> waitForLoading(@NotNull NamedMySQLDataSource<?> dataSource) {
+        KeelMySQLConfiguration mySQLConfiguration = dataSource.getConfiguration();
         PoolOptions poolOptions = mySQLConfiguration.getPoolOptions();
         Promise<Void> initializedPromise = Promise.promise();
         getVertx().setTimer(
@@ -84,7 +87,7 @@ public class KeelMySQLDataSourceProvider implements KeelHolder {
             initializedPromise.tryComplete();
             return Future.succeededFuture();
         });
-        return initializedPromise.future().map(v -> dataSource);
+        return initializedPromise.future();
     }
 
     @NotNull
