@@ -129,7 +129,8 @@ abstract public class AbstractStatement implements AnyStatement {
                          getSqlAuditLogger().info(r -> r.setForDone(statement_uuid, theSql.get(), resultMatrix.getTotalAffectedRows(), resultMatrix.getTotalFetchedRows()));
                          return Future.succeededFuture(resultMatrix);
                      }, throwable -> {
-                         getSqlAuditLogger().exception(throwable, r -> r.setForFailed(statement_uuid, theSql.get()));
+                         getSqlAuditLogger().error(r -> r.setForFailed(statement_uuid, theSql.get())
+                                                         .exception(throwable));
                          return Future.failedFuture(throwable);
                      });
     }

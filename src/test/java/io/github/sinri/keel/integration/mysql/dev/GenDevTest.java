@@ -6,28 +6,28 @@ import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
 
 public class GenDevTest extends KeelInstantRunner {
-    private KeelMySQLDataSourceProvider keelMySQLDataSourceProvider;
+    private KeelMySQLDataSourceProvider provider;
 
     @Override
     protected @NotNull Future<Void> beforeRun() {
-        this.keelMySQLDataSourceProvider = new KeelMySQLDataSourceProvider(getKeel());
+        this.provider = new KeelMySQLDataSourceProvider(getKeel());
         return Future.succeededFuture();
     }
 
     @Override
     protected @NotNull Future<Void> run() throws Exception {
-        return keelMySQLDataSourceProvider.loadDefault(SampleMySQLConnection::new)
-                                          .compose(namedMySQLDataSource -> {
-                                              return namedMySQLDataSource.withConnection(sampleMySQLConnection -> {
-                                                  TableRowClassSourceCodeGenerator tableRowClassSourceCodeGenerator = new TableRowClassSourceCodeGenerator(getKeel(), sampleMySQLConnection);
-                                                  return tableRowClassSourceCodeGenerator
-                                                          .generate(
-                                                                  "io.github.sinri.keel.integration.mysql.dev.runtime",
-                                                                  this.config("table.package.path")
-                                                          );
-                                              });
+        return provider.loadDefault()
+                       .compose(dataSource -> {
+                           return dataSource.withConnection(sampleMySQLConnection -> {
+                               TableRowClassSourceCodeGenerator tableRowClassSourceCodeGenerator = new TableRowClassSourceCodeGenerator(getKeel(), sampleMySQLConnection);
+                               return tableRowClassSourceCodeGenerator
+                                       .generate(
+                                               "io.github.sinri.keel.integration.mysql.dev.runtime",
+                                               this.config("table.package.path")
+                                       );
+                           });
 
-                                          });
+                       });
 
     }
 

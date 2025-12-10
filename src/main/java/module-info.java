@@ -1,11 +1,11 @@
 module io.github.sinri.keel.integration.mysql {
-    requires io.github.sinri.keel.base;
-    requires io.github.sinri.keel.core;
-    requires io.github.sinri.keel.logger.api;
-    requires io.vertx.core;
-    requires io.vertx.sql.client;
-    requires io.vertx.sql.client.mysql;
-    requires org.jetbrains.annotations;
+    requires transitive io.github.sinri.keel.base;
+    requires transitive io.github.sinri.keel.core;
+    requires transitive io.github.sinri.keel.logger.api;
+    requires transitive io.vertx.core;
+    requires transitive io.vertx.sql.client;
+    requires transitive io.vertx.sql.client.mysql;
+    requires transitive org.jetbrains.annotations;
 
     // 默认导出所有包
     exports io.github.sinri.keel.integration.mysql;

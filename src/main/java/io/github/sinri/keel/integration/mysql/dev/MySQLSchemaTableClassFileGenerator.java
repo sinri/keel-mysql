@@ -6,6 +6,7 @@ import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.provider.KeelMySQLDataSourceProvider;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
+import io.vertx.core.file.FileSystem;
 import io.vertx.sqlclient.SqlConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -188,58 +189,59 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
             String schemaPackageName,
             @Nullable List<String> tables
     ) {
-        KeelMySQLDataSourceProvider keelMySQLDataSourceProvider = new KeelMySQLDataSourceProvider(getKeel());
-        return keelMySQLDataSourceProvider.load(dataSourceName, sqlConnectionWrapper)
-                                          .compose(mySQLDataSource -> {
-                                              var dir = getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName;
-                                              return getVertx().fileSystem().exists(dir)
-                                                               .compose(existed -> {
-                                                                   if (!existed) {
-                                                                       return getVertx().fileSystem().mkdirs(dir);
-                                                                   } else {
-                                                                       return Future.succeededFuture();
-                                                                   }
-                                                               })
-                                                               .compose(dirEnsured -> {
-                                                                   getUnitLogger().debug("Table Row Class Directory Ensured as " + dir);
-                                                                   return this.stashOldClassFiles(dir)
-                                                                              .compose((Void v) -> mySQLDataSource.withConnection(sqlConnection -> {
-                                                                                  var x = new TableRowClassSourceCodeGenerator(getKeel(), sqlConnection)
-                                                                                          .forSchema(schemaName);
-                                                                                  x.setLogger(getUnitLogger());
-                                                                                  if (tables != null) {
-                                                                                      x.forTables(tables);
-                                                                                  }
-                                                                                  x.setStandardHandler(standard -> {
-                                                                                      String strictEnumPackage = getStrictEnumPackage();
-                                                                                      if (strictEnumPackage != null) {
-                                                                                          standard.setStrictEnumPackage(strictEnumPackage);
-                                                                                      }
-                                                                                      String envelopePackage = getEnvelopePackage();
-                                                                                      if (envelopePackage != null) {
-                                                                                          standard.setEnvelopePackage(envelopePackage);
-                                                                                      }
-                                                                                      standard
-                                                                                              .setProvideConstSchema(isProvideConstSchema())
-                                                                                              .setProvideConstTable(isProvideConstTable())
-                                                                                              .setProvideConstSchemaAndTable(isProvideConstSchemaAndTable());
-                                                                                      standard.setVcsFriendly(true);
-                                                                                  });
+        KeelMySQLDataSourceProvider provider = new KeelMySQLDataSourceProvider(getKeel());
+        FileSystem fs = getVertx().fileSystem();
+        return provider.load(dataSourceName, sqlConnectionWrapper)
+                       .compose(mySQLDataSource -> {
+                           var dir = getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName;
+                           return fs.exists(dir)
+                                    .compose(existed -> {
+                                        if (!existed) {
+                                            return fs.mkdirs(dir);
+                                        } else {
+                                            return Future.succeededFuture();
+                                        }
+                                    })
+                                    .compose(dirEnsured -> {
+                                        getUnitLogger().debug("Table Row Class Directory Ensured as " + dir);
+                                        return this.stashOldClassFiles(dir)
+                                                   .compose((Void v) -> mySQLDataSource.withConnection(sqlConnection -> {
+                                                       var x = new TableRowClassSourceCodeGenerator(getKeel(), sqlConnection)
+                                                               .forSchema(schemaName);
+                                                       x.setLogger(getUnitLogger());
+                                                       if (tables != null) {
+                                                           x.forTables(tables);
+                                                       }
+                                                       x.setStandardHandler(standard -> {
+                                                           String strictEnumPackage = getStrictEnumPackage();
+                                                           if (strictEnumPackage != null) {
+                                                               standard.setStrictEnumPackage(strictEnumPackage);
+                                                           }
+                                                           String envelopePackage = getEnvelopePackage();
+                                                           if (envelopePackage != null) {
+                                                               standard.setEnvelopePackage(envelopePackage);
+                                                           }
+                                                           standard
+                                                                   .setProvideConstSchema(isProvideConstSchema())
+                                                                   .setProvideConstTable(isProvideConstTable())
+                                                                   .setProvideConstSchemaAndTable(isProvideConstSchemaAndTable());
+                                                           standard.setVcsFriendly(true);
+                                                       });
 
-                                                                                  return x.generate(
-                                                                                          getTablePackage() + "." + dataSourceName + "." + schemaPackageName,
-                                                                                          getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName
-                                                                                  );
-                                                                              }))
-                                                                              .compose(
-                                                                                      v -> this.removeOldClassFiles(dir),
-                                                                                      failure -> this.callbackOldClassFiles(dir)
-                                                                                                     .eventually(() -> {
-                                                                                                         return Future.failedFuture(failure);
-                                                                                                     })
-                                                                              );
-                                                               });
-                                          });
+                                                       return x.generate(
+                                                               getTablePackage() + "." + dataSourceName + "." + schemaPackageName,
+                                                               getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName
+                                                       );
+                                                   }))
+                                                   .compose(
+                                                           v -> this.removeOldClassFiles(dir),
+                                                           failure -> this.callbackOldClassFiles(dir)
+                                                                          .eventually(() -> {
+                                                                              return Future.failedFuture(failure);
+                                                                          })
+                                                   );
+                                    });
+                       });
     }
 
     /**

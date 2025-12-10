@@ -64,7 +64,7 @@ public class KeelMySQLDataSourceProvider implements KeelHolder {
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
     ) {
         KeelMySQLConfiguration mySQLConfiguration = getMySQLConfiguration(getKeel(), dataSourceName);
-        var dataSource = NamedMySQLDataSource.create(
+        var dataSource = new NamedMySQLDataSource<>(
                 getKeel(),
                 mySQLConfiguration,
                 connectionSetUpFunction,
@@ -99,8 +99,8 @@ public class KeelMySQLDataSourceProvider implements KeelHolder {
     }
 
     @NotNull
-    public <C extends NamedMySQLConnection> Future<@NotNull NamedMySQLDataSource<C>> loadDefault(@NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
-        return load(defaultMySQLDataSourceName(getKeel()), sqlConnectionWrapper, null);
+    public Future<@NotNull NamedMySQLDataSource<DynamicNamedMySQLConnection>> loadDefault() {
+        return loadDynamic(defaultMySQLDataSourceName(getKeel()));
     }
 
     @NotNull

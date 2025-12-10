@@ -1,9 +1,15 @@
 package io.github.sinri.keel.integration.mysql.connection;
 
+import io.github.sinri.keel.core.utils.ReflectionUtils;
+import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.ThreadingModel;
+import io.vertx.core.Vertx;
 import io.vertx.sqlclient.SqlConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.Closeable;
 
 
 /**
@@ -11,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @since 5.0.0
  */
-public interface NamedMySQLConnection {
+public interface NamedMySQLConnection extends Closeable {
 
     @NotNull SqlConnection getSqlConnection();
 
@@ -91,5 +97,18 @@ public interface NamedMySQLConnection {
     @NotNull
     default Future<Void> closeSqlConnection() {
         return getSqlConnection().close();
+    }
+
+    @Override
+    default void close() {
+        Future<Void> future = closeSqlConnection();
+
+        Context currentContext = Vertx.currentContext();
+        if (currentContext != null
+                && currentContext.threadingModel() == ThreadingModel.VIRTUAL_THREAD
+                && ReflectionUtils.isVirtualThreadsAvailable()
+        ) {
+            future.await();
+        }
     }
 }
