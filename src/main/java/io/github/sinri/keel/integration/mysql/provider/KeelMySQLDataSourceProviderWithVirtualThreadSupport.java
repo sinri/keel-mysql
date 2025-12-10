@@ -26,16 +26,16 @@ public class KeelMySQLDataSourceProviderWithVirtualThreadSupport extends KeelMyS
     }
 
     @NotNull
-    public <C extends ClosableNamedMySQLConnection> NamedMySQLDataSource<C> loadInVirtualThread(
+    public <C extends ClosableNamedMySQLConnection> Future<@NotNull NamedMySQLDataSource<C>> loadInVirtualThread(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
     ) {
-        return load(dataSourceName, sqlConnectionWrapper, connectionSetUpFunction).await();
+        return load(dataSourceName, sqlConnectionWrapper, connectionSetUpFunction);
     }
 
     @NotNull
-    public <C extends ClosableNamedMySQLConnection> NamedMySQLDataSource<C> loadInVirtualThread(
+    public <C extends ClosableNamedMySQLConnection> Future<@NotNull NamedMySQLDataSource<C>> loadInVirtualThread(
             @NotNull String dataSourceName,
             @NotNull Function<SqlConnection, C> sqlConnectionWrapper
     ) {
@@ -43,12 +43,12 @@ public class KeelMySQLDataSourceProviderWithVirtualThreadSupport extends KeelMyS
     }
 
     @NotNull
-    public <C extends ClosableNamedMySQLConnection> NamedMySQLDataSource<C> loadDefaultInVirtualThread(@NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
+    public <C extends ClosableNamedMySQLConnection> Future<@NotNull NamedMySQLDataSource<C>> loadDefaultInVirtualThread(@NotNull Function<SqlConnection, C> sqlConnectionWrapper) {
         return loadInVirtualThread(defaultMySQLDataSourceName(getKeel()), sqlConnectionWrapper, null);
     }
 
     @NotNull
-    public NamedMySQLDataSource<DynamicClosableNamedMySQLConnection> loadDynamicInVirtualThread(@NotNull String dataSourceName) {
+    public Future<@NotNull NamedMySQLDataSource<DynamicClosableNamedMySQLConnection>> loadDynamicInVirtualThread(@NotNull String dataSourceName) {
         return loadInVirtualThread(dataSourceName, sqlConnection -> new DynamicClosableNamedMySQLConnection(sqlConnection, dataSourceName));
     }
 }
