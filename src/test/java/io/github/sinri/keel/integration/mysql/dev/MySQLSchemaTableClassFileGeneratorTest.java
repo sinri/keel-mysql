@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
+import io.github.sinri.keel.integration.mysql.provider.KeelMySQLDataSourceProvider;
 import io.github.sinri.keel.tesuto.KeelInstantRunner;
 import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
@@ -24,8 +25,8 @@ public class MySQLSchemaTableClassFileGeneratorTest extends KeelInstantRunner im
     @Override
     protected @NotNull Future<Void> run() throws Exception {
         return rebuildTablesInSchema(
-                this.defaultMySQLDataSourceName(),
-                sqlConnection -> new SampleMySQLConnection(sqlConnection),
+                KeelMySQLDataSourceProvider.defaultMySQLDataSourceName(getKeel()),
+                SampleMySQLConnection::new,
                 "drydock_lesson"
         );
     }

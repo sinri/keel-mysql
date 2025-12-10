@@ -3,7 +3,6 @@ package io.github.sinri.keel.integration.mysql.dev;
 import io.github.sinri.keel.base.KeelHolder;
 import io.github.sinri.keel.base.logger.logger.StdoutLogger;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
-import io.github.sinri.keel.integration.mysql.datasource.NamedMySQLDataSource;
 import io.github.sinri.keel.integration.mysql.provider.KeelMySQLDataSourceProvider;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
@@ -23,7 +22,7 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
-public interface MySQLSchemaTableClassFileGenerator extends KeelHolder, KeelMySQLDataSourceProvider {
+public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
 
     default Logger getUnitLogger() {
         return new StdoutLogger(getClass().getName());
@@ -189,59 +188,58 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder, KeelMySQ
             String schemaPackageName,
             @Nullable List<String> tables
     ) {
-        NamedMySQLDataSource<C> mySQLDataSource = initializeNamedMySQLDataSource(
-                dataSourceName,
-                sqlConnectionWrapper
-        );
-
-        var dir = getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName;
-        return getVertx().fileSystem().exists(dir)
-                         .compose(existed -> {
-                             if (!existed) {
-                                 return getVertx().fileSystem().mkdirs(dir);
-                             } else {
-                                 return Future.succeededFuture();
-                             }
-                         })
-                         .compose(dirEnsured -> {
-                             getUnitLogger().debug("Table Row Class Directory Ensured as " + dir);
-                             return this.stashOldClassFiles(dir)
-                                        .compose((Void v) -> mySQLDataSource.withConnection(sqlConnection -> {
-                                            var x = new TableRowClassSourceCodeGenerator(getKeel(), sqlConnection)
-                                                    .forSchema(schemaName);
-                                            x.setLogger(getUnitLogger());
-                                            if (tables != null) {
-                                                x.forTables(tables);
-                                            }
-                                            x.setStandardHandler(standard -> {
-                                                String strictEnumPackage = getStrictEnumPackage();
-                                                if (strictEnumPackage != null) {
-                                                    standard.setStrictEnumPackage(strictEnumPackage);
-                                                }
-                                                String envelopePackage = getEnvelopePackage();
-                                                if (envelopePackage != null) {
-                                                    standard.setEnvelopePackage(envelopePackage);
-                                                }
-                                                standard
-                                                        .setProvideConstSchema(isProvideConstSchema())
-                                                        .setProvideConstTable(isProvideConstTable())
-                                                        .setProvideConstSchemaAndTable(isProvideConstSchemaAndTable());
-                                                standard.setVcsFriendly(true);
-                                            });
-
-                                            return x.generate(
-                                                    getTablePackage() + "." + dataSourceName + "." + schemaPackageName,
-                                                    getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName
-                                            );
-                                        }))
-                                        .compose(
-                                                v -> this.removeOldClassFiles(dir),
-                                                failure -> this.callbackOldClassFiles(dir)
-                                                               .eventually(() -> {
-                                                                   return Future.failedFuture(failure);
+        KeelMySQLDataSourceProvider keelMySQLDataSourceProvider = new KeelMySQLDataSourceProvider(getKeel());
+        return keelMySQLDataSourceProvider.load(dataSourceName, sqlConnectionWrapper)
+                                          .compose(mySQLDataSource -> {
+                                              var dir = getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName;
+                                              return getVertx().fileSystem().exists(dir)
+                                                               .compose(existed -> {
+                                                                   if (!existed) {
+                                                                       return getVertx().fileSystem().mkdirs(dir);
+                                                                   } else {
+                                                                       return Future.succeededFuture();
+                                                                   }
                                                                })
-                                        );
-                         });
+                                                               .compose(dirEnsured -> {
+                                                                   getUnitLogger().debug("Table Row Class Directory Ensured as " + dir);
+                                                                   return this.stashOldClassFiles(dir)
+                                                                              .compose((Void v) -> mySQLDataSource.withConnection(sqlConnection -> {
+                                                                                  var x = new TableRowClassSourceCodeGenerator(getKeel(), sqlConnection)
+                                                                                          .forSchema(schemaName);
+                                                                                  x.setLogger(getUnitLogger());
+                                                                                  if (tables != null) {
+                                                                                      x.forTables(tables);
+                                                                                  }
+                                                                                  x.setStandardHandler(standard -> {
+                                                                                      String strictEnumPackage = getStrictEnumPackage();
+                                                                                      if (strictEnumPackage != null) {
+                                                                                          standard.setStrictEnumPackage(strictEnumPackage);
+                                                                                      }
+                                                                                      String envelopePackage = getEnvelopePackage();
+                                                                                      if (envelopePackage != null) {
+                                                                                          standard.setEnvelopePackage(envelopePackage);
+                                                                                      }
+                                                                                      standard
+                                                                                              .setProvideConstSchema(isProvideConstSchema())
+                                                                                              .setProvideConstTable(isProvideConstTable())
+                                                                                              .setProvideConstSchemaAndTable(isProvideConstSchemaAndTable());
+                                                                                      standard.setVcsFriendly(true);
+                                                                                  });
+
+                                                                                  return x.generate(
+                                                                                          getTablePackage() + "." + dataSourceName + "." + schemaPackageName,
+                                                                                          getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName
+                                                                                  );
+                                                                              }))
+                                                                              .compose(
+                                                                                      v -> this.removeOldClassFiles(dir),
+                                                                                      failure -> this.callbackOldClassFiles(dir)
+                                                                                                     .eventually(() -> {
+                                                                                                         return Future.failedFuture(failure);
+                                                                                                     })
+                                                                              );
+                                                               });
+                                          });
     }
 
     /**

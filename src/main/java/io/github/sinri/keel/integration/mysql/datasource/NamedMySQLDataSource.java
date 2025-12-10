@@ -20,6 +20,7 @@ import java.util.function.Function;
  */
 public interface NamedMySQLDataSource<C extends NamedMySQLConnection> extends KeelHolder {
 
+    @NotNull
     static <T extends NamedMySQLConnection> NamedMySQLDataSource<T> create(
             @NotNull Keel keel,
             @NotNull KeelMySQLConfiguration configuration,
@@ -29,6 +30,7 @@ public interface NamedMySQLDataSource<C extends NamedMySQLConnection> extends Ke
         return new NamedMySQLDataSourceImpl<>(keel, configuration, connectionSetUpFunction, sqlConnectionWrapper);
     }
 
+    @NotNull
     static <T extends NamedMySQLConnection> NamedMySQLDataSource<T> create(
             @NotNull Keel keel,
             @NotNull KeelMySQLConfiguration configuration,
