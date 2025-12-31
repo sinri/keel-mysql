@@ -49,7 +49,10 @@ dependencies {
     api("io.vertx:vertx-mysql-client:$vertxVersion")
 
     // Annotations (from module-info.java)
-    api("org.jetbrains:annotations")
+    // https://mvnrepository.com/artifact/org.jetbrains/annotations
+    compileOnly("org.jetbrains:annotations:26.0.2")
+    // https://mvnrepository.com/artifact/org.jspecify/jspecify
+//    compileOnly("org.jspecify:jspecify:1.0.0")
 
     // Test dependencies
     testImplementation("io.github.sinri:keel-test:$keelTestVersion")

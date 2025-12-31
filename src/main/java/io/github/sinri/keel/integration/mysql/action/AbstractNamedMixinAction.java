@@ -17,6 +17,7 @@ public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W
 
     /**
      * 构造具有指定命名MySQL连接的抽象命名Mixin动作
+     *
      * @param namedSqlConnection 与此动作关联的命名MySQL连接实例，不能为null
      */
     public AbstractNamedMixinAction(@NotNull C namedSqlConnection) {
@@ -25,11 +26,11 @@ public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W
 
     /**
      * 获取与此动作关联的命名MySQL连接
+     *
      * @return 与此动作关联的命名MySQL连接实例，永不为null
      */
-    @NotNull
     @Override
-    public final C getNamedSqlConnection() {
+    public final @NotNull C getNamedSqlConnection() {
         return namedSqlConnection;
     }
 }

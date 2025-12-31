@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * 抽象命名动作基类，实现了NamedActionInterface接口用于处理命名MySQL连接
  * 该类提供了构造函数来初始化命名MySQL连接，并实现了getNamedSqlConnection方法返回连接
  *
- * @param <C> 扩展NamedMySQLConnection的特定连接类
+ * @param <C> 扩展 NamedMySQLConnection 的特定连接类
  * @since 5.0.0
  */
 public abstract class AbstractNamedAction<C extends NamedMySQLConnection> implements NamedActionInterface<C> {
@@ -26,9 +26,8 @@ public abstract class AbstractNamedAction<C extends NamedMySQLConnection> implem
      * 获取与此动作关联的命名MySQL连接
      * @return 与此动作关联的命名MySQL连接实例，永不为null
      */
-    @NotNull
     @Override
-    public C getNamedSqlConnection() {
+    public @NotNull C getNamedSqlConnection() {
         return namedSqlConnection;
     }
 }

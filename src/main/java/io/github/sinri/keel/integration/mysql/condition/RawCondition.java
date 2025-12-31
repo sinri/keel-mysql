@@ -9,8 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * @since 5.0.0
  */
 public class RawCondition implements MySQLCondition {
-    @NotNull
-    private String rawConditionExpression;
+    private @NotNull String rawConditionExpression;
 
     /**
      * 构造空的原始条件
@@ -41,7 +40,7 @@ public class RawCondition implements MySQLCondition {
      * @return SQL条件表达式
      */
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return rawConditionExpression;
     }
 }

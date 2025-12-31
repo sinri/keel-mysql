@@ -286,7 +286,7 @@ public class CompareCondition implements MySQLCondition {
      * 生成SQL的条件表达式文本
      */
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         String x = leftSide + " " + operator + " " + rightSide;
         if (inverseOperator) {
             x = "NOT (" + x + ")";

@@ -26,16 +26,14 @@ public interface NamedMySQLConnection extends Closeable {
      *
      * @return 数据源名称
      */
-    @NotNull
-    String getDataSourceName();
+    @NotNull String getDataSourceName();
 
     /**
      * 获取MySQL版本信息
      *
      * @return MySQL版本，可能为null
      */
-    @Nullable
-    String getMysqlVersion();
+    @Nullable String getMysqlVersion();
 
     void setMysqlVersion(@Nullable String mysqlVersion);
 
@@ -93,9 +91,7 @@ public interface NamedMySQLConnection extends Closeable {
         return null != sqlConnection.transaction();
     }
 
-
-    @NotNull
-    default Future<Void> closeSqlConnection() {
+    default @NotNull Future<Void> closeSqlConnection() {
         return getSqlConnection().close();
     }
 

@@ -68,7 +68,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
     public NamedMySQLDataSource(
             @NotNull Keel keel,
             @NotNull KeelMySQLConfiguration configuration,
-            @NotNull Function<SqlConnection, C> sqlConnectionWrapper
+            @NotNull Function<@NotNull SqlConnection, @NotNull C> sqlConnectionWrapper
     ) {
         this(keel, configuration, sqlConnection -> Future.succeededFuture(), sqlConnectionWrapper);
     }
@@ -84,8 +84,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
     public NamedMySQLDataSource(
             @NotNull Keel keel,
             @NotNull KeelMySQLConfiguration configuration,
-            @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
-            @NotNull Function<SqlConnection, C> sqlConnectionWrapper
+            @Nullable Function<@NotNull SqlConnection, @NotNull Future<Void>> connectionSetUpFunction,
+            @NotNull Function<@NotNull SqlConnection, @NotNull C> sqlConnectionWrapper
     ) {
         this.keel = keel;
         this.configuration = configuration;
@@ -110,7 +110,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      * @return 包含版本信息的Future
      */
     @NotNull
-    private static Future<String> checkMySQLVersion(@NotNull SqlConnection sqlConnection) {
+    private static Future<@Nullable String> checkMySQLVersion(@NotNull SqlConnection sqlConnection) {
         return sqlConnection.preparedQuery("SELECT VERSION() as v; ")
                             .execute()
                             .compose(rows -> Future.succeededFuture(ResultMatrix.create(rows)))
@@ -134,7 +134,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      */
     private void initializeConnection(
             @NotNull SqlConnection sqlConnection,
-            @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
+            @Nullable Function<@NotNull SqlConnection, @NotNull Future<Void>> connectionSetUpFunction
     ) {
         Future.succeededFuture()
               .compose(v -> {
@@ -219,7 +219,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      * @return 操作结果Future
      */
     @NotNull
-    public <T> Future<T> withConnection(@NotNull Function<C, Future<T>> function) {
+    public <T> Future<T> withConnection(@NotNull Function<@NotNull C, @NotNull Future<T>> function) {
         return Future.succeededFuture().compose(
                 v -> fetchMySQLConnection()
                         .compose(sqlConnectionWrapper -> {
@@ -246,7 +246,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      * @return 事务结果Future
      */
     @NotNull
-    public <T> Future<T> withTransaction(@NotNull Function<C, Future<T>> function) {
+    public <T> Future<T> withTransaction(@NotNull Function<@NotNull C, @NotNull Future<T>> function) {
         return withConnection(c -> {
             return Future.succeededFuture()
                          .compose(v -> c.getSqlConnection().begin())
@@ -304,7 +304,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      * @return 连接Future
      */
     @NotNull
-    private Future<C> fetchMySQLConnection() {
+    private Future<@NotNull C> fetchMySQLConnection() {
         return Future.succeededFuture()
                      .compose(v -> pool.getConnection())
                      .compose(
@@ -336,7 +336,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
         return pool;
     }
 
-    @NotNull Function<SqlConnection, C> getSqlConnectionWrapper() {
+    @NotNull Function<@NotNull SqlConnection, @NotNull C> getSqlConnectionWrapper() {
         return sqlConnectionWrapper;
     }
 

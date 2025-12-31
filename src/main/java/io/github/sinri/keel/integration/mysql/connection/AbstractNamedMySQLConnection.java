@@ -5,10 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractNamedMySQLConnection implements NamedMySQLConnection {
-    @NotNull
-    private final SqlConnection sqlConnection;
-    @Nullable
-    private String mysqlVersion;
+    private final @NotNull SqlConnection sqlConnection;
+    private @Nullable String mysqlVersion;
 
     /**
      * 构造命名MySQL连接
@@ -33,8 +31,7 @@ public abstract class AbstractNamedMySQLConnection implements NamedMySQLConnecti
      *
      * @return MySQL版本，可能为null
      */
-    @Nullable
-    public final String getMysqlVersion() {
+    public final @Nullable String getMysqlVersion() {
         return mysqlVersion;
     }
 

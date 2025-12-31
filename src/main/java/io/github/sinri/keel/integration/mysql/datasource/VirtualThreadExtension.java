@@ -5,6 +5,7 @@ import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Transaction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -21,13 +22,13 @@ public class VirtualThreadExtension<C extends NamedMySQLConnection> {
         return this.mappedDataSource;
     }
 
-    public <T> @NotNull T withConnection(@NotNull Function<C, T> function) {
+    public <T> @Nullable T withConnection(@NotNull Function<@NotNull C, @Nullable T> function) {
         try (C c = fetchMySQLConnection()) {
             return function.apply(c);
         }
     }
 
-    public <T> @NotNull T withTransaction(@NotNull Function<C, T> function) {
+    public <T> @Nullable T withTransaction(@NotNull Function<@NotNull C, @Nullable T> function) {
         try (C c = fetchMySQLConnection()) {
             Transaction transaction = c.getSqlConnection().begin().await();
             T t;
@@ -45,7 +46,7 @@ public class VirtualThreadExtension<C extends NamedMySQLConnection> {
     /**
      * In virtual thread mode, fetch a closable named mysql connection (wrapper) to use in try-with closure.
      */
-    public C fetchMySQLConnection() {
+    public @NotNull C fetchMySQLConnection() {
         SqlConnection sqlConnection = getMappedDataSource().getPool().getConnection().await();
         return getMappedDataSource().getSqlConnectionWrapper().apply(sqlConnection);
     }
