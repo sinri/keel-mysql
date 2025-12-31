@@ -20,7 +20,7 @@ public final class CreateTableLikeTableStatement extends CreateTableStatementBas
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "CREATE " + (useTemporary() ? "TEMPORARY " : " ") + "TABLE "
                 + (useIfNotExists() ? "IF NOT EXISTS " : " ")
                 + getTableExpression()

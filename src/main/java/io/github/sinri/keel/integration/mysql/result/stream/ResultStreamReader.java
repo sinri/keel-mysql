@@ -3,6 +3,7 @@ package io.github.sinri.keel.integration.mysql.result.stream;
 import io.github.sinri.keel.integration.mysql.result.row.ResultRow;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 结果流读取器接口，用于处理流式结果读取
@@ -17,7 +18,7 @@ public interface ResultStreamReader {
      * @param clazz 实体类
      * @return 实体对象
      */
-    static <T> T mapRowToEntity(Row row, Class<T> clazz) {
+    static <T> @NotNull T mapRowToEntity(@NotNull Row row, @NotNull Class<T> clazz) {
         return row.toJson().mapTo(clazz);
     }
 
@@ -27,7 +28,7 @@ public interface ResultStreamReader {
      * @param clazz 结果行类
      * @return 结果行对象
      */
-    static <R extends ResultRow> R mapRowToResultRow(Row row, Class<R> clazz) {
+    static <R extends ResultRow> @NotNull R mapRowToResultRow(@NotNull Row row, @NotNull Class<R> clazz) {
         return ResultRow.of(row, clazz);
     }
 
@@ -36,5 +37,5 @@ public interface ResultStreamReader {
      * @param row SQL行
      * @return 读取结果Future
      */
-    Future<Void> read(Row row);
+    @NotNull Future<Void> read(@NotNull Row row);
 }

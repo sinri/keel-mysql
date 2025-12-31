@@ -35,7 +35,7 @@ public interface AnyStatement {
      * @param sql 原始SQL语句
      * @return SQL语句对象
      */
-    static AbstractStatement raw(@NotNull String sql) {
+    static @NotNull AbstractStatement raw(@NotNull String sql) {
         return raw(sql, false);
     }
 
@@ -46,10 +46,10 @@ public interface AnyStatement {
      * @param withoutPrepare 是否不使用预处理语句
      * @return SQL语句对象
      */
-    static AbstractStatement raw(@NotNull String sql, boolean withoutPrepare) {
+    static @NotNull AbstractStatement raw(@NotNull String sql, boolean withoutPrepare) {
         return new AbstractStatement() {
             @Override
-            public String toString() {
+            public @NotNull String toString() {
                 return sql;
             }
 
@@ -65,7 +65,7 @@ public interface AnyStatement {
      * @param statementHandler SELECT语句处理器
      * @return SELECT语句对象
      */
-    static SelectStatementMixin select(@NotNull Handler<SelectStatement> statementHandler) {
+    static @NotNull SelectStatementMixin select(@NotNull Handler<@NotNull SelectStatement> statementHandler) {
         SelectStatement selectStatement = new SelectStatement();
         statementHandler.handle(selectStatement);
         return selectStatement;
@@ -76,7 +76,7 @@ public interface AnyStatement {
      * @param unionStatementHandler UNION语句处理器
      * @return UNION语句对象
      */
-    static ReadStatementMixin union(@NotNull Handler<UnionStatement> unionStatementHandler) {
+    static @NotNull ReadStatementMixin union(@NotNull Handler<@NotNull UnionStatement> unionStatementHandler) {
         UnionStatement unionStatement = new UnionStatement();
         unionStatementHandler.handle(unionStatement);
         return unionStatement;
@@ -87,7 +87,7 @@ public interface AnyStatement {
      * @param updateStatementHandler UPDATE语句处理器
      * @return UPDATE语句对象
      */
-    static ModifyStatementMixin update(@NotNull Handler<UpdateStatement> updateStatementHandler) {
+    static @NotNull ModifyStatementMixin update(@NotNull Handler<@NotNull UpdateStatement> updateStatementHandler) {
         UpdateStatement updateStatement = new UpdateStatement();
         updateStatementHandler.handle(updateStatement);
         return updateStatement;
@@ -98,7 +98,7 @@ public interface AnyStatement {
      * @param deleteStatementHandler DELETE语句处理器
      * @return DELETE语句对象
      */
-    static ModifyStatementMixin delete(@NotNull Handler<DeleteStatement> deleteStatementHandler) {
+    static @NotNull ModifyStatementMixin delete(@NotNull Handler<@NotNull DeleteStatement> deleteStatementHandler) {
         DeleteStatement deleteStatement = new DeleteStatement();
         deleteStatementHandler.handle(deleteStatement);
         return deleteStatement;
@@ -109,7 +109,7 @@ public interface AnyStatement {
      * @param statementHandler INSERT语句处理器
      * @return INSERT语句对象
      */
-    static WriteIntoStatementMixin insert(Handler<WriteIntoStatement> statementHandler) {
+    static @NotNull WriteIntoStatementMixin insert(@NotNull Handler<@NotNull WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.INSERT);
         statementHandler.handle(writeIntoStatement);
         return writeIntoStatement;
@@ -120,7 +120,7 @@ public interface AnyStatement {
      * @param statementHandler REPLACE语句处理器
      * @return REPLACE语句对象
      */
-    static WriteIntoStatementMixin replace(@NotNull Handler<WriteIntoStatement> statementHandler) {
+    static @NotNull WriteIntoStatementMixin replace(@NotNull Handler<@NotNull WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.REPLACE);
         statementHandler.handle(writeIntoStatement);
         return writeIntoStatement;
@@ -131,7 +131,7 @@ public interface AnyStatement {
      * @param statementHandler CALL语句处理器
      * @return CALL语句对象
      */
-    static AbstractStatement call(@NotNull Handler<CallStatement> statementHandler) {
+    static @NotNull AbstractStatement call(@NotNull Handler<@NotNull CallStatement> statementHandler) {
         CallStatement callStatement = new CallStatement();
         statementHandler.handle(callStatement);
         return callStatement;
@@ -142,7 +142,7 @@ public interface AnyStatement {
      * @param statementHandler TRUNCATE TABLE语句处理器
      * @return TRUNCATE TABLE语句对象
      */
-    static AbstractStatement truncateTable(@NotNull Handler<TruncateTableStatement> statementHandler) {
+    static @NotNull AbstractStatement truncateTable(@NotNull Handler<@NotNull TruncateTableStatement> statementHandler) {
         TruncateTableStatement truncateTableStatement = new TruncateTableStatement();
         statementHandler.handle(truncateTableStatement);
         return truncateTableStatement;
@@ -153,7 +153,7 @@ public interface AnyStatement {
      * @param statementHandler CREATE TABLE语句处理器
      * @return CREATE TABLE语句对象
      */
-    static AbstractStatement createTable(@NotNull Handler<CreateTableStatement> statementHandler) {
+    static @NotNull AbstractStatement createTable(@NotNull Handler<@NotNull CreateTableStatement> statementHandler) {
         CreateTableStatement createTableStatement = new CreateTableStatement();
         statementHandler.handle(createTableStatement);
         return createTableStatement;
@@ -164,7 +164,7 @@ public interface AnyStatement {
      * @param statementHandler CREATE TABLE LIKE语句处理器
      * @return CREATE TABLE LIKE语句对象
      */
-    static AbstractStatement createTableLikeTable(@NotNull Handler<CreateTableLikeTableStatement> statementHandler) {
+    static @NotNull AbstractStatement createTableLikeTable(@NotNull Handler<@NotNull CreateTableLikeTableStatement> statementHandler) {
         CreateTableLikeTableStatement createTableStatement = new CreateTableLikeTableStatement();
         statementHandler.handle(createTableStatement);
         return createTableStatement;
@@ -175,7 +175,7 @@ public interface AnyStatement {
      * @param statementHandler ALTER TABLE语句处理器
      * @return ALTER TABLE语句对象
      */
-    static AbstractStatement alterTable(@NotNull Handler<AlterTableStatement> statementHandler) {
+    static @NotNull AbstractStatement alterTable(@NotNull Handler<@NotNull AlterTableStatement> statementHandler) {
         AlterTableStatement alterTableStatement = new AlterTableStatement();
         statementHandler.handle(alterTableStatement);
         return alterTableStatement;
@@ -186,7 +186,7 @@ public interface AnyStatement {
      * @param statementHandler CREATE VIEW语句处理器
      * @return CREATE VIEW语句对象
      */
-    static AbstractStatement createView(@NotNull Handler<CreateViewStatement> statementHandler) {
+    static @NotNull AbstractStatement createView(@NotNull Handler<@NotNull CreateViewStatement> statementHandler) {
         CreateViewStatement createViewStatement = new CreateViewStatement();
         statementHandler.handle(createViewStatement);
         return createViewStatement;
@@ -197,7 +197,7 @@ public interface AnyStatement {
      * @param statementHandler ALTER VIEW语句处理器
      * @return ALTER VIEW语句对象
      */
-    static AbstractStatement alterView(@NotNull Handler<AlterViewStatement> statementHandler) {
+    static @NotNull AbstractStatement alterView(@NotNull Handler<@NotNull AlterViewStatement> statementHandler) {
         AlterViewStatement alterViewStatement = new AlterViewStatement();
         statementHandler.handle(alterViewStatement);
         return alterViewStatement;
@@ -208,7 +208,7 @@ public interface AnyStatement {
      * @param statementHandler DROP VIEW语句处理器
      * @return DROP VIEW语句对象
      */
-    static AbstractStatement dropView(@NotNull Handler<DropViewStatement> statementHandler) {
+    static @NotNull AbstractStatement dropView(@NotNull Handler<@NotNull DropViewStatement> statementHandler) {
         DropViewStatement dropViewStatement = new DropViewStatement();
         statementHandler.handle(dropViewStatement);
         return dropViewStatement;
@@ -220,7 +220,7 @@ public interface AnyStatement {
      * @param templatedReadStatementHandler 模板参数映射处理器
      * @return 模板化读取语句对象
      */
-    static ReadStatementMixin templatedRead(@NotNull String path, @NotNull Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
+    static @NotNull ReadStatementMixin templatedRead(@NotNull String path, @NotNull Handler<@NotNull TemplateArgumentMapping> templatedReadStatementHandler) {
         TemplatedReadStatement readStatement = TemplatedStatement.loadTemplateToRead(path);
         TemplateArgumentMapping arguments = readStatement.getArguments();
         templatedReadStatementHandler.handle(arguments);
@@ -233,7 +233,7 @@ public interface AnyStatement {
      * @param templatedModifyStatementHandler 模板参数映射处理器
      * @return 模板化修改语句对象
      */
-    static ModifyStatementMixin templatedModify(@NotNull String path, @NotNull Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
+    static @NotNull ModifyStatementMixin templatedModify(@NotNull String path, @NotNull Handler<@NotNull TemplateArgumentMapping> templatedModifyStatementHandler) {
         TemplatedModifyStatement templatedModifyStatement = TemplatedStatement.loadTemplateToModify(path);
         TemplateArgumentMapping arguments = templatedModifyStatement.getArguments();
         templatedModifyStatementHandler.handle(arguments);
@@ -244,14 +244,14 @@ public interface AnyStatement {
      * 生成SQL字符串
      * @return 生成的SQL语句
      */
-    String toString();
+    @NotNull String toString();
 
     /**
      * 在指定的MySQL连接上执行SQL语句
      * @param namedSqlConnection MySQL命名连接
      * @return 执行结果的Future
      */
-    Future<ResultMatrix> execute(@NotNull NamedMySQLConnection namedSqlConnection);
+    @NotNull Future<@NotNull ResultMatrix> execute(@NotNull NamedMySQLConnection namedSqlConnection);
 
     /**
      * 判断是否不使用预处理语句

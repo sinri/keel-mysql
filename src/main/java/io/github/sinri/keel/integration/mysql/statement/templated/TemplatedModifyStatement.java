@@ -26,7 +26,7 @@ public class TemplatedModifyStatement extends AbstractStatement implements Modif
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return this.build();
     }
 

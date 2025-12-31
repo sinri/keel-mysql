@@ -38,7 +38,7 @@ public class TemplatedReadStatement extends AbstractStatement implements ReadSta
 
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return this.build();
     }
 

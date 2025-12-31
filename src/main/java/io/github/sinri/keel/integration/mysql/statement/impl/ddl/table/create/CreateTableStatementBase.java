@@ -60,5 +60,5 @@ public abstract class CreateTableStatementBase<T> extends AbstractStatement impl
      * @return the generated DDL SQL.
      */
     @Override
-    abstract public String toString();
+    abstract public @NotNull String toString();
 }

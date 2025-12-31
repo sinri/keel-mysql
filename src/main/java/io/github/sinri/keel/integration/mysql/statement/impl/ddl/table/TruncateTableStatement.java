@@ -37,7 +37,7 @@ public class TruncateTableStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "TRUNCATE TABLE " + getTableExpression();
     }
 }

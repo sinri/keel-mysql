@@ -39,7 +39,7 @@ public class CallStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         String s = "CALL " + storedProcedureName;
         s += "(";
         if (!parameters.isEmpty()) {

@@ -1,6 +1,5 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
-import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.integration.mysql.Quoter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +21,6 @@ import java.util.Objects;
  * Case operator</a>
  * @since 5.0.0
  */
-@TechnicalPreview(since = "3.0.19")
 public class CaseOperator {
     private final Collection<CaseOperatorPair> whenThenPairs;
     private String caseValueExpression = null;

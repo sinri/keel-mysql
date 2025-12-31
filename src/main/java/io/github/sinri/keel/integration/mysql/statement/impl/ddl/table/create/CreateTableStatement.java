@@ -57,7 +57,7 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         var ds = definitions.stream().map(Object::toString).collect(Collectors.toList());
         var sql = "CREATE " + (useTemporary() ? "TEMPORARY " : " ") + "TABLE "
                 + (useIfNotExists() ? "IF NOT EXISTS " : " ")

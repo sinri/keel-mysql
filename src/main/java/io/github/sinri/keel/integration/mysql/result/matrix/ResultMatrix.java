@@ -26,6 +26,7 @@ public interface ResultMatrix {
 
     /**
      * 从RowSet创建结果矩阵
+     *
      * @param rowSet SQL行集合
      * @return 结果矩阵
      */
@@ -38,58 +39,66 @@ public interface ResultMatrix {
      *
      * @return 结果行列表
      */
-    List<JsonObject> getRowList();
+    @NotNull List<@NotNull JsonObject> getRowList();
 
     /**
      * 获取获取的总行数
+     *
      * @return 总行数
      */
     int getTotalFetchedRows();
 
     /**
      * 获取影响的总行数
+     *
      * @return 影响的行数
      */
     int getTotalAffectedRows();
 
     /**
      * 获取最后插入的ID
+     *
      * @return 最后插入的ID
      */
     long getLastInsertedID();
 
     /**
      * 转换为JSON数组
+     *
      * @return JSON数组
      */
-    JsonArray toJsonArray();
+    @NotNull JsonArray toJsonArray();
 
     /**
      * 获取第一行数据
+     *
      * @return 第一行数据
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
-    JsonObject getFirstRow() throws KeelSQLResultRowIndexError;
+    @NotNull JsonObject getFirstRow() throws KeelSQLResultRowIndexError;
 
     /**
      * 根据索引获取行数据
+     *
      * @param index 行索引
      * @return 指定行的数据
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
-    JsonObject getRowByIndex(int index) throws KeelSQLResultRowIndexError;
+    @NotNull JsonObject getRowByIndex(int index) throws KeelSQLResultRowIndexError;
 
     /**
      * 根据索引构建表行对象
-     * @param index 行索引
+     *
+     * @param index           行索引
      * @param classOfTableRow 表行类
      * @return 表行对象
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
-    <T extends ResultRow> T buildTableRowByIndex(int index, Class<T> classOfTableRow) throws KeelSQLResultRowIndexError;
+    <T extends ResultRow> @NotNull T buildTableRowByIndex(int index, @NotNull Class<T> classOfTableRow) throws KeelSQLResultRowIndexError;
 
     /**
      * 获取第一行指定列的日期时间值
+     *
      * @param columnName 列名
      * @return 日期时间值
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
@@ -98,6 +107,7 @@ public interface ResultMatrix {
 
     /**
      * 获取第一行指定列的字符串值
+     *
      * @param columnName 列名
      * @return 字符串值
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
@@ -106,6 +116,7 @@ public interface ResultMatrix {
 
     /**
      * 获取第一行指定列的数值对象
+     *
      * @param columnName 列名
      * @return 数值对象
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
@@ -114,6 +125,7 @@ public interface ResultMatrix {
 
     /**
      * 获取第一行指定列的整数值
+     *
      * @param columnName 列名
      * @return 整数值
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
@@ -122,6 +134,7 @@ public interface ResultMatrix {
 
     /**
      * 获取第一行指定列的长整数值
+     *
      * @param columnName 列名
      * @return 长整数值
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
@@ -130,6 +143,7 @@ public interface ResultMatrix {
 
     /**
      * 获取指定列的所有日期时间值
+     *
      * @param columnName 列名
      * @return 日期时间值列表
      */
@@ -137,6 +151,7 @@ public interface ResultMatrix {
 
     /**
      * 获取指定列的所有字符串值
+     *
      * @param columnName 列名
      * @return 字符串值列表
      */
@@ -144,6 +159,7 @@ public interface ResultMatrix {
 
     /**
      * 获取指定列的所有数值对象
+     *
      * @param columnName 列名
      * @return 数值对象列表
      */
@@ -151,6 +167,7 @@ public interface ResultMatrix {
 
     /**
      * 获取指定列的所有长整数值
+     *
      * @param columnName 列名
      * @return 长整数值列表
      */
@@ -158,6 +175,7 @@ public interface ResultMatrix {
 
     /**
      * 获取指定列的所有整数值
+     *
      * @param columnName 列名
      * @return 整数值列表
      */
@@ -165,18 +183,20 @@ public interface ResultMatrix {
 
     /**
      * 构建所有表行对象列表
+     *
      * @param classOfTableRow 表行类
      * @return 表行对象列表
      * @throws RuntimeException 封装类时可能抛出异常
      */
-    <T extends ResultRow> List<T> buildTableRowList(Class<T> classOfTableRow);
+    <T extends ResultRow> @NotNull List<@NotNull T> buildTableRowList(@NotNull Class<T> classOfTableRow);
 
     /**
      * 构建分类行映射图
+     *
      * @param categoryGenerator 分类生成器
      * @return 分类行映射图
      */
-    default <K> Future<Map<K, List<JsonObject>>> buildCategorizedRowsMap(Function<JsonObject, K> categoryGenerator) {
+    default <K> @NotNull Future<@NotNull Map<K, List<JsonObject>>> buildCategorizedRowsMap(@NotNull Function<@NotNull JsonObject, @NotNull K> categoryGenerator) {
         Map<K, List<JsonObject>> map = new HashMap<>();
         var list = getRowList();
         list.forEach(item -> {
@@ -188,10 +208,11 @@ public interface ResultMatrix {
 
     /**
      * 构建唯一键绑定行映射图
+     *
      * @param uniqueKeyGenerator 唯一键生成器
      * @return 唯一键绑定行映射图
      */
-    default <K> Future<Map<K, JsonObject>> buildUniqueKeyBoundRowMap(Function<JsonObject, K> uniqueKeyGenerator) {
+    default <K> @NotNull Future<@NotNull Map<K, JsonObject>> buildUniqueKeyBoundRowMap(@NotNull Function<@NotNull JsonObject, @NotNull K> uniqueKeyGenerator) {
         Map<K, JsonObject> map = new HashMap<>();
         var list = getRowList();
         list.forEach(item -> {
@@ -203,11 +224,12 @@ public interface ResultMatrix {
 
     /**
      * 构建分类表行映射图（分类映射到表行列表）
-     * @param classOfTableRow 表行类
+     *
+     * @param classOfTableRow   表行类
      * @param categoryGenerator 分类生成器
      * @return 分类表行映射图
      */
-    default <K, T extends ResultRow> Future<Map<K, List<T>>> buildCategorizedRowsMap(Class<T> classOfTableRow, Function<T, K> categoryGenerator) {
+    default <K, T extends ResultRow> @NotNull Future<@NotNull Map<K, List<T>>> buildCategorizedRowsMap(@NotNull Class<T> classOfTableRow, @NotNull Function<@NotNull T, @NotNull K> categoryGenerator) {
         Map<K, List<T>> map = new HashMap<>();
         var list = buildTableRowList(classOfTableRow);
         list.forEach(item -> {
@@ -220,11 +242,12 @@ public interface ResultMatrix {
     /**
      * 构建唯一键绑定表行映射图（一个唯一键映射到一个结果行）
      * 警告：如果uniqueKeyGenerator提供重复键，映射值将不确定
-     * @param classOfTableRow 表行类
+     *
+     * @param classOfTableRow    表行类
      * @param uniqueKeyGenerator 唯一键生成器
      * @return 唯一键绑定表行映射图
      */
-    default <K, T extends ResultRow> Future<Map<K, T>> buildUniqueKeyBoundRowMap(Class<T> classOfTableRow, Function<T, K> uniqueKeyGenerator) {
+    default <K, T extends ResultRow> @NotNull Future<@NotNull Map<K, T>> buildUniqueKeyBoundRowMap(@NotNull Class<T> classOfTableRow, @NotNull Function<@NotNull T, @NotNull K> uniqueKeyGenerator) {
         Map<K, T> map = new HashMap<>();
         var list = buildTableRowList(classOfTableRow);
         list.forEach(item -> {
@@ -236,11 +259,12 @@ public interface ResultMatrix {
 
     /**
      * 构建自定义映射图（类似矩阵转置）
+     *
      * @param rowToMapHandler 行到映射处理器
      * @return 自定义映射图
      */
-    default <K, V> Future<Map<K, V>> buildCustomizedMap(
-            BiConsumer<Map<K, V>, JsonObject> rowToMapHandler
+    default <K, V> @NotNull Future<@NotNull Map<K, V>> buildCustomizedMap(
+            @NotNull BiConsumer<@NotNull Map<K, V>, @NotNull JsonObject> rowToMapHandler
     ) {
         Map<K, V> map = new HashMap<>();
         var list = getRowList();
@@ -250,13 +274,14 @@ public interface ResultMatrix {
 
     /**
      * 构建收缩列表（根据一组键收缩结果矩阵）
-     * @param shrinkByKeys 不收缩的字段键
+     *
+     * @param shrinkByKeys      不收缩的字段键
      * @param shrinkBodyListKey 结果中收缩主体的键
      * @return 收缩后的列表
      */
-    default Future<List<JsonObject>> buildShrinkList(
-            Collection<String> shrinkByKeys,
-            String shrinkBodyListKey
+    default @NotNull Future<@NotNull List<JsonObject>> buildShrinkList(
+            @NotNull Collection<String> shrinkByKeys,
+            @NotNull String shrinkBodyListKey
     ) {
         Map<String, JsonObject> keyMap = new HashMap<>();
         Map<String, List<JsonObject>> bodyMap = new HashMap<>();
@@ -295,8 +320,7 @@ public interface ResultMatrix {
         return Future.succeededFuture(resultList);
     }
 
-    @NotNull
-    private JsonObject getSortedJsonObject(@NotNull JsonObject object) {
+    private @NotNull JsonObject getSortedJsonObject(@NotNull JsonObject object) {
         JsonObject result = new JsonObject();
         List<String> keyList = new ArrayList<>(object.getMap().keySet());
         keyList.sort(Comparator.naturalOrder());
@@ -313,8 +337,7 @@ public interface ResultMatrix {
         return result;
     }
 
-    @NotNull
-    private JsonArray getSortedJsonArray(@NotNull JsonArray array) {
+    private @NotNull JsonArray getSortedJsonArray(@NotNull JsonArray array) {
         List<Object> list = new ArrayList<>();
         array.forEach(list::add);
         list.sort(Comparator.comparing(Object::toString));

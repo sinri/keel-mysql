@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.view;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class DropViewStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         /*
         DROP VIEW [IF EXISTS]
     view_name [, view_name] ...

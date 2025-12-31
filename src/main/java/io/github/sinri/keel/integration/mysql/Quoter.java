@@ -74,7 +74,7 @@ public class Quoter {
     public Quoter(@NotNull List<?> list) {
         StringBuilder q = new StringBuilder();
         for (Object y : list) {
-            if (q.length() > 0) {
+            if (!q.isEmpty()) {
                 q.append(",");
             }
             if (y instanceof Number) {

@@ -9,6 +9,7 @@ import io.vertx.mysqlclient.MySQLClient;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.data.Numeric;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.Objects;
  */
 class ResultMatrixImpl implements ResultMatrix {
     //private final RowSet<Row> rowSet;
-    private final List<Row> rowList = new ArrayList<>();
+    private final @NotNull List<@NotNull Row> rowList = new ArrayList<>();
     private final int totalFetchedRows;
     private final int totalAffectedRows;
     private final @Nullable Long lastInsertedID;
@@ -33,7 +34,7 @@ class ResultMatrixImpl implements ResultMatrix {
      *
      * @param rowSet SQL行集合
      */
-    public ResultMatrixImpl(RowSet<Row> rowSet) {
+    public ResultMatrixImpl(@NotNull RowSet<@NotNull Row> rowSet) {
         //this.rowSet = rowSet;
         for (var row : rowSet) {
             rowList.add(row);
@@ -43,9 +44,9 @@ class ResultMatrixImpl implements ResultMatrix {
         this.lastInsertedID = rowSet.property(MySQLClient.LAST_INSERTED_ID);
     }
 
-//    public RowSet<Row> getRowSet() {
-//        return rowSet;
-//    }
+    //    public RowSet<Row> getRowSet() {
+    //        return rowSet;
+    //    }
 
     @Override
     public int getTotalFetchedRows() {
@@ -63,7 +64,7 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     @Override
-    public JsonArray toJsonArray() {
+    public @NotNull JsonArray toJsonArray() {
         JsonArray array = new JsonArray();
         for (var row : rowList) {
             array.add(row.toJson());
@@ -72,7 +73,7 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     @Override
-    public List<JsonObject> getRowList() {
+    public @NotNull List<@NotNull JsonObject> getRowList() {
         List<JsonObject> l = new ArrayList<>();
         for (var item : rowList) {
             l.add(item.toJson());
@@ -81,18 +82,19 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     @Override
-    public JsonObject getFirstRow() throws KeelSQLResultRowIndexError {
+    public @NotNull JsonObject getFirstRow() throws KeelSQLResultRowIndexError {
         return getRowByIndex(0);
     }
 
     /**
      * 根据索引获取行数据
+     *
      * @param index 行索引
      * @return 指定行的数据
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
     @Override
-    public JsonObject getRowByIndex(int index) throws KeelSQLResultRowIndexError {
+    public @NotNull JsonObject getRowByIndex(int index) throws KeelSQLResultRowIndexError {
         try {
             return rowList.get(index).toJson();
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
@@ -102,25 +104,27 @@ class ResultMatrixImpl implements ResultMatrix {
 
     /**
      * 根据索引构建表行对象
-     * @param index 行索引
+     *
+     * @param index           行索引
      * @param classOfTableRow 表行类
      * @return 表行对象
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
-     * @throws RuntimeException 封装类时可能抛出异常
+     * @throws RuntimeException           封装类时可能抛出异常
      */
     @Override
-    public <T extends ResultRow> T buildTableRowByIndex(int index, Class<T> classOfTableRow) throws KeelSQLResultRowIndexError {
+    public <T extends ResultRow> @NotNull T buildTableRowByIndex(int index, @NotNull Class<T> classOfTableRow) throws KeelSQLResultRowIndexError {
         return ResultRow.of(getRowByIndex(index), classOfTableRow);
     }
 
     /**
      * 构建所有表行对象列表
+     *
      * @param classOfTableRow 表行类
      * @return 表行对象列表
      * @throws RuntimeException 封装类时可能抛出异常
      */
     @Override
-    public <T extends ResultRow> List<T> buildTableRowList(Class<T> classOfTableRow) {
+    public <T extends ResultRow> @NotNull List<@NotNull T> buildTableRowList(@NotNull Class<T> classOfTableRow) {
         ArrayList<T> list = new ArrayList<>();
         for (var x : rowList) {
             list.add(ResultRow.of(x, classOfTableRow));
@@ -130,6 +134,7 @@ class ResultMatrixImpl implements ResultMatrix {
 
     /**
      * 获取第一行指定列的日期时间值
+     *
      * @param columnName 列名
      * @return 日期时间值
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
@@ -161,6 +166,7 @@ class ResultMatrixImpl implements ResultMatrix {
 
     /**
      * 获取指定列的所有日期时间值
+     *
      * @param columnName 列名
      * @return 日期时间值列表
      */

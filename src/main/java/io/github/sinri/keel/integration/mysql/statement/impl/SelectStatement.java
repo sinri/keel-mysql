@@ -214,7 +214,7 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         return this;
     }
 
-    public String toString() {
+    public @NotNull String toString() {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
 

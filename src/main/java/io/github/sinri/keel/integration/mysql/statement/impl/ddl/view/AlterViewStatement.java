@@ -65,7 +65,7 @@ public class AlterViewStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         /*
         ALTER
     [ALGORITHM = {UNDEFINED | MERGE | TEMPTABLE}]

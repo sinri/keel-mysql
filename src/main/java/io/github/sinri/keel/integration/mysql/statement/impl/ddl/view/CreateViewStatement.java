@@ -71,7 +71,7 @@ public class CreateViewStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         /*
         CREATE
     [OR REPLACE]

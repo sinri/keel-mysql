@@ -60,7 +60,7 @@ public class AlterTableStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         // ALTER TABLE tbl_name
         //    [alter_option [, alter_option] ...]
         //    [partition_options]

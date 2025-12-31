@@ -26,7 +26,7 @@ public interface ResultRow extends JsonifiableDataUnit {
      * @param clazz 结果行类
      * @return 结果行对象
      */
-    static <R extends ResultRow> R of(@NotNull JsonObject tableRow, Class<R> clazz) {
+    static <R extends ResultRow> @NotNull R of(@NotNull JsonObject tableRow, @NotNull Class<R> clazz) {
         try {
             Constructor<R> constructor = clazz.getConstructor(JsonObject.class);
             return constructor.newInstance(tableRow);
@@ -41,7 +41,7 @@ public interface ResultRow extends JsonifiableDataUnit {
      * @param clazz 结果行类
      * @return 结果行对象
      */
-    static <R extends ResultRow> R of(@NotNull Row tableRow, Class<R> clazz) {
+    static <R extends ResultRow> @NotNull R of(@NotNull Row tableRow, @NotNull Class<R> clazz) {
         return of(tableRow.toJson(), clazz);
     }
 
@@ -51,7 +51,7 @@ public interface ResultRow extends JsonifiableDataUnit {
      * @param rows 结果行集合
      * @return JSON数组
      */
-    static JsonArray batchToJsonArray(@NotNull Collection<? extends ResultRow> rows) {
+    static @NotNull JsonArray batchToJsonArray(@NotNull Collection<? extends ResultRow> rows) {
         JsonArray array = new JsonArray();
         rows.forEach(row -> array.add(row.getRow()));
         return array;
@@ -63,7 +63,7 @@ public interface ResultRow extends JsonifiableDataUnit {
      * @param transformer 结果行转换器
      * @return JSON数组
      */
-    static JsonArray batchToJsonArray(@NotNull Collection<? extends ResultRow> rows, @NotNull Function<ResultRow, JsonObject> transformer) {
+    static @NotNull JsonArray batchToJsonArray(@NotNull Collection<? extends ResultRow> rows, @NotNull Function<ResultRow, JsonObject> transformer) {
         JsonArray array = new JsonArray();
         rows.forEach(row -> array.add(transformer.apply(row)));
         return array;
@@ -73,7 +73,7 @@ public interface ResultRow extends JsonifiableDataUnit {
      * 获取行数据
      * @return 行数据JSON对象
      */
-    default JsonObject getRow() {
+    default @NotNull JsonObject getRow() {
         return toJsonObject();
     }
 

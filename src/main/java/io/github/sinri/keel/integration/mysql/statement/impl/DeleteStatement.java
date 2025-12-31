@@ -75,7 +75,7 @@ public class DeleteStatement extends AbstractStatement implements ModifyStatemen
         return this;
     }
 
-    public String toString() {
+    public @NotNull String toString() {
         String sql = "DELETE FROM ";
         if (schema != null) {
             sql += schema + ".";

@@ -121,7 +121,7 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
         return this;
     }
 
-    public String toString() {
+    public @NotNull String toString() {
         String sql = "UPDATE " + ignoreMark;
         if (schema != null) {
             sql += " " + schema + ".";

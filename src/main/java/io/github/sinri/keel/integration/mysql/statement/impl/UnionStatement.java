@@ -56,7 +56,7 @@ public class UnionStatement extends AbstractStatement implements ReadStatementMi
         return this;
     }
 
-    public String toString() {
+    public @NotNull String toString() {
         return String.join(" ", selections) + (getRemarkAsComment().isEmpty() ? "" : ("\n-- " + getRemarkAsComment()));
     }
 

@@ -107,7 +107,7 @@ abstract public class AbstractStatement implements AnyStatement {
      * @since 3.0.0 removed try-catch
      */
     @Override
-    public Future<ResultMatrix> execute(@NotNull NamedMySQLConnection namedSqlConnection) {
+    public @NotNull Future<@NotNull ResultMatrix> execute(@NotNull NamedMySQLConnection namedSqlConnection) {
         AtomicReference<String> theSql = new AtomicReference<>();
         return Future.succeededFuture(this.toString())
                      .compose(sql -> {

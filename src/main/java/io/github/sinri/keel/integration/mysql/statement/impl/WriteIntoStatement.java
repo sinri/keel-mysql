@@ -220,7 +220,7 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
         return this;
     }
 
-    public String toString() {
+    public @NotNull String toString() {
         String sql = writeType + " " + ignoreMark + " INTO ";
         if (schema != null) {
             sql += schema + ".";
