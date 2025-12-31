@@ -2,7 +2,7 @@ package io.github.sinri.keel.integration.mysql.provider;
 
 import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.KeelHolder;
-import io.github.sinri.keel.base.configuration.ConfigTree;
+import io.github.sinri.keel.base.configuration.NotConfiguredException;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
 import io.github.sinri.keel.integration.mysql.connection.DynamicNamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
@@ -40,7 +40,7 @@ public class KeelMySQLDataSourceProvider implements KeelHolder {
     public static String defaultMySQLDataSourceName(@NotNull Keel keel) {
         try {
             return keel.getConfiguration().readString(List.of("mysql", "default_data_source_name"));
-        } catch (ConfigTree.NotConfiguredException e) {
+        } catch (NotConfiguredException e) {
             return "default";
         }
     }

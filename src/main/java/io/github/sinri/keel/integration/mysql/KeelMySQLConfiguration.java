@@ -4,7 +4,7 @@ import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.ConfigPropertiesBuilder;
-import io.github.sinri.keel.base.configuration.ConfigTree;
+import io.github.sinri.keel.base.configuration.NotConfiguredException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
 import io.vertx.mysqlclient.MySQLBuilder;
@@ -23,7 +23,7 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
-public class KeelMySQLConfiguration extends ConfigTree {
+public class KeelMySQLConfiguration extends ConfigElement {
     public KeelMySQLConfiguration(@NotNull ConfigElement base) {
         super(base);
     }
@@ -207,7 +207,7 @@ public class KeelMySQLConfiguration extends ConfigTree {
      */
     @NotNull
     public String getDataSourceName() {
-        return getName();
+        return getElementName();
     }
 
 

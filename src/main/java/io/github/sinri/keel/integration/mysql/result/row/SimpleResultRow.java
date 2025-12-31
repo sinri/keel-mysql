@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql.result.row;
 
+import io.github.sinri.keel.base.json.JsonifiableDataUnitImpl;
 import io.vertx.core.json.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
-public class SimpleResultRow implements ResultRow {
+public class SimpleResultRow extends JsonifiableDataUnitImpl implements ResultRow {
     private JsonObject row;
 
     /**
@@ -23,6 +24,7 @@ public class SimpleResultRow implements ResultRow {
 
     /**
      * 转换为JSON对象
+     *
      * @return JSON对象
      */
     @Override
@@ -32,6 +34,7 @@ public class SimpleResultRow implements ResultRow {
 
     /**
      * 重新加载数据
+     *
      * @param jsonObject JSON对象
      */
     @Override
