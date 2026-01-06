@@ -1,7 +1,6 @@
 package io.github.sinri.keel.integration.mysql.provider;
 
 import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.KeelHolder;
 import io.github.sinri.keel.base.configuration.NotConfiguredException;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
 import io.github.sinri.keel.integration.mysql.connection.DynamicNamedMySQLConnection;
@@ -9,10 +8,11 @@ import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.datasource.NamedMySQLDataSource;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlConnection;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,11 +24,10 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
-public class KeelMySQLDataSourceProvider implements KeelHolder {
-    private final @NotNull Keel keel;
+@NullMarked
+public class KeelMySQLDataSourceProvider {
 
-    public KeelMySQLDataSourceProvider(@NotNull Keel keel) {
-        this.keel = keel;
+    public KeelMySQLDataSourceProvider() {
     }
 
     /**
@@ -36,49 +35,49 @@ public class KeelMySQLDataSourceProvider implements KeelHolder {
      *
      * @return 默认数据源名称
      */
-    @NotNull
-    public static String defaultMySQLDataSourceName(@NotNull Keel keel) {
+    public static String defaultMySQLDataSourceName() {
         try {
-            return keel.getConfiguration().readString(List.of("mysql", "default_data_source_name"));
+            return Keel.SHARED_CONFIGURATION.readString(List.of("mysql", "default_data_source_name"));
         } catch (NotConfiguredException e) {
             return "default";
         }
     }
 
-    @NotNull
-    public static KeelMySQLConfiguration getDefaultMySQLConfiguration(@NotNull Keel keel) {
-        return getMySQLConfiguration(keel, defaultMySQLDataSourceName(keel));
+
+    public static KeelMySQLConfiguration getDefaultMySQLConfiguration() {
+        return getMySQLConfiguration(defaultMySQLDataSourceName());
     }
 
-    @NotNull
-    public static KeelMySQLConfiguration getMySQLConfiguration(@NotNull Keel keel, @NotNull String dataSourceName) {
-        var configuration = keel.getConfiguration().extract("mysql", dataSourceName);
+
+    public static KeelMySQLConfiguration getMySQLConfiguration(String dataSourceName) {
+        var configuration = Keel.SHARED_CONFIGURATION.extract("mysql", dataSourceName);
         Objects.requireNonNull(configuration);
         return new KeelMySQLConfiguration(configuration);
     }
 
-    @NotNull
-    public <C extends NamedMySQLConnection> Future<@NotNull NamedMySQLDataSource<C>> load(
-            @NotNull String dataSourceName,
-            @NotNull Function<SqlConnection, C> sqlConnectionWrapper,
+
+    public <C extends NamedMySQLConnection> Future<NamedMySQLDataSource<C>> load(
+            Vertx vertx,
+            String dataSourceName,
+            Function<SqlConnection, C> sqlConnectionWrapper,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
     ) {
-        KeelMySQLConfiguration mySQLConfiguration = getMySQLConfiguration(getKeel(), dataSourceName);
+        KeelMySQLConfiguration mySQLConfiguration = getMySQLConfiguration(dataSourceName);
         var dataSource = new NamedMySQLDataSource<>(
-                getKeel(),
+                vertx,
                 mySQLConfiguration,
                 connectionSetUpFunction,
                 sqlConnectionWrapper
         );
-        return waitForLoading(dataSource).map(v -> dataSource);
+        return waitForLoading(vertx, dataSource).map(v -> dataSource);
     }
 
-    @NotNull
-    protected Future<Void> waitForLoading(@NotNull NamedMySQLDataSource<?> dataSource) {
+
+    protected Future<Void> waitForLoading(Vertx vertx, NamedMySQLDataSource<?> dataSource) {
         KeelMySQLConfiguration mySQLConfiguration = dataSource.getConfiguration();
         PoolOptions poolOptions = mySQLConfiguration.getPoolOptions();
         Promise<Void> initializedPromise = Promise.promise();
-        getVertx().setTimer(
+        vertx.setTimer(
                 poolOptions.getConnectionTimeoutUnit().toMillis(poolOptions.getConnectionTimeout()),
                 x -> {
                     initializedPromise.tryFail("MySQL Pool Connection Timeout on testing, the configuration might need adjusting.");
@@ -90,26 +89,23 @@ public class KeelMySQLDataSourceProvider implements KeelHolder {
         return initializedPromise.future();
     }
 
-    @NotNull
-    public <C extends NamedMySQLConnection> Future<@NotNull NamedMySQLDataSource<C>> load(
-            @NotNull String dataSourceName,
-            @NotNull Function<SqlConnection, C> sqlConnectionWrapper
+
+    public <C extends NamedMySQLConnection> Future<NamedMySQLDataSource<C>> load(
+            Vertx vertx,
+            String dataSourceName,
+            Function<SqlConnection, C> sqlConnectionWrapper
     ) {
-        return load(dataSourceName, sqlConnectionWrapper, null);
+        return load(vertx, dataSourceName, sqlConnectionWrapper, null);
     }
 
-    @NotNull
-    public Future<@NotNull NamedMySQLDataSource<DynamicNamedMySQLConnection>> loadDefault() {
-        return loadDynamic(defaultMySQLDataSourceName(getKeel()));
+
+    public Future<NamedMySQLDataSource<DynamicNamedMySQLConnection>> loadDefault(Vertx vertx) {
+        return loadDynamic(vertx, defaultMySQLDataSourceName());
     }
 
-    @NotNull
-    public Future<@NotNull NamedMySQLDataSource<DynamicNamedMySQLConnection>> loadDynamic(@NotNull String dataSourceName) {
-        return load(dataSourceName, sqlConnection -> new DynamicNamedMySQLConnection(sqlConnection, dataSourceName));
+
+    public Future<NamedMySQLDataSource<DynamicNamedMySQLConnection>> loadDynamic(Vertx vertx, String dataSourceName) {
+        return load(vertx, dataSourceName, sqlConnection -> new DynamicNamedMySQLConnection(sqlConnection, dataSourceName));
     }
 
-    @Override
-    final public @NotNull Keel getKeel() {
-        return keel;
-    }
 }

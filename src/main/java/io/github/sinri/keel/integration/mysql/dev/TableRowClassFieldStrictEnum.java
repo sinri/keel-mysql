@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.core.utils.value.ValueEnveloping;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -12,6 +12,7 @@ import java.util.Objects;
  * @see ValueEnveloping
  * @since 5.0.0
  */
+@NullMarked
 class TableRowClassFieldStrictEnum {
     private final String fieldName;
     private final String enumPackage;
@@ -25,7 +26,7 @@ class TableRowClassFieldStrictEnum {
      * @param enumPackage 枚举包名
      * @param enumClass   枚举类名
      */
-    public TableRowClassFieldStrictEnum(@NotNull String fieldName, @Nullable String enumPackage, @NotNull String enumClass) {
+    public TableRowClassFieldStrictEnum(String fieldName, @Nullable String enumPackage, String enumClass) {
         this.fieldName = fieldName;
         this.enumPackage = Objects.requireNonNullElse(enumPackage, "");
         this.enumClass = enumClass;

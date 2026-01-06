@@ -1,13 +1,15 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 表行类构建标准类，定义了构建表行类的通用标准
  *
  * @since 5.0.0
  */
+@NullMarked
 public class TableRowClassBuildStandard {
     private boolean provideConstSchema;
     private boolean provideConstTable;

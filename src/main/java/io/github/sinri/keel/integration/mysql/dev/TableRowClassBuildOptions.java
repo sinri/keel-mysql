@@ -1,21 +1,24 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 表行类构建选项类，继承自TableRowClassBuildStandard，定义了构建表行类的具体选项
  *
  * @since 5.0.0
  */
+@NullMarked
 class TableRowClassBuildOptions extends TableRowClassBuildStandard {
-    private final @NotNull List<TableRowClassField> fields = new ArrayList<>();
-    private String packageName;
+    private final List<TableRowClassField> fields = new ArrayList<>();
+    private @Nullable String packageName;
     private @Nullable String schema;
-    private String table;
+    private @Nullable String table;
     private @Nullable String tableComment;
     private @Nullable String ddl;
 
@@ -28,10 +31,10 @@ class TableRowClassBuildOptions extends TableRowClassBuildStandard {
     }
 
     public String getPackageName() {
-        return packageName;
+        return Objects.requireNonNull(packageName);
     }
 
-    public TableRowClassBuildOptions setPackageName(@NotNull String packageName) {
+    public TableRowClassBuildOptions setPackageName(String packageName) {
         this.packageName = packageName;
         return this;
     }
@@ -47,10 +50,10 @@ class TableRowClassBuildOptions extends TableRowClassBuildStandard {
     }
 
     public String getTable() {
-        return table;
+        return Objects.requireNonNull(table);
     }
 
-    public TableRowClassBuildOptions setTable(@NotNull String table) {
+    public TableRowClassBuildOptions setTable(String table) {
         this.table = table;
         return this;
     }
@@ -81,12 +84,12 @@ class TableRowClassBuildOptions extends TableRowClassBuildStandard {
         return this;
     }
 
-    public TableRowClassBuildOptions addFields(@NotNull List<TableRowClassField> fields) {
+    public TableRowClassBuildOptions addFields(List<TableRowClassField> fields) {
         this.fields.addAll(fields);
         return this;
     }
 
-    @NotNull
+
     public List<TableRowClassField> getFields() {
         return fields;
     }

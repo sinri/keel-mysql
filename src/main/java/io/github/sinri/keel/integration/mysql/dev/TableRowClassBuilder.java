@@ -3,7 +3,7 @@ package io.github.sinri.keel.integration.mysql.dev;
 import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.integration.mysql.result.row.AbstractTableRow;
 import io.vertx.core.json.JsonObject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Date;
 
@@ -13,10 +13,11 @@ import java.util.Date;
  *
  * @since 5.0.0
  */
+@NullMarked
 class TableRowClassBuilder {
 
 
-    private final @NotNull TableRowClassBuildOptions options;
+    private final TableRowClassBuildOptions options;
     private boolean tableDeprecated = false;
 
     /**
@@ -24,7 +25,7 @@ class TableRowClassBuilder {
      *
      * @param options 构建选项
      */
-    public TableRowClassBuilder(@NotNull TableRowClassBuildOptions options) {
+    public TableRowClassBuilder(TableRowClassBuildOptions options) {
         this.options = options;
     }
 
@@ -110,7 +111,7 @@ class TableRowClassBuilder {
                 .append("\t}\n")
                 .append("\n")
                 .append("\t@Override\n")
-                .append("\t@NotNull\n")
+                .append("\t\n")
                 .append("\tpublic String sourceTableName() {\n")
                 .append("\t\treturn ").append(this.options.isProvideConstTable() ? "TABLE" : "\"" + table + "\"")
                 .append(";\n")
@@ -123,7 +124,7 @@ class TableRowClassBuilder {
                 .append("\t}\n");
         }
 
-        options.getFields().forEach(field -> code.append(field.toString()).append("\n"));
+        options.getFields().forEach(field -> code.append(field).append("\n"));
 
         code.append("\n}\n");
 

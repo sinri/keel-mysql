@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.core.utils.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
  *
  * @since 5.0.0
  */
+@NullMarked
 class TableRowClassField {
     private static final Pattern patternForLooseEnum;
     private static final Pattern patternForStrictEnum;
@@ -28,33 +29,23 @@ class TableRowClassField {
 
     private final String field;
     private final String type;
-    private final String comment;
+    private final @Nullable String comment;
     private final @Nullable String strictEnumPackage;
     private final @Nullable String envelopePackage;
-    /**
-     * @since 3.1.10
-     */
     private final boolean nullable;
-    private @NotNull
-    final String tableExpression;
+    private final String tableExpression;
     private String returnType;
     private String readMethod;
     private @Nullable TableRowClassFieldLooseEnum looseEnum;
     private @Nullable TableRowClassFieldStrictEnum strictEnum;
-    /**
-     * @since 4.1.1
-     */
     private @Nullable TableRowClassFieldAnyEnvelope envelope;
-    /**
-     * @since 3.1.7
-     */
     private boolean fieldDeprecated = false;
     private String actualComment;
 
     public TableRowClassField(
-            @NotNull String tableExpression,
-            @NotNull String field,
-            @NotNull String type,
+            String tableExpression,
+            String field,
+            String type,
             boolean nullable,
             @Nullable String comment,
             @Nullable String strictEnumPackage,
@@ -166,7 +157,7 @@ class TableRowClassField {
             if (nullable) {
                 code.append("\t@Nullable\n");
             } else {
-                code.append("\t@NotNull\n");
+                code.append("\t\n");
             }
             code.append("\tpublic ").append(looseEnum.looseEnumName()).append(" ").append(getter).append("() {\n")
                 .append("\t\t@Nullable String enumExpression=").append(readMethod).append("(\"").append(field)
@@ -192,7 +183,7 @@ class TableRowClassField {
             if (nullable) {
                 code.append("\t@Nullable\n");
             } else {
-                code.append("\t@NotNull\n");
+                code.append("\t\n");
             }
             code.append("\tpublic ").append(strictEnum.fullEnumRef()).append(" ").append(getter).append("() {\n")
                 .append("\t\t@Nullable String enumExpression=").append(readMethod).append("(\"").append(field)
@@ -220,7 +211,7 @@ class TableRowClassField {
             if (nullable) {
                 code.append("\t@Nullable\n");
             } else {
-                code.append("\t@NotNull\n");
+                code.append("\t\n");
             }
             code.append("\tpublic ").append(returnType).append(" ").append(getter).append("() {\n")
                 .append("\t\treturn ")

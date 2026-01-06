@@ -4,31 +4,33 @@ import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Transaction;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 @TechnicalPreview(since = "5.0.0")
+@NullMarked
 public class VirtualThreadExtension<C extends NamedMySQLConnection> {
-    @NotNull
+
     private final NamedMySQLDataSource<C> mappedDataSource;
 
-    public VirtualThreadExtension(@NotNull NamedMySQLDataSource<C> mappedDataSource) {
+    public VirtualThreadExtension(NamedMySQLDataSource<C> mappedDataSource) {
         this.mappedDataSource = mappedDataSource;
     }
 
-    protected @NotNull NamedMySQLDataSource<C> getMappedDataSource() {
+    protected NamedMySQLDataSource<C> getMappedDataSource() {
         return this.mappedDataSource;
     }
 
-    public <T> @Nullable T withConnection(@NotNull Function<@NotNull C, @Nullable T> function) {
+    public <T extends @Nullable Objects> T withConnection(Function<C, T> function) {
         try (C c = fetchMySQLConnection()) {
             return function.apply(c);
         }
     }
 
-    public <T> @Nullable T withTransaction(@NotNull Function<@NotNull C, @Nullable T> function) {
+    public <T extends @Nullable Objects> T withTransaction(Function<C, T> function) {
         try (C c = fetchMySQLConnection()) {
             Transaction transaction = c.getSqlConnection().begin().await();
             T t;
@@ -46,7 +48,7 @@ public class VirtualThreadExtension<C extends NamedMySQLConnection> {
     /**
      * In virtual thread mode, fetch a closable named mysql connection (wrapper) to use in try-with closure.
      */
-    public @NotNull C fetchMySQLConnection() {
+    public C fetchMySQLConnection() {
         SqlConnection sqlConnection = getMappedDataSource().getPool().getConnection().await();
         return getMappedDataSource().getSqlConnectionWrapper().apply(sqlConnection);
     }

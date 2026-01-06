@@ -1,7 +1,5 @@
 package io.github.sinri.keel.integration.mysql.datasource;
 
-import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.KeelHolder;
 import io.github.sinri.keel.core.utils.ReflectionUtils;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
@@ -11,13 +9,14 @@ import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.TransactionRollbackException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,70 +29,65 @@ import java.util.function.Function;
  * @param <C> 连接类型
  * @since 5.0.0
  */
-public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements KeelHolder {
+@NullMarked
+public class NamedMySQLDataSource<C extends NamedMySQLConnection> {
 
-    @NotNull
     private final Pool pool;
-    @NotNull
     private final KeelMySQLConfiguration configuration;
-    @Nullable
-    private final VirtualThreadExtension<C> virtualThreadExtension;
+    private final @Nullable VirtualThreadExtension<C> virtualThreadExtension;
 
     /**
      * 记录初始化到池中的连接数
      */
-    @NotNull
+
     private final AtomicInteger initializedConnectionCounter = new AtomicInteger(0);
     /**
      * 记录当前正在使用的连接数
      */
-    @NotNull
+
     private final AtomicInteger borrowedConnectionCounter = new AtomicInteger(0);
 
-    @NotNull
+
     private final Function<SqlConnection, C> sqlConnectionWrapper;
 
-    @NotNull
+
     private final AtomicReference<String> fullVersionRef = new AtomicReference<>(null);
-    @NotNull
-    private final Keel keel;
 
     /**
      * 构造命名MySQL数据源
      *
-     * @param keel                 Keel实例
+     * @param vertx                Vertx实例
      * @param configuration        MySQL配置
      * @param sqlConnectionWrapper SQL连接包装器
      */
     public NamedMySQLDataSource(
-            @NotNull Keel keel,
-            @NotNull KeelMySQLConfiguration configuration,
-            @NotNull Function<@NotNull SqlConnection, @NotNull C> sqlConnectionWrapper
+            Vertx vertx,
+            KeelMySQLConfiguration configuration,
+            Function<SqlConnection, C> sqlConnectionWrapper
     ) {
-        this(keel, configuration, sqlConnection -> Future.succeededFuture(), sqlConnectionWrapper);
+        this(vertx, configuration, sqlConnection -> Future.succeededFuture(), sqlConnectionWrapper);
     }
 
     /**
      * 构造命名MySQL数据源，支持自定义连接设置函数
      *
-     * @param keel                    Keel实例
+     * @param vertx                   Vertx实例
      * @param configuration           MySQL配置
      * @param connectionSetUpFunction 连接设置函数
      * @param sqlConnectionWrapper    SQL连接包装器
      */
     public NamedMySQLDataSource(
-            @NotNull Keel keel,
-            @NotNull KeelMySQLConfiguration configuration,
-            @Nullable Function<@NotNull SqlConnection, @NotNull Future<Void>> connectionSetUpFunction,
-            @NotNull Function<@NotNull SqlConnection, @NotNull C> sqlConnectionWrapper
+            Vertx vertx,
+            KeelMySQLConfiguration configuration,
+            @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction,
+            Function<SqlConnection, C> sqlConnectionWrapper
     ) {
-        this.keel = keel;
         this.configuration = configuration;
         this.sqlConnectionWrapper = sqlConnectionWrapper;
         this.pool = MySQLBuilder.pool()
                                 .with(configuration.getPoolOptions())
                                 .connectingTo(configuration.getConnectOptions())
-                                .using(keel.getVertx())
+                                .using(vertx)
                                 .withConnectHandler(sqlConnection -> initializeConnection(sqlConnection, connectionSetUpFunction))
                                 .build();
         if (ReflectionUtils.isVirtualThreadsAvailable()) {
@@ -109,8 +103,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      * @param sqlConnection SQL连接
      * @return 包含版本信息的Future
      */
-    @NotNull
-    private static Future<@Nullable String> checkMySQLVersion(@NotNull SqlConnection sqlConnection) {
+
+    private static Future<@Nullable String> checkMySQLVersion(SqlConnection sqlConnection) {
         return sqlConnection.preparedQuery("SELECT VERSION() as v; ")
                             .execute()
                             .compose(rows -> Future.succeededFuture(ResultMatrix.create(rows)))
@@ -133,8 +127,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      * @param connectionSetUpFunction 连接设置函数
      */
     private void initializeConnection(
-            @NotNull SqlConnection sqlConnection,
-            @Nullable Function<@NotNull SqlConnection, @NotNull Future<Void>> connectionSetUpFunction
+            SqlConnection sqlConnection,
+            @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
     ) {
         Future.succeededFuture()
               .compose(v -> {
@@ -170,7 +164,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      *
      * @return MySQL配置对象
      */
-    @NotNull
+
     public KeelMySQLConfiguration getConfiguration() {
         return configuration;
     }
@@ -218,8 +212,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      * @param function 连接操作函数
      * @return 操作结果Future
      */
-    @NotNull
-    public <T> Future<T> withConnection(@NotNull Function<@NotNull C, @NotNull Future<T>> function) {
+
+    public <T> Future<T> withConnection(Function<C, Future<T>> function) {
         return Future.succeededFuture().compose(
                 v -> fetchMySQLConnection()
                         .compose(sqlConnectionWrapper -> {
@@ -245,8 +239,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      * @param function 事务操作函数
      * @return 事务结果Future
      */
-    @NotNull
-    public <T> Future<T> withTransaction(@NotNull Function<@NotNull C, @NotNull Future<T>> function) {
+
+    public <T> Future<T> withTransaction(Function<C, Future<T>> function) {
         return withConnection(c -> {
             return Future.succeededFuture()
                          .compose(v -> c.getSqlConnection().begin())
@@ -284,7 +278,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      *
      * @return 关闭操作Future
      */
-    @NotNull
+
     public Future<Void> close() {
         return this.pool.close();
     }
@@ -294,7 +288,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      *
      * @param ar 异步结果处理器
      */
-    public void close(@NotNull Handler<AsyncResult<Void>> ar) {
+    public void close(Handler<AsyncResult<Void>> ar) {
         this.pool.close().onComplete(ar);
     }
 
@@ -303,8 +297,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
      *
      * @return 连接Future
      */
-    @NotNull
-    private Future<@NotNull C> fetchMySQLConnection() {
+
+    private Future<C> fetchMySQLConnection() {
         return Future.succeededFuture()
                      .compose(v -> pool.getConnection())
                      .compose(
@@ -327,20 +321,20 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Kee
                      );
     }
 
-    @Override
-    public @NotNull Keel getKeel() {
-        return keel;
-    }
+    //    @Override
+    //    public Keel getKeel() {
+    //        return keel;
+    //    }
 
-    @NotNull Pool getPool() {
+    Pool getPool() {
         return pool;
     }
 
-    @NotNull Function<@NotNull SqlConnection, @NotNull C> getSqlConnectionWrapper() {
+    Function<SqlConnection, C> getSqlConnectionWrapper() {
         return sqlConnectionWrapper;
     }
 
-    @NotNull
+
     public VirtualThreadExtension<C> inVirtualThread() {
         if (virtualThreadExtension == null) {
             throw new UnsupportedOperationException("Virtual Thread Extension Not Available!");

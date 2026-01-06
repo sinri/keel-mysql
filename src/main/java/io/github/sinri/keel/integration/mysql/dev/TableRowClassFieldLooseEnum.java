@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql.dev;
 
 
 import io.github.sinri.keel.core.utils.StringUtils;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Collection;
 
@@ -11,6 +12,7 @@ import java.util.Collection;
  *
  * @since 5.0.0
  */
+@NullMarked
 class TableRowClassFieldLooseEnum {
     private final String fieldName;
     private final Collection<String> enumElements;

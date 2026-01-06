@@ -1,17 +1,18 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.KeelHolder;
+import io.github.sinri.keel.base.async.KeelAsyncMixin;
 import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.sqlclient.SqlConnection;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,18 +23,15 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @since 5.0.0
  */
-public class TableRowClassSourceCodeGenerator implements KeelHolder {
+@NullMarked
+public class TableRowClassSourceCodeGenerator implements KeelAsyncMixin {
     private final SqlConnection sqlConnection;
     private final Set<String> tableSet;
     private final Set<String> excludedTableSet;
-    private String schema;
-
-    @Nullable
-    private Handler<TableRowClassBuildStandard> standardHandler;
-
-    @NotNull
-    private final Keel keel;
-    @NotNull
+    //private final Keel keel;
+    private final Vertx vertx;
+    private @Nullable String schema;
+    private @Nullable Handler<TableRowClassBuildStandard> standardHandler;
     private Logger logger;
 
     /**
@@ -41,13 +39,13 @@ public class TableRowClassSourceCodeGenerator implements KeelHolder {
      *
      * @param namedMySQLConnection 命名MySQL连接
      */
-    public TableRowClassSourceCodeGenerator(@NotNull Keel keel, @NotNull NamedMySQLConnection namedMySQLConnection) {
+    public TableRowClassSourceCodeGenerator(Vertx vertx, NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
         this.schema = null;
         this.tableSet = new HashSet<>();
         this.excludedTableSet = new HashSet<>();
         this.logger = StdoutLoggerFactory.getInstance().createLogger(getClass().getSimpleName());
-        this.keel = keel;
+        this.vertx = vertx;
     }
 
     /**
@@ -70,7 +68,12 @@ public class TableRowClassSourceCodeGenerator implements KeelHolder {
         return this;
     }
 
-    public TableRowClassSourceCodeGenerator forSchema(String schema) {
+    @Override
+    public Vertx getVertx() {
+        return vertx;
+    }
+
+    public TableRowClassSourceCodeGenerator forSchema(@Nullable String schema) {
         if (schema == null || schema.isBlank()) {
             this.schema = null;
         } else {
@@ -148,35 +151,35 @@ public class TableRowClassSourceCodeGenerator implements KeelHolder {
         getLogger().info("To generate class code for tables: " + String.join(", ", tables));
 
         Map<String, String> writeMap = new HashMap<>();
-        return getKeel().asyncCallIteratively(
-                                tables,
-                                table -> {
-                                    String className = StringUtils.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
-                                    String classFile = packagePath + "/" + className + ".java";
+        return asyncCallIteratively(
+                tables,
+                table -> {
+                    String className = StringUtils.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
+                    String classFile = packagePath + "/" + className + ".java";
 
-                                    getLogger().info(String.format("To generate class %s to file %s", className, classFile));
+                    getLogger().info(String.format("To generate class %s to file %s", className, classFile));
 
-                                    TableRowClassBuildStandard standard = new TableRowClassBuildStandard();
-                                    if (standardHandler != null) {
-                                        standardHandler.handle(standard);
-                                    }
-                                    var options = new TableRowClassBuildOptions(standard)
-                                            .setSchema(schema)
-                                            .setTable(table)
-                                            .setPackageName(packageName);
+                    TableRowClassBuildStandard standard = new TableRowClassBuildStandard();
+                    if (standardHandler != null) {
+                        standardHandler.handle(standard);
+                    }
+                    var options = new TableRowClassBuildOptions(standard)
+                            .setSchema(schema)
+                            .setTable(table)
+                            .setPackageName(packageName);
 
-                                    return this.generateClassCodeForOneTable(options)
-                                               .compose(code -> {
-                                                   writeMap.put(classFile, code);
-                                                   return Future.succeededFuture();
-                                               });
-                                })
-                        .compose(v -> getKeel().asyncCallIteratively(writeMap.entrySet(), entry -> {
-                            var classFile = entry.getKey();
-                            var code = entry.getValue();
-                            return getKeel().getVertx().fileSystem()
-                                            .writeFile(classFile, Buffer.buffer(code));
-                        }));
+                    return this.generateClassCodeForOneTable(options)
+                               .compose(code -> {
+                                   writeMap.put(classFile, code);
+                                   return Future.succeededFuture();
+                               });
+                })
+                .compose(v -> asyncCallIteratively(writeMap.entrySet(), entry -> {
+                    var classFile = entry.getKey();
+                    var code = entry.getValue();
+                    return getVertx().fileSystem()
+                                     .writeFile(classFile, Buffer.buffer(code));
+                }));
     }
 
     private Future<String> generateClassCodeForOneTable(TableRowClassBuildOptions options) {
@@ -203,7 +206,7 @@ public class TableRowClassSourceCodeGenerator implements KeelHolder {
     /**
      * Fetch comment of a table (in schema).
      */
-    private Future<String> getCommentOfTable(@NotNull String table, @Nullable String schema) {
+    private Future<String> getCommentOfTable(String table, @Nullable String schema) {
         String sql_for_table_comment = "SELECT TABLE_COMMENT " +
                 "FROM INFORMATION_SCHEMA.TABLES " +
                 "WHERE TABLE_NAME = '" + table + "' " +
@@ -216,7 +219,7 @@ public class TableRowClassSourceCodeGenerator implements KeelHolder {
                             });
     }
 
-    private Future<List<TableRowClassField>> getFieldsOfTable(@NotNull String table, @Nullable String schema, @Nullable String strictEnumPackage, @Nullable String envelopePackage) {
+    private Future<List<TableRowClassField>> getFieldsOfTable(String table, @Nullable String schema, @Nullable String strictEnumPackage, @Nullable String envelopePackage) {
         String sql_for_columns = "show full columns in ";
         if (schema != null && !schema.isBlank()) {
             sql_for_columns += "`" + schema + "`.";
@@ -249,7 +252,7 @@ public class TableRowClassSourceCodeGenerator implements KeelHolder {
                             });
     }
 
-    private Future<String> getCreationOfTable(@NotNull String table, @Nullable String schema) {
+    private Future<String> getCreationOfTable(String table, @Nullable String schema) {
         String sql_sct = "show create table ";
         if (schema != null) {
             sql_sct += "`" + schema + "`.";
@@ -258,14 +261,12 @@ public class TableRowClassSourceCodeGenerator implements KeelHolder {
         return sqlConnection.query(sql_sct)
                             .execute()
                             .compose(rows -> {
-                                AtomicReference<String> creation = new AtomicReference<>();
-                                rows.forEach(row -> creation.set(row.getString(1)));
-                                return Future.succeededFuture(creation.get());
+                                LateObject<String> lateDDL = new LateObject<>();
+                                rows.forEach(row -> {
+                                    String s = row.getString(1);
+                                    lateDDL.set(s);
+                                });
+                                return Future.succeededFuture(lateDDL.get());
                             });
-    }
-
-    @Override
-    public final @NotNull Keel getKeel() {
-        return keel;
     }
 }

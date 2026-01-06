@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.base.KeelHolder;
+import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.async.KeelAsyncMixin;
 import io.github.sinri.keel.base.logger.logger.StdoutLogger;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.provider.KeelMySQLDataSourceProvider;
@@ -8,8 +9,8 @@ import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.file.FileSystem;
 import io.vertx.sqlclient.SqlConnection;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
@@ -23,7 +24,8 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
-public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
+@NullMarked
+public interface MySQLSchemaTableClassFileGenerator extends KeelAsyncMixin {
 
     default Logger getUnitLogger() {
         return new StdoutLogger(getClass().getName());
@@ -40,7 +42,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
      * @throws RuntimeException if the configuration property is not set or blank
      */
     default String getTablePackagePath() {
-        var p = getKeel().config("table.package.path");
+        var p = Keel.SHARED_CONFIGURATION.readString("table.package.path");
         if (p == null || p.isBlank()) {
             throw new RuntimeException("The table package path not set in config as `table.package.path`!");
         }
@@ -65,8 +67,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
      *
      * @return the package name for strict enum classes, or null if not specified
      */
-    @Nullable
-    String getStrictEnumPackage();
+    @Nullable String getStrictEnumPackage();
 
     /**
      * Gets the package name for envelope classes.
@@ -76,8 +77,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
      *
      * @return the package name for envelope classes, or null if not specified
      */
-    @Nullable
-    String getEnvelopePackage();
+    @Nullable String getEnvelopePackage();
 
     /**
      * Determines whether to generate schema name constants.
@@ -128,8 +128,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
      * @return a valid Java package name derived from the schema name
      * @throws IllegalArgumentException if the resulting package name is empty
      */
-    @NotNull
-    private String buildPackageNameForSchema(@NotNull String schemaName) {
+    private String buildPackageNameForSchema(String schemaName) {
         var x = schemaName.replaceAll("[^A-Za-z0-9]+", "").toLowerCase();
         if (x.isBlank()) throw new IllegalArgumentException("SCHEMA PACKAGE NAME EMPTY");
         return x;
@@ -148,7 +147,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
      * @param schemaName           the name of the MySQL schema to process
      * @return a Future that completes when all table classes are generated
      */
-    @NotNull
+
     default <C extends NamedMySQLConnection> Future<Void> rebuildTablesInSchema(
             String dataSourceName,
             Function<SqlConnection, C> sqlConnectionWrapper,
@@ -189,9 +188,9 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
             String schemaPackageName,
             @Nullable List<String> tables
     ) {
-        KeelMySQLDataSourceProvider provider = new KeelMySQLDataSourceProvider(getKeel());
+        KeelMySQLDataSourceProvider provider = new KeelMySQLDataSourceProvider();
         FileSystem fs = getVertx().fileSystem();
-        return provider.load(dataSourceName, sqlConnectionWrapper)
+        return provider.load(getVertx(), dataSourceName, sqlConnectionWrapper)
                        .compose(mySQLDataSource -> {
                            var dir = getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName;
                            return fs.exists(dir)
@@ -206,7 +205,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
                                         getUnitLogger().debug("Table Row Class Directory Ensured as " + dir);
                                         return this.stashOldClassFiles(dir)
                                                    .compose((Void v) -> mySQLDataSource.withConnection(sqlConnection -> {
-                                                       var x = new TableRowClassSourceCodeGenerator(getKeel(), sqlConnection)
+                                                       var x = new TableRowClassSourceCodeGenerator(getVertx(), sqlConnection)
                                                                .forSchema(schemaName);
                                                        x.setLogger(getUnitLogger());
                                                        if (tables != null) {
@@ -259,7 +258,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
         getUnitLogger().notice("stashOldClassFiles");
         return getVertx().fileSystem().readDir(dir)
                          .compose(files -> {
-                             return getKeel().asyncCallIteratively(files, file -> {
+                             return asyncCallIteratively(files, file -> {
                                  if (file.endsWith("/package-info.java")) {
                                      return Future.succeededFuture();
                                  } else {
@@ -284,7 +283,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
         getUnitLogger().warning("callbackOldClassFiles");
         return getVertx().fileSystem().readDir(dir)
                          .compose(files -> {
-                             return getKeel().asyncCallIteratively(files, file -> {
+                             return asyncCallIteratively(files, file -> {
                                  if (file.endsWith(".stash")) {
                                      String x = file.substring(0, file.length() - ".stash".length());
                                      return getVertx().fileSystem().move(file, x);
@@ -308,7 +307,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelHolder {
         getUnitLogger().notice("removeOldClassFiles");
         return getVertx().fileSystem().readDir(dir)
                          .compose(files -> {
-                             return getKeel().asyncCallIteratively(files, file -> {
+                             return asyncCallIteratively(files, file -> {
                                  if (file.endsWith(".stash")) {
                                      return getVertx().fileSystem().delete(file);
                                  }
