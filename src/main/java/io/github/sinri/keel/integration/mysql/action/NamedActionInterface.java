@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.action;
 
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * 命名MySQL动作接口，定义了命名MySQL动作的接口
@@ -18,10 +18,12 @@ import org.jetbrains.annotations.NotNull;
  * @see AbstractNamedAction
  * @since 5.0.0
  */
+@NullMarked
 public interface NamedActionInterface<C extends NamedMySQLConnection> {
     /**
      * 获取关联的命名MySQL连接
+     *
      * @return 与实现动作关联的命名MySQL连接实例，永不为null
      */
-    @NotNull C getNamedSqlConnection();
+    C getNamedSqlConnection();
 }

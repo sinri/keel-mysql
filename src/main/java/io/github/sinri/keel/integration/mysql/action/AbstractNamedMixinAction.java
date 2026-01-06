@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.action;
 
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 
 /**
@@ -12,15 +12,16 @@ import org.jetbrains.annotations.NotNull;
  * @param <W> 表示mixin或附加上下文的泛型类型
  * @since 5.0.0
  */
+@NullMarked
 public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W> implements NamedActionMixinInterface<C, W> {
-    private final @NotNull C namedSqlConnection;
+    private final C namedSqlConnection;
 
     /**
      * 构造具有指定命名MySQL连接的抽象命名Mixin动作
      *
      * @param namedSqlConnection 与此动作关联的命名MySQL连接实例，不能为null
      */
-    public AbstractNamedMixinAction(@NotNull C namedSqlConnection) {
+    public AbstractNamedMixinAction(C namedSqlConnection) {
         this.namedSqlConnection = namedSqlConnection;
     }
 
@@ -30,7 +31,7 @@ public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W
      * @return 与此动作关联的命名MySQL连接实例，永不为null
      */
     @Override
-    public final @NotNull C getNamedSqlConnection() {
+    public final C getNamedSqlConnection() {
         return namedSqlConnection;
     }
 }

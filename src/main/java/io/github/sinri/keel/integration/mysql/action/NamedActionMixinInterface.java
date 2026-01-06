@@ -2,7 +2,7 @@ package io.github.sinri.keel.integration.mysql.action;
 
 import io.github.sinri.keel.base.annotations.SelfInterface;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Mixin风格命名MySQL动作接口，定义了mixin风格的命名MySQL动作接口
@@ -16,11 +16,13 @@ import org.jetbrains.annotations.NotNull;
  * @param <W> 表示mixin或附加上下文的泛型类型
  * @since 5.0.0
  */
+@NullMarked
 public interface NamedActionMixinInterface<C extends NamedMySQLConnection, W>
         extends SelfInterface<W> {
     /**
      * 获取关联的命名MySQL连接
+     *
      * @return 与此动作关联的命名MySQL连接实例，永不为null
      */
-    @NotNull C getNamedSqlConnection();
+    C getNamedSqlConnection();
 }

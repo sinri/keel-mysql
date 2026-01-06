@@ -5,7 +5,7 @@ module io.github.sinri.keel.integration.mysql {
     requires transitive io.vertx.core;
     requires transitive io.vertx.sql.client;
     requires transitive io.vertx.sql.client.mysql;
-    requires transitive org.jetbrains.annotations;
+    requires static org.jspecify;
 
     // 默认导出所有包
     exports io.github.sinri.keel.integration.mysql;
