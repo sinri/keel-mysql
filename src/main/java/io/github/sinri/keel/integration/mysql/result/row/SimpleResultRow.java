@@ -2,7 +2,7 @@ package io.github.sinri.keel.integration.mysql.result.row;
 
 import io.github.sinri.keel.base.json.JsonifiableDataUnitImpl;
 import io.vertx.core.json.JsonObject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 
 /**
@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class SimpleResultRow extends JsonifiableDataUnitImpl implements ResultRow {
     private JsonObject row;
 
@@ -18,7 +19,7 @@ public class SimpleResultRow extends JsonifiableDataUnitImpl implements ResultRo
      *
      * @param tableRow 表格行JSON对象
      */
-    public SimpleResultRow(@NotNull JsonObject tableRow) {
+    public SimpleResultRow(JsonObject tableRow) {
         this.reloadData(tableRow);
     }
 
@@ -28,7 +29,7 @@ public class SimpleResultRow extends JsonifiableDataUnitImpl implements ResultRo
      * @return JSON对象
      */
     @Override
-    public final @NotNull JsonObject toJsonObject() {
+    public final JsonObject toJsonObject() {
         return row;
     }
 
@@ -38,7 +39,7 @@ public class SimpleResultRow extends JsonifiableDataUnitImpl implements ResultRo
      * @param jsonObject JSON对象
      */
     @Override
-    public final void reloadData(@NotNull JsonObject jsonObject) {
+    public final void reloadData(JsonObject jsonObject) {
         this.row = jsonObject;
     }
 }

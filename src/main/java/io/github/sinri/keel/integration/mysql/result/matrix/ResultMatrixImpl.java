@@ -9,8 +9,8 @@ import io.vertx.mysqlclient.MySQLClient;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.data.Numeric;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +22,10 @@ import java.util.Objects;
  *
  * @since 5.0.0
  */
+@NullMarked
 class ResultMatrixImpl implements ResultMatrix {
     //private final RowSet<Row> rowSet;
-    private final @NotNull List<@NotNull Row> rowList = new ArrayList<>();
+    private final List<Row> rowList = new ArrayList<>();
     private final int totalFetchedRows;
     private final int totalAffectedRows;
     private final @Nullable Long lastInsertedID;
@@ -34,7 +35,7 @@ class ResultMatrixImpl implements ResultMatrix {
      *
      * @param rowSet SQL行集合
      */
-    public ResultMatrixImpl(@NotNull RowSet<@NotNull Row> rowSet) {
+    public ResultMatrixImpl(RowSet<Row> rowSet) {
         //this.rowSet = rowSet;
         for (var row : rowSet) {
             rowList.add(row);
@@ -64,7 +65,7 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     @Override
-    public @NotNull JsonArray toJsonArray() {
+    public JsonArray toJsonArray() {
         JsonArray array = new JsonArray();
         for (var row : rowList) {
             array.add(row.toJson());
@@ -73,7 +74,7 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     @Override
-    public @NotNull List<@NotNull JsonObject> getRowList() {
+    public List<JsonObject> getRowList() {
         List<JsonObject> l = new ArrayList<>();
         for (var item : rowList) {
             l.add(item.toJson());
@@ -82,7 +83,7 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     @Override
-    public @NotNull JsonObject getFirstRow() throws KeelSQLResultRowIndexError {
+    public JsonObject getFirstRow() throws KeelSQLResultRowIndexError {
         return getRowByIndex(0);
     }
 
@@ -94,7 +95,7 @@ class ResultMatrixImpl implements ResultMatrix {
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
     @Override
-    public @NotNull JsonObject getRowByIndex(int index) throws KeelSQLResultRowIndexError {
+    public JsonObject getRowByIndex(int index) throws KeelSQLResultRowIndexError {
         try {
             return rowList.get(index).toJson();
         } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
@@ -112,7 +113,7 @@ class ResultMatrixImpl implements ResultMatrix {
      * @throws RuntimeException           封装类时可能抛出异常
      */
     @Override
-    public <T extends ResultRow> @NotNull T buildTableRowByIndex(int index, @NotNull Class<T> classOfTableRow) throws KeelSQLResultRowIndexError {
+    public <T extends ResultRow> T buildTableRowByIndex(int index, Class<T> classOfTableRow) throws KeelSQLResultRowIndexError {
         return ResultRow.of(getRowByIndex(index), classOfTableRow);
     }
 
@@ -124,7 +125,7 @@ class ResultMatrixImpl implements ResultMatrix {
      * @throws RuntimeException 封装类时可能抛出异常
      */
     @Override
-    public <T extends ResultRow> @NotNull List<@NotNull T> buildTableRowList(@NotNull Class<T> classOfTableRow) {
+    public <T extends ResultRow> List<T> buildTableRowList(Class<T> classOfTableRow) {
         ArrayList<T> list = new ArrayList<>();
         for (var x : rowList) {
             list.add(ResultRow.of(x, classOfTableRow));
@@ -140,27 +141,33 @@ class ResultMatrixImpl implements ResultMatrix {
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
     @Override
-    public String getOneColumnOfFirstRowAsDateTime(String columnName) throws KeelSQLResultRowIndexError {
-        return TimeUtils.getMySQLFormatLocalDateTimeExpression(getFirstRow().getString(columnName));
+    public @Nullable String getOneColumnOfFirstRowAsDateTime(String columnName) throws KeelSQLResultRowIndexError {
+        String string = getFirstRow().getString(columnName);
+        if (string == null) {
+            return null;
+        }
+        return TimeUtils.getMySQLFormatLocalDateTimeExpression(string);
     }
 
     @Override
-    public String getOneColumnOfFirstRowAsString(String columnName) throws KeelSQLResultRowIndexError {
+    public @Nullable String getOneColumnOfFirstRowAsString(String columnName) throws KeelSQLResultRowIndexError {
         return getFirstRow().getString(columnName);
     }
 
     @Override
-    public Numeric getOneColumnOfFirstRowAsNumeric(String columnName) throws KeelSQLResultRowIndexError {
-        return Numeric.create(getFirstRow().getNumber(columnName));
+    public @Nullable Numeric getOneColumnOfFirstRowAsNumeric(String columnName) throws KeelSQLResultRowIndexError {
+        var x = getFirstRow().getNumber(columnName);
+        if (x == null) return null;
+        return Numeric.create(x);
     }
 
     @Override
-    public Integer getOneColumnOfFirstRowAsInteger(String columnName) throws KeelSQLResultRowIndexError {
+    public @Nullable Integer getOneColumnOfFirstRowAsInteger(String columnName) throws KeelSQLResultRowIndexError {
         return getFirstRow().getInteger(columnName);
     }
 
     @Override
-    public Long getOneColumnOfFirstRowAsLong(String columnName) throws KeelSQLResultRowIndexError {
+    public @Nullable Long getOneColumnOfFirstRowAsLong(String columnName) throws KeelSQLResultRowIndexError {
         return getFirstRow().getLong(columnName);
     }
 
@@ -171,17 +178,22 @@ class ResultMatrixImpl implements ResultMatrix {
      * @return 日期时间值列表
      */
     @Override
-    public List<String> getOneColumnAsDateTime(String columnName) {
-        List<String> x = new ArrayList<>();
+    public List<@Nullable String> getOneColumnAsDateTime(String columnName) {
+        List<@Nullable String> x = new ArrayList<>();
         for (var row : rowList) {
-            x.add(TimeUtils.getMySQLFormatLocalDateTimeExpression(row.getString(columnName)));
+            var s = row.getString(columnName);
+            if (s == null) {
+                x.add(null);
+                continue;
+            }
+            x.add(TimeUtils.getMySQLFormatLocalDateTimeExpression(s));
         }
         return x;
     }
 
     @Override
-    public List<String> getOneColumnAsString(String columnName) {
-        List<String> x = new ArrayList<>();
+    public List<@Nullable String> getOneColumnAsString(String columnName) {
+        List<@Nullable String> x = new ArrayList<>();
         for (var row : rowList) {
             x.add(row.getString(columnName));
         }
@@ -189,8 +201,8 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     @Override
-    public List<Numeric> getOneColumnAsNumeric(String columnName) {
-        List<Numeric> x = new ArrayList<>();
+    public List<@Nullable Numeric> getOneColumnAsNumeric(String columnName) {
+        List<@Nullable Numeric> x = new ArrayList<>();
         for (var row : rowList) {
             x.add(row.getNumeric(columnName));
         }
@@ -198,8 +210,8 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     @Override
-    public List<Long> getOneColumnAsLong(String columnName) {
-        List<Long> x = new ArrayList<>();
+    public List<@Nullable Long> getOneColumnAsLong(String columnName) {
+        List<@Nullable Long> x = new ArrayList<>();
         for (var row : rowList) {
             x.add(row.getLong(columnName));
         }
@@ -207,8 +219,8 @@ class ResultMatrixImpl implements ResultMatrix {
     }
 
     @Override
-    public List<Integer> getOneColumnAsInteger(String columnName) {
-        List<Integer> x = new ArrayList<>();
+    public List<@Nullable Integer> getOneColumnAsInteger(String columnName) {
+        List<@Nullable Integer> x = new ArrayList<>();
         for (var row : rowList) {
             x.add(row.getInteger(columnName));
         }

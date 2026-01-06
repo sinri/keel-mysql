@@ -1,10 +1,13 @@
 package io.github.sinri.keel.integration.mysql.exception;
 
+import org.jspecify.annotations.NullMarked;
+
 /**
  * SQL结果行索引错误异常类，用于处理结果行索引访问的错误
  *
  * @since 5.0.0
  */
+@NullMarked
 public class KeelSQLResultRowIndexError extends Exception {
     /**
      * 构造包含消息的结果行索引错误

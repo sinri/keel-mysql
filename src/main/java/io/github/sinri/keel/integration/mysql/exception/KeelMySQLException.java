@@ -1,10 +1,13 @@
 package io.github.sinri.keel.integration.mysql.exception;
 
+import org.jspecify.annotations.NullMarked;
+
 /**
  * Keel MySQL通用异常类，用于处理MySQL相关的一般性错误
  *
  * @since 5.0.0
  */
+@NullMarked
 public class KeelMySQLException extends Exception {
     /**
      * 构造包含消息的异常

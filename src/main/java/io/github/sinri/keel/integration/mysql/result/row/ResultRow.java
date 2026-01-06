@@ -4,8 +4,8 @@ import io.github.sinri.keel.base.json.JsonifiableDataUnit;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
@@ -19,14 +19,16 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
+@NullMarked
 public interface ResultRow extends JsonifiableDataUnit {
     /**
      * 从JSON对象创建结果行对象
+     *
      * @param tableRow 表格行JSON对象
-     * @param clazz 结果行类
+     * @param clazz    结果行类
      * @return 结果行对象
      */
-    static <R extends ResultRow> @NotNull R of(@NotNull JsonObject tableRow, @NotNull Class<R> clazz) {
+    static <R extends ResultRow> R of(JsonObject tableRow, Class<R> clazz) {
         try {
             Constructor<R> constructor = clazz.getConstructor(JsonObject.class);
             return constructor.newInstance(tableRow);
@@ -37,11 +39,12 @@ public interface ResultRow extends JsonifiableDataUnit {
 
     /**
      * 从SQL行对象创建结果行对象
+     *
      * @param tableRow SQL行对象
-     * @param clazz 结果行类
+     * @param clazz    结果行类
      * @return 结果行对象
      */
-    static <R extends ResultRow> @NotNull R of(@NotNull Row tableRow, @NotNull Class<R> clazz) {
+    static <R extends ResultRow> R of(Row tableRow, Class<R> clazz) {
         return of(tableRow.toJson(), clazz);
     }
 
@@ -51,7 +54,7 @@ public interface ResultRow extends JsonifiableDataUnit {
      * @param rows 结果行集合
      * @return JSON数组
      */
-    static @NotNull JsonArray batchToJsonArray(@NotNull Collection<? extends ResultRow> rows) {
+    static JsonArray batchToJsonArray(Collection<? extends ResultRow> rows) {
         JsonArray array = new JsonArray();
         rows.forEach(row -> array.add(row.getRow()));
         return array;
@@ -59,11 +62,12 @@ public interface ResultRow extends JsonifiableDataUnit {
 
     /**
      * 使用转换器将结果行集合批量转换为JSON数组
-     * @param rows 结果行集合
+     *
+     * @param rows        结果行集合
      * @param transformer 结果行转换器
      * @return JSON数组
      */
-    static @NotNull JsonArray batchToJsonArray(@NotNull Collection<? extends ResultRow> rows, @NotNull Function<ResultRow, JsonObject> transformer) {
+    static JsonArray batchToJsonArray(Collection<? extends ResultRow> rows, Function<ResultRow, JsonObject> transformer) {
         JsonArray array = new JsonArray();
         rows.forEach(row -> array.add(transformer.apply(row)));
         return array;
@@ -71,19 +75,20 @@ public interface ResultRow extends JsonifiableDataUnit {
 
     /**
      * 获取行数据
+     *
      * @return 行数据JSON对象
      */
-    default @NotNull JsonObject getRow() {
+    default JsonObject getRow() {
         return toJsonObject();
     }
 
     /**
      * 读取日期时间字段
+     *
      * @param field 字段名
      * @return 日期时间字符串
      */
-    @Nullable
-    default String readDateTime(@NotNull String field) {
+    default @Nullable String readDateTime(String field) {
         String s = readString(field);
         if (s == null) return null;
         return LocalDateTime.parse(s)
@@ -92,21 +97,21 @@ public interface ResultRow extends JsonifiableDataUnit {
 
     /**
      * 读取日期字段
+     *
      * @param field 字段名
      * @return 日期字符串
      */
-    @Nullable
-    default String readDate(@NotNull String field) {
+    default @Nullable String readDate(String field) {
         return readString(field);
     }
 
     /**
      * 读取时间字段
+     *
      * @param field 字段名
      * @return 时间字符串
      */
-    @Nullable
-    default String readTime(@NotNull String field) {
+    default @Nullable String readTime(String field) {
         var s = readString(field);
         if (s == null) return null;
         return s
@@ -116,11 +121,11 @@ public interface ResultRow extends JsonifiableDataUnit {
 
     /**
      * 读取时间戳字段
+     *
      * @param field 字段名
      * @return 时间戳字符串
      */
-    @Nullable
-    default String readTimestamp(@NotNull String field) {
+    default @Nullable String readTimestamp(String field) {
         return readDateTime(field);
     }
 }
