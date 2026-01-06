@@ -1,7 +1,8 @@
 package io.github.sinri.keel.integration.mysql;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -10,8 +11,9 @@ import java.util.List;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class Quoter {
-    private final @NotNull String quoted;
+    private final String quoted;
 
     /**
      * 构造字符串引号处理器
@@ -33,6 +35,7 @@ public class Quoter {
 
     /**
      * 构造数字引号处理器
+     *
      * @param number 数字值
      */
     public Quoter(@Nullable Number number) {
@@ -45,6 +48,7 @@ public class Quoter {
 
     /**
      * 构造布尔值引号处理器
+     *
      * @param b 布尔值
      */
     public Quoter(boolean b) {
@@ -56,6 +60,7 @@ public class Quoter {
 
     /**
      * 构造字符串引号处理器
+     *
      * @param s 字符串值
      */
     public Quoter(@Nullable String s) {
@@ -69,9 +74,10 @@ public class Quoter {
 
     /**
      * 构造列表引号处理器
+     *
      * @param list 列表
      */
-    public Quoter(@NotNull List<?> list) {
+    public Quoter(List<?> list) {
         StringBuilder q = new StringBuilder();
         for (Object y : list) {
             if (!q.isEmpty()) {
@@ -88,10 +94,11 @@ public class Quoter {
 
     /**
      * 转义字符串中的特殊字符
+     *
      * @param s 原始字符串
      * @return 转义后的字符串
      */
-    public static @NotNull String escapeString(@NotNull String s) {
+    public static String escapeString(String s) {
         return s.replace("\\", "\\\\")
                 .replace("\b", "\\b")
                 .replace("\n", "\\n")
@@ -105,10 +112,11 @@ public class Quoter {
 
     /**
      * 转义字符串中的特殊字符和通配符
+     *
      * @param s 原始字符串
      * @return 转义后的字符串
      */
-    public static @NotNull String escapeStringWithWildcards(@NotNull String s) {
+    public static String escapeStringWithWildcards(String s) {
         return escapeString(s)
                 .replace("%", "\\%")
                 .replace("_", "\\_");
@@ -116,10 +124,11 @@ public class Quoter {
 
     /**
      * 为转义后的字符串添加引号
+     *
      * @param s 转义后的字符串
      * @return 带引号的字符串
      */
-    public static @NotNull String quoteEscapedString(@NotNull String s) {
+    public static String quoteEscapedString(String s) {
         return "'" + s + "'";
     }
 

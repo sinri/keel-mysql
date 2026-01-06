@@ -3,8 +3,8 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.component.*;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
 import io.vertx.core.Handler;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  *         Docs
  * @since 5.0.0
  */
+@NullMarked
 public class CreateTableStatement extends CreateTableStatementBase<CreateTableStatement> {
     private final List<TableCreateDefinition> definitions = new ArrayList<>();
     private final CreateTableOptions tableOptions = new CreateTableOptions();
@@ -37,27 +38,27 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
      * IGNORE or REPLACE
      */
     private @Nullable String asSourceType = null;
-    private ReadStatementMixin readStatement = null;
+    private @Nullable ReadStatementMixin readStatement = null;
 
-    public CreateTableStatement asReadStatement(@NotNull ReadStatementMixin readStatement) {
+    public CreateTableStatement asReadStatement(ReadStatementMixin readStatement) {
         this.readStatement = readStatement;
         return getImplementation();
     }
 
-    public CreateTableStatement asReadStatementWithIgnore(@NotNull ReadStatementMixin readStatement) {
+    public CreateTableStatement asReadStatementWithIgnore(ReadStatementMixin readStatement) {
         this.asSourceType = "IGNORE";
         this.readStatement = readStatement;
         return getImplementation();
     }
 
-    public CreateTableStatement asReadStatementWithReplace(@NotNull ReadStatementMixin readStatement) {
+    public CreateTableStatement asReadStatementWithReplace(ReadStatementMixin readStatement) {
         this.asSourceType = "REPLACE";
         this.readStatement = readStatement;
         return getImplementation();
     }
 
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         var ds = definitions.stream().map(Object::toString).collect(Collectors.toList());
         var sql = "CREATE " + (useTemporary() ? "TEMPORARY " : " ") + "TABLE "
                 + (useIfNotExists() ? "IF NOT EXISTS " : " ")
@@ -80,7 +81,7 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
         return getImplementation();
     }
 
-    public CreateTableStatement handleTableOptions(@NotNull Handler<CreateTableOptions> tableOptionHandler) {
+    public CreateTableStatement handleTableOptions(Handler<CreateTableOptions> tableOptionHandler) {
         tableOptionHandler.handle(tableOptions);
         return getImplementation();
     }
@@ -90,31 +91,31 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
         return getImplementation();
     }
 
-    public CreateTableStatement addColumnDefinition(@NotNull Handler<TableCreateDefinitionForColumn> columnDefinitionHandler) {
+    public CreateTableStatement addColumnDefinition(Handler<TableCreateDefinitionForColumn> columnDefinitionHandler) {
         TableCreateDefinitionForColumn tableCreateDefinitionForColumn = new TableCreateDefinitionForColumn();
         columnDefinitionHandler.handle(tableCreateDefinitionForColumn);
         return this.addDefinition(tableCreateDefinitionForColumn);
     }
 
-    public CreateTableStatement addPrimaryKeyDefinition(@NotNull Handler<TableCreateDefinitionForPrimaryKey> primaryKeyDefinitionHandler) {
+    public CreateTableStatement addPrimaryKeyDefinition(Handler<TableCreateDefinitionForPrimaryKey> primaryKeyDefinitionHandler) {
         TableCreateDefinitionForPrimaryKey tableCreateDefinitionForPrimaryKey = new TableCreateDefinitionForPrimaryKey();
         primaryKeyDefinitionHandler.handle(tableCreateDefinitionForPrimaryKey);
         return this.addDefinition(tableCreateDefinitionForPrimaryKey);
     }
 
-    public CreateTableStatement addUniqueKeyDefinition(@NotNull Handler<TableCreateDefinitionForUniqueKey> uniqueKeyDefinitionHandler) {
+    public CreateTableStatement addUniqueKeyDefinition(Handler<TableCreateDefinitionForUniqueKey> uniqueKeyDefinitionHandler) {
         TableCreateDefinitionForUniqueKey tableCreateDefinitionForUniqueKey = new TableCreateDefinitionForUniqueKey();
         uniqueKeyDefinitionHandler.handle(tableCreateDefinitionForUniqueKey);
         return this.addDefinition(tableCreateDefinitionForUniqueKey);
     }
 
-    public CreateTableStatement addKeyDefinition(@NotNull Handler<TableCreateDefinitionForKey> keyDefinitionHandler) {
+    public CreateTableStatement addKeyDefinition(Handler<TableCreateDefinitionForKey> keyDefinitionHandler) {
         TableCreateDefinitionForKey tableCreateDefinitionForKey = new TableCreateDefinitionForKey();
         keyDefinitionHandler.handle(tableCreateDefinitionForKey);
         return this.addDefinition(tableCreateDefinitionForKey);
     }
 
-    @NotNull
+
     @Override
     public CreateTableStatement getImplementation() {
         return this;

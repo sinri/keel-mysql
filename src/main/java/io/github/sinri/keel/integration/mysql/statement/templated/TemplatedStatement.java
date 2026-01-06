@@ -2,7 +2,7 @@ package io.github.sinri.keel.integration.mysql.statement.templated;
 
 
 import io.github.sinri.keel.core.utils.FileUtils;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,6 +21,7 @@ import java.util.regex.Matcher;
  * @see TemplatedModifyStatement
  * @since 5.0.0
  */
+@NullMarked
 public interface TemplatedStatement {
     /**
      * 从文件加载模板生成读取语句
@@ -28,7 +29,7 @@ public interface TemplatedStatement {
      * @param templatePath 模板文件路径
      * @return 模板读取语句实例
      */
-    static TemplatedReadStatement loadTemplateToRead(@NotNull String templatePath) {
+    static TemplatedReadStatement loadTemplateToRead(String templatePath) {
         try {
             byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
             String sqlTemplate = new String(bytes);
@@ -40,10 +41,11 @@ public interface TemplatedStatement {
 
     /**
      * 从文件加载模板生成修改语句
+     *
      * @param templatePath 模板文件路径
      * @return 模板修改语句实例
      */
-    static TemplatedModifyStatement loadTemplateToModify(@NotNull String templatePath) {
+    static TemplatedModifyStatement loadTemplateToModify(String templatePath) {
         try {
             byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
             String sqlTemplate = new String(bytes);
@@ -55,18 +57,21 @@ public interface TemplatedStatement {
 
     /**
      * 获取SQL模板字符串
+     *
      * @return SQL模板字符串
      */
     String getSqlTemplate();
 
     /**
      * 获取参数映射
+     *
      * @return 参数映射实例
      */
     TemplateArgumentMapping getArguments();
 
     /**
      * 构建最终的SQL字符串
+     *
      * @return 构建后的SQL字符串
      */
     default String build() {

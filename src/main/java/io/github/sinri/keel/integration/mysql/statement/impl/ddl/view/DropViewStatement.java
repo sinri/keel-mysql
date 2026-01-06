@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.view;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/drop-view.html">DROP VIEW Statement</a>
  * @since 5.0.0
  */
+@NullMarked
 public class DropViewStatement extends AbstractStatement {
     private final List<String> viewNames = new ArrayList<>();
     private boolean ifExists = false;
@@ -27,7 +28,7 @@ public class DropViewStatement extends AbstractStatement {
     }
 
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         /*
         DROP VIEW [IF EXISTS]
     view_name [, view_name] ...

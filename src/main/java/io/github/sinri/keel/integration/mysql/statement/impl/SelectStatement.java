@@ -13,8 +13,8 @@ import io.github.sinri.keel.integration.mysql.statement.component.ConditionsComp
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
 import io.github.sinri.keel.integration.mysql.statement.mixin.SelectStatementMixin;
 import io.vertx.core.Future;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,7 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class SelectStatement extends AbstractStatement implements SelectStatementMixin {
     final ConditionsComponent whereConditionsComponent;
     final ConditionsComponent havingConditionsComponent;
@@ -36,19 +37,17 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
     private final List<String> sortRules;
     private long offset;
     private long limit;
-    private @NotNull String lockMode;
+    private String lockMode;
     /**
      * For MySQL 5.7 ,8.0 or higher, in Select, to limit the max execution time in millisecond.
      *
-     * @since 3.1.0
      */
     private @Nullable Long maxExecutionTime;
 
     /**
      * @param another To swift clone one instance based on without direct reference.
-     * @since 3.2.3
      */
-    public SelectStatement(@NotNull SelectStatement another) {
+    public SelectStatement(SelectStatement another) {
         this.whereConditionsComponent = new ConditionsComponent(another.whereConditionsComponent);
         this.havingConditionsComponent = new ConditionsComponent(another.havingConditionsComponent);
         this.tables = new ArrayList<>(another.tables);
@@ -74,11 +73,11 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         this.maxExecutionTime = null;
     }
 
-    public SelectStatement from(@NotNull String tableExpression) {
+    public SelectStatement from(String tableExpression) {
         return from(tableExpression, null);
     }
 
-    public SelectStatement from(@NotNull String tableExpression, @Nullable String alias) {
+    public SelectStatement from(String tableExpression, @Nullable String alias) {
         if (tableExpression.isBlank()) {
             throw new KeelSQLGenerateError("Select from blank");
         }
@@ -97,32 +96,32 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
     /**
      * @since 2.8
      */
-    public SelectStatement from(@NotNull ReadStatementMixin subQuery, @NotNull String alias) {
+    public SelectStatement from(ReadStatementMixin subQuery, String alias) {
         if (alias.isBlank()) {
             throw new KeelSQLGenerateError("Sub Query without alias");
         }
         return this.from("(" + subQuery + ")", alias);
     }
 
-    public SelectStatement leftJoin(@NotNull Function<JoinComponent, JoinComponent> joinFunction) {
+    public SelectStatement leftJoin(Function<JoinComponent, JoinComponent> joinFunction) {
         JoinComponent join = new JoinComponent("LEFT JOIN");
         tables.add(joinFunction.apply(join).toString());
         return this;
     }
 
-    public SelectStatement rightJoin(@NotNull Function<JoinComponent, JoinComponent> joinFunction) {
+    public SelectStatement rightJoin(Function<JoinComponent, JoinComponent> joinFunction) {
         JoinComponent join = new JoinComponent("RIGHT JOIN");
         tables.add(joinFunction.apply(join).toString());
         return this;
     }
 
-    public SelectStatement innerJoin(@NotNull Function<JoinComponent, JoinComponent> joinFunction) {
+    public SelectStatement innerJoin(Function<JoinComponent, JoinComponent> joinFunction) {
         JoinComponent join = new JoinComponent("INNER JOIN");
         tables.add(joinFunction.apply(join).toString());
         return this;
     }
 
-    public SelectStatement straightJoin(@NotNull Function<JoinComponent, JoinComponent> joinFunction) {
+    public SelectStatement straightJoin(Function<JoinComponent, JoinComponent> joinFunction) {
         JoinComponent join = new JoinComponent("STRAIGHT_JOIN");
         tables.add(joinFunction.apply(join).toString());
         return this;
@@ -133,12 +132,12 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         return this;
     }
 
-    public SelectStatement column(@NotNull Function<ColumnComponent, ColumnComponent> func) {
+    public SelectStatement column(Function<ColumnComponent, ColumnComponent> func) {
         columns.add(func.apply(new ColumnComponent()).toString());
         return this;
     }
 
-    public SelectStatement columnWithAlias(@NotNull String columnExpression, @NotNull String alias) {
+    public SelectStatement columnWithAlias(String columnExpression, String alias) {
         if (columnExpression.isBlank() || alias.isBlank()) {
             throw new IllegalArgumentException("Column or its alias is empty.");
         }
@@ -146,7 +145,7 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         return this;
     }
 
-    public SelectStatement columnAsExpression(@NotNull String fieldName) {
+    public SelectStatement columnAsExpression(String fieldName) {
         columns.add(fieldName);
         return this;
     }
@@ -156,32 +155,32 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
      * @return this
      * @since 1.4
      */
-    public SelectStatement where(@NotNull Function<ConditionsComponent, ConditionsComponent> function) {
+    public SelectStatement where(Function<ConditionsComponent, ConditionsComponent> function) {
         function.apply(whereConditionsComponent);
         return this;
     }
 
-    public SelectStatement groupBy(@NotNull String x) {
+    public SelectStatement groupBy(String x) {
         categories.add(x);
         return this;
     }
 
-    public SelectStatement groupBy(@NotNull List<String> x) {
+    public SelectStatement groupBy(List<String> x) {
         categories.addAll(x);
         return this;
     }
 
-    public SelectStatement having(@NotNull Function<ConditionsComponent, ConditionsComponent> function) {
+    public SelectStatement having(Function<ConditionsComponent, ConditionsComponent> function) {
         function.apply(havingConditionsComponent);
         return this;
     }
 
-    public SelectStatement orderByAsc(@NotNull String x) {
+    public SelectStatement orderByAsc(String x) {
         sortRules.add(x);
         return this;
     }
 
-    public SelectStatement orderByDesc(@NotNull String x) {
+    public SelectStatement orderByDesc(String x) {
         sortRules.add(x + " DESC");
         return this;
     }
@@ -198,7 +197,7 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         return this;
     }
 
-    public SelectStatement setLockMode(@NotNull String lockMode) {
+    public SelectStatement setLockMode(String lockMode) {
         Objects.requireNonNull(lockMode);
         this.lockMode = lockMode;
         return this;
@@ -214,7 +213,7 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         return this;
     }
 
-    public @NotNull String toString() {
+    public String toString() {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
 
@@ -289,7 +288,8 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
                              countStatement.execute(sqlConnection)
                                            .compose(resultMatrix -> {
                                                try {
-                                                   long total = resultMatrix.getOneColumnOfFirstRowAsLong("total");
+                                                   Long total = resultMatrix.getOneColumnOfFirstRowAsLong("total");
+                                                   Objects.requireNonNull(total);
                                                    return Future.succeededFuture(total);
                                                } catch (KeelSQLResultRowIndexError e) {
                                                    throw new RuntimeException(e);
@@ -305,44 +305,44 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
     }
 
     public static class JoinComponent {
-        @NotNull
+
         final String joinType;
         final List<MySQLCondition> onConditions = new ArrayList<>();
-        @NotNull
+
         String tableExpression = "NOT-SET";
         @Nullable
         String alias;
 
-        public JoinComponent(@NotNull String joinType) {
+        public JoinComponent(String joinType) {
             this.joinType = joinType;
         }
 
-        public JoinComponent table(@NotNull String tableExpression) {
+        public JoinComponent table(String tableExpression) {
             this.tableExpression = tableExpression;
             return this;
         }
 
-        public JoinComponent alias(@NotNull String alias) {
+        public JoinComponent alias(String alias) {
             this.alias = alias;
             return this;
         }
 
-        public JoinComponent onForRaw(@NotNull Function<RawCondition, RawCondition> func) {
+        public JoinComponent onForRaw(Function<RawCondition, RawCondition> func) {
             this.onConditions.add(func.apply(new RawCondition()));
             return this;
         }
 
-        public JoinComponent onForAndGroup(@NotNull Function<GroupCondition, GroupCondition> func) {
+        public JoinComponent onForAndGroup(Function<GroupCondition, GroupCondition> func) {
             this.onConditions.add(func.apply(new GroupCondition(GroupCondition.JUNCTION_FOR_AND)));
             return this;
         }
 
-        public JoinComponent onForOrGroup(@NotNull Function<GroupCondition, GroupCondition> func) {
+        public JoinComponent onForOrGroup(Function<GroupCondition, GroupCondition> func) {
             this.onConditions.add(func.apply(new GroupCondition(GroupCondition.JUNCTION_FOR_OR)));
             return this;
         }
 
-        public JoinComponent onForCompare(@NotNull Function<CompareCondition, CompareCondition> func) {
+        public JoinComponent onForCompare(Function<CompareCondition, CompareCondition> func) {
             this.onConditions.add(func.apply(new CompareCondition()));
             return this;
         }
@@ -370,18 +370,18 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         @Nullable
         String alias;
 
-        public ColumnComponent field(@NotNull String field) {
+        public ColumnComponent field(String field) {
             this.field = field;
             return this;
         }
 
-        public ColumnComponent field(@Nullable String schema, @NotNull String field) {
+        public ColumnComponent field(@Nullable String schema, String field) {
             this.schema = schema;
             this.field = field;
             return this;
         }
 
-        public ColumnComponent expression(@NotNull String expression) {
+        public ColumnComponent expression(String expression) {
             this.expression = expression;
             return this;
         }

@@ -1,16 +1,18 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.component;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 
 /**
  * @since 5.0.0
  */
+@NullMarked
 public final class TableCreateDefinitionForColumn extends TableCreateDefinition {
-    private String columnName;
+    private @Nullable String columnName;
     //private ColumnDefinition columnDefinition;
-    private String dataType;
+    private @Nullable String dataType;
     private boolean nullable;
     private @Nullable String defaultExpression;
     private boolean autoIncrement = false;

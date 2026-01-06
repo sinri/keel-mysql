@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create;
 
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Follow Pattern:
@@ -11,23 +11,24 @@ import org.jetbrains.annotations.NotNull;
  *         Docs
  * @since 5.0.0
  */
+@NullMarked
 public final class CreateTableLikeTableStatement extends CreateTableStatementBase<CreateTableLikeTableStatement> {
-    private @NotNull String anotherTableExpression = "";
+    private String anotherTableExpression = "";
 
-    public CreateTableLikeTableStatement setAnotherTableExpression(@NotNull String anotherTableExpression) {
+    public CreateTableLikeTableStatement setAnotherTableExpression(String anotherTableExpression) {
         this.anotherTableExpression = anotherTableExpression;
         return this;
     }
 
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         return "CREATE " + (useTemporary() ? "TEMPORARY " : " ") + "TABLE "
                 + (useIfNotExists() ? "IF NOT EXISTS " : " ")
                 + getTableExpression()
                 + " LIKE " + anotherTableExpression;
     }
 
-    @NotNull
+
     @Override
     public CreateTableLikeTableStatement getImplementation() {
         return this;

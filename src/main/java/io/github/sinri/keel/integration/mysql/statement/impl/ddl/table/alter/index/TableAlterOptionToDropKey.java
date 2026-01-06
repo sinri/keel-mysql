@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.index;
 
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.TableAlterOption;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 
 /**
@@ -9,8 +9,9 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
+@NullMarked
 public final class TableAlterOptionToDropKey extends TableAlterOption {
-    private @NotNull String indexName = "";
+    private String indexName = "";
 
     /**
      * 设置要删除的索引名称
@@ -18,7 +19,7 @@ public final class TableAlterOptionToDropKey extends TableAlterOption {
      * @param indexName 索引名称
      * @return 自身实例
      */
-    public TableAlterOptionToDropKey setIndexName(@NotNull String indexName) {
+    public TableAlterOptionToDropKey setIndexName(String indexName) {
         this.indexName = indexName;
         return this;
     }

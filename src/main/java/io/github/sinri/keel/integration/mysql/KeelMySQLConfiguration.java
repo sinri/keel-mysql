@@ -1,17 +1,18 @@
 package io.github.sinri.keel.integration.mysql;
 
-import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
+import io.github.sinri.keel.base.async.KeelAsyncMixin;
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.ConfigPropertiesBuilder;
 import io.github.sinri.keel.base.configuration.NotConfiguredException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.sqlclient.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +24,9 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class KeelMySQLConfiguration extends ConfigElement {
-    public KeelMySQLConfiguration(@NotNull ConfigElement base) {
+    public KeelMySQLConfiguration(ConfigElement base) {
         super(base);
     }
 
@@ -36,20 +38,20 @@ public class KeelMySQLConfiguration extends ConfigElement {
      * @param poolOptions         连接池选项
      * @return 配置属性字符串
      */
-    @NotNull
-    public static String generatePropertiesForConfig(@NotNull String dataSourceName, @NotNull MySQLConnectOptions mySQLConnectOptions, @NotNull PoolOptions poolOptions) {
-        var builder = new ConfigPropertiesBuilder();
-        builder.setPrefix("mysql", dataSourceName);
 
-        builder.add("host", mySQLConnectOptions.getHost());
-        builder.add("port", String.valueOf(mySQLConnectOptions.getPort()));
-        builder.add("username", mySQLConnectOptions.getUser());
-        builder.add("password", mySQLConnectOptions.getPassword());
-        builder.add("schema", mySQLConnectOptions.getDatabase());
-        builder.add("charset", mySQLConnectOptions.getCharset());
-        builder.add("poolMaxSize", String.valueOf(poolOptions.getMaxSize()));
-        builder.add("poolShared", (poolOptions.isShared() ? "YES" : "NO"));
-        builder.add("poolConnectionTimeout", String.valueOf(poolOptions.getConnectionTimeout()));
+    public static String generatePropertiesForConfig(String dataSourceName, MySQLConnectOptions mySQLConnectOptions, PoolOptions poolOptions) {
+        var builder = new ConfigPropertiesBuilder();
+        List<String> prefix = List.of("mysql", dataSourceName);
+
+        builder.add(prefix, "host", mySQLConnectOptions.getHost());
+        builder.add(prefix, "port", String.valueOf(mySQLConnectOptions.getPort()));
+        builder.add(prefix, "username", mySQLConnectOptions.getUser());
+        builder.add(prefix, "password", mySQLConnectOptions.getPassword());
+        builder.add(prefix, "schema", mySQLConnectOptions.getDatabase());
+        builder.add(prefix, "charset", mySQLConnectOptions.getCharset());
+        builder.add(prefix, "poolMaxSize", String.valueOf(poolOptions.getMaxSize()));
+        builder.add(prefix, "poolShared", (poolOptions.isShared() ? "YES" : "NO"));
+        builder.add(prefix, "poolConnectionTimeout", String.valueOf(poolOptions.getConnectionTimeout()));
 
         return builder.writeToString();
     }
@@ -59,7 +61,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
      *
      * @return MySQL连接选项
      */
-    @NotNull
+
     public MySQLConnectOptions getConnectOptions() {
         // mysql.XXX.connect::database,host,password,port,user,charset,useAffectedRows,connectionTimeout
         MySQLConnectOptions mySQLConnectOptions = new MySQLConnectOptions()
@@ -83,7 +85,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
      *
      * @return 连接池选项
      */
-    @NotNull
+
     public PoolOptions getPoolOptions() {
         // mysql.XXX.pool::poolConnectionTimeout
         PoolOptions poolOptions = new PoolOptions();
@@ -106,7 +108,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
      *
      * @return 主机地址
      */
-    @NotNull
+
     public String getHost() {
         try {
             return readString(List.of("host"));
@@ -205,7 +207,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
      *
      * @return 数据源名称
      */
-    @NotNull
+
     public String getDataSourceName() {
         return getElementName();
     }
@@ -254,15 +256,16 @@ public class KeelMySQLConfiguration extends ConfigElement {
      * @param sql 确认已过滤的SQL语句
      */
     @TechnicalPreview(since = "5.0.0")
-    @NotNull
-    public Future<ResultMatrix> instantQuery(@NotNull Keel keel, @NotNull String sql) {
+
+    public Future<ResultMatrix> instantQuery(Vertx vertx, String sql) {
         var sqlClient = MySQLBuilder.client()
                                     .with(this.getPoolOptions())
                                     .connectingTo(this.getConnectOptions())
-                                    .using(keel.getVertx())
+                                    .using(vertx)
                                     .build();
         return Future.succeededFuture()
-                     .compose(v -> sqlClient.preparedQuery(sql).execute()
+                     .compose(v -> sqlClient.preparedQuery(sql)
+                                            .execute()
                                             .compose(rows -> Future.succeededFuture(ResultMatrix.create(rows))))
                      .andThen(ar -> sqlClient.close());
     }
@@ -276,14 +279,14 @@ public class KeelMySQLConfiguration extends ConfigElement {
      * @param readWindowSize     how many rows read once
      * @param readWindowFunction the async handler of the read rows
      */
-    @NotNull
-    public Future<Void> instantQueryForStream(@NotNull Keel keel, @NotNull String sql, int readWindowSize, @NotNull Function<RowSet<Row>, Future<Void>> readWindowFunction) {
+
+    public Future<Void> instantQueryForStream(KeelAsyncMixin keelAsyncMixin, String sql, int readWindowSize, Function<RowSet<Row>, Future<Void>> readWindowFunction) {
         return Future.succeededFuture()
                      .compose(v -> {
                          Pool pool = MySQLBuilder.pool()
                                                  .with(this.getPoolOptions())
                                                  .connectingTo(this.getConnectOptions())
-                                                 .using(keel.getVertx())
+                                                 .using(keelAsyncMixin.getVertx())
                                                  .build();
                          return Future.succeededFuture(pool);
                      })
@@ -294,17 +297,17 @@ public class KeelMySQLConfiguration extends ConfigElement {
                                      .compose(preparedStatement -> {
                                          Cursor cursor = preparedStatement.cursor();
 
-                                         return keel.asyncCallRepeatedly(routineResult -> cursor
-                                                            .read(readWindowSize)
-                                                            .compose(readWindowFunction)
-                                                            .compose(v -> {
-                                                                if (!cursor.hasMore()) {
-                                                                    routineResult.stop();
-                                                                    return Future.succeededFuture();
-                                                                }
-                                                                return Future.succeededFuture();
-                                                            }))
-                                                    .eventually(cursor::close);
+                                         return keelAsyncMixin.asyncCallRepeatedly(routineResult -> cursor
+                                                                      .read(readWindowSize)
+                                                                      .compose(readWindowFunction)
+                                                                      .compose(v -> {
+                                                                          if (!cursor.hasMore()) {
+                                                                              routineResult.stop();
+                                                                              return Future.succeededFuture();
+                                                                          }
+                                                                          return Future.succeededFuture();
+                                                                      }))
+                                                              .eventually(cursor::close);
                                      })
                                      .eventually(sqlConnection::close))
                              .eventually(pool::close));

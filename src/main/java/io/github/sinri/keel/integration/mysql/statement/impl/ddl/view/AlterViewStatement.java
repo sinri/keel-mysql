@@ -2,8 +2,8 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.view;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.SelectStatement;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/alter-view.html">ALTER VIEW Statement</a>
  * @since 5.0.0
  */
+@NullMarked
 public class AlterViewStatement extends AbstractStatement {
     private final List<String> columns = new ArrayList<>();
     /**
@@ -22,8 +23,8 @@ public class AlterViewStatement extends AbstractStatement {
     private @Nullable String algorithm = null;
     private @Nullable String definer = null;
     private @Nullable String sqlSecurity = null;
-    private @NotNull String viewName = "";
-    private SelectStatement selectStatement;
+    private String viewName = "";
+    private @Nullable SelectStatement selectStatement;
     /**
      * {@code [WITH [CASCADED | LOCAL] CHECK OPTION]}
      */
@@ -49,7 +50,7 @@ public class AlterViewStatement extends AbstractStatement {
         return this;
     }
 
-    public AlterViewStatement setViewName(@NotNull String viewName) {
+    public AlterViewStatement setViewName(String viewName) {
         this.viewName = viewName;
         return this;
     }
@@ -65,7 +66,7 @@ public class AlterViewStatement extends AbstractStatement {
     }
 
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         /*
         ALTER
     [ALGORITHM = {UNDEFINED | MERGE | TEMPTABLE}]

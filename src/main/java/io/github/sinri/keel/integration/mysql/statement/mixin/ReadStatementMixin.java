@@ -8,7 +8,7 @@ import io.github.sinri.keel.integration.mysql.result.stream.ResultStreamReader;
 import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Cursor;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +22,7 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
+@NullMarked
 public interface ReadStatementMixin extends AnyStatement {
     /**
      * @param namedMySQLConnection NamedMySQLConnection
@@ -29,7 +30,7 @@ public interface ReadStatementMixin extends AnyStatement {
      * @param <T>                  type of result object
      * @return 查询到数据，异步返回第一行数据封装的指定类实例；查询不到时异步返回null。
      */
-    default <T extends ResultRow> Future<T> queryForOneRow(@NotNull NamedMySQLConnection namedMySQLConnection, @NotNull Class<T> classT) {
+    default <T extends ResultRow> Future<T> queryForOneRow(NamedMySQLConnection namedMySQLConnection, Class<T> classT) {
         return execute(namedMySQLConnection)
                 .compose(resultMatrix -> {
                     try {
@@ -46,7 +47,7 @@ public interface ReadStatementMixin extends AnyStatement {
      * @param <T>    type of result object
      * @return 查询到数据，异步返回所有行数据封装的指定类实例；查询不到时异步返回null。
      */
-    default <T extends ResultRow> Future<List<T>> queryForRowList(@NotNull NamedMySQLConnection namedMySQLConnection, @NotNull Class<T> classT) {
+    default <T extends ResultRow> Future<List<T>> queryForRowList(NamedMySQLConnection namedMySQLConnection, Class<T> classT) {
         return execute(namedMySQLConnection)
                 .compose(resultMatrix -> {
                     List<T> ts = resultMatrix.buildTableRowList(classT);
@@ -55,9 +56,9 @@ public interface ReadStatementMixin extends AnyStatement {
     }
 
     default <K, T extends ResultRow> Future<Map<K, List<T>>> queryForCategorizedMap(
-            @NotNull NamedMySQLConnection namedMySQLConnection,
-            @NotNull Class<T> classT,
-            @NotNull Function<T, K> categoryGenerator
+            NamedMySQLConnection namedMySQLConnection,
+            Class<T> classT,
+            Function<T, K> categoryGenerator
     ) {
         Map<K, List<T>> map = new HashMap<>();
         return queryForRowList(namedMySQLConnection, classT)
@@ -72,9 +73,9 @@ public interface ReadStatementMixin extends AnyStatement {
 
 
     default <K, T extends ResultRow> Future<Map<K, T>> queryForUniqueKeyBoundMap(
-            @NotNull NamedMySQLConnection namedMySQLConnection,
-            @NotNull Class<T> classT,
-            @NotNull Function<T, K> uniqueKeyGenerator
+            NamedMySQLConnection namedMySQLConnection,
+            Class<T> classT,
+            Function<T, K> uniqueKeyGenerator
     ) {
         Map<K, T> map = new HashMap<>();
 
@@ -90,9 +91,9 @@ public interface ReadStatementMixin extends AnyStatement {
 
 
     default Future<Void> stream(
-            @NotNull Keel keel,
-            @NotNull NamedMySQLConnection namedMySQLConnection,
-            @NotNull ResultStreamReader resultStreamReader
+            Keel keel,
+            NamedMySQLConnection namedMySQLConnection,
+            ResultStreamReader resultStreamReader
     ) {
         return namedMySQLConnection.getSqlConnection()
                                    .prepare(toString())

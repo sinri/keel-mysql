@@ -3,7 +3,7 @@ package io.github.sinri.keel.integration.mysql.statement.impl;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,7 @@ import java.util.List;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class UnionStatement extends AbstractStatement implements ReadStatementMixin {
     final List<String> selections = new ArrayList<>();
 
@@ -20,11 +21,11 @@ public class UnionStatement extends AbstractStatement implements ReadStatementMi
 
     }
 
-    public UnionStatement(@NotNull String firstSelection) {
+    public UnionStatement(String firstSelection) {
         selections.add("(" + AbstractStatement.SQL_COMPONENT_SEPARATOR + firstSelection + AbstractStatement.SQL_COMPONENT_SEPARATOR + ")");
     }
 
-    public UnionStatement union(@NotNull String selection) {
+    public UnionStatement union(String selection) {
         if (this.selections.isEmpty()) {
             selections.add("(" + AbstractStatement.SQL_COMPONENT_SEPARATOR + selection + AbstractStatement.SQL_COMPONENT_SEPARATOR + ")");
         } else {
@@ -33,7 +34,7 @@ public class UnionStatement extends AbstractStatement implements ReadStatementMi
         return this;
     }
 
-    public UnionStatement unionAll(@NotNull String selection) {
+    public UnionStatement unionAll(String selection) {
         if (this.selections.isEmpty()) {
             selections.add("(" + AbstractStatement.SQL_COMPONENT_SEPARATOR + selection + AbstractStatement.SQL_COMPONENT_SEPARATOR + ")");
         } else {
@@ -42,21 +43,21 @@ public class UnionStatement extends AbstractStatement implements ReadStatementMi
         return this;
     }
 
-    public UnionStatement union(@NotNull List<String> list) {
+    public UnionStatement union(List<String> list) {
         for (String selection : list) {
             union(selection);
         }
         return this;
     }
 
-    public UnionStatement unionAll(@NotNull List<String> list) {
+    public UnionStatement unionAll(List<String> list) {
         for (String selection : list) {
             unionAll(selection);
         }
         return this;
     }
 
-    public @NotNull String toString() {
+    public String toString() {
         return String.join(" ", selections) + (getRemarkAsComment().isEmpty() ? "" : ("\n-- " + getRemarkAsComment()));
     }
 

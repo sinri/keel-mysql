@@ -2,33 +2,34 @@ package io.github.sinri.keel.integration.mysql.statement;
 
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.github.sinri.keel.logger.api.factory.SilentLoggerFactory;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 抽象SQL语句基类，实现了通用的SQL执行和审计功能
  *
  * @since 5.0.0
  */
+@NullMarked
 abstract public class AbstractStatement implements AnyStatement {
-    protected static @NotNull String SQL_COMPONENT_SEPARATOR = " ";//"\n";
+    protected static String SQL_COMPONENT_SEPARATOR = " ";//"\n";
     /**
      * SQL审计日志记录器
      */
-    protected static @NotNull SpecificLogger<MySQLAuditSpecificLog> sqlAuditLogger;
+    protected static SpecificLogger<MySQLAuditSpecificLog> sqlAuditLogger;
 
     static {
         sqlAuditLogger = buildSqlAuditLogger(SilentLoggerFactory.getInstance());
     }
 
-    protected final @NotNull String statement_uuid;
-    private @NotNull String remarkAsComment = "";
+    protected final String statement_uuid;
+    private String remarkAsComment = "";
     /**
      * @since 4.0.7
      */
@@ -46,7 +47,7 @@ abstract public class AbstractStatement implements AnyStatement {
      *
      * @return SQL审计日志记录器
      */
-    @NotNull
+
     public static SpecificLogger<MySQLAuditSpecificLog> getSqlAuditLogger() {
         return sqlAuditLogger;
     }
@@ -54,44 +55,49 @@ abstract public class AbstractStatement implements AnyStatement {
 
     /**
      * 构建SQL审计日志记录器
+     *
      * @param loggerFactory 日志工厂
      * @return SQL审计日志记录器
      */
-    private static SpecificLogger<MySQLAuditSpecificLog> buildSqlAuditLogger(@NotNull LoggerFactory loggerFactory) {
+    private static SpecificLogger<MySQLAuditSpecificLog> buildSqlAuditLogger(LoggerFactory loggerFactory) {
         return loggerFactory.createLogger(MySQLAuditSpecificLog.AttributeMysqlAudit, MySQLAuditSpecificLog::new);
     }
 
     /**
      * 重新加载SQL审计问题记录器
+     *
      * @param issueRecordCenter SQL审计发送到的记录中心
      */
-    public static synchronized void reloadSqlAuditIssueRecording(@NotNull LoggerFactory issueRecordCenter) {
+    public static synchronized void reloadSqlAuditIssueRecording(LoggerFactory issueRecordCenter) {
         sqlAuditLogger = buildSqlAuditLogger(issueRecordCenter);
     }
 
     /**
      * 设置SQL组件分隔符
+     *
      * @param sqlComponentSeparator SQL组件分隔符
      */
-    public static void setSqlComponentSeparator(@NotNull String sqlComponentSeparator) {
+    public static void setSqlComponentSeparator(String sqlComponentSeparator) {
         SQL_COMPONENT_SEPARATOR = sqlComponentSeparator;
     }
 
     /**
      * 获取备注注释
+     *
      * @return 备注注释
      */
-    @NotNull
+
     protected String getRemarkAsComment() {
         return remarkAsComment;
     }
 
     /**
      * 设置备注注释
+     *
      * @param remarkAsComment 备注注释
      * @return 自身实例
      */
-    public AbstractStatement setRemarkAsComment(@NotNull String remarkAsComment) {
+    public AbstractStatement setRemarkAsComment(String remarkAsComment) {
         remarkAsComment = remarkAsComment.replaceAll("[\\r\\n]+", "¦");
         this.remarkAsComment = remarkAsComment;
         return this;
@@ -107,8 +113,8 @@ abstract public class AbstractStatement implements AnyStatement {
      * @since 3.0.0 removed try-catch
      */
     @Override
-    public @NotNull Future<@NotNull ResultMatrix> execute(@NotNull NamedMySQLConnection namedSqlConnection) {
-        AtomicReference<String> theSql = new AtomicReference<>();
+    public Future<ResultMatrix> execute(NamedMySQLConnection namedSqlConnection) {
+        LateObject<String> theSql = new LateObject<>();
         return Future.succeededFuture(this.toString())
                      .compose(sql -> {
                          theSql.set(sql);
@@ -137,6 +143,7 @@ abstract public class AbstractStatement implements AnyStatement {
 
     /**
      * 判断是否不使用预处理语句
+     *
      * @return 是否不使用预处理语句
      */
     @Override
@@ -146,6 +153,7 @@ abstract public class AbstractStatement implements AnyStatement {
 
     /**
      * 设置是否不使用预处理语句
+     *
      * @param withoutPrepare 是否不使用预处理语句
      * @return 自身实例
      */

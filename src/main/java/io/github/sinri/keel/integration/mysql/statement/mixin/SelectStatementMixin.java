@@ -4,20 +4,20 @@ import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * SELECT语句混合类，为读取操作提供分页查询功能
  *
  * @since 5.0.0
  */
+@NullMarked
 public interface SelectStatementMixin extends ReadStatementMixin {
     /**
      * Call from this instance, as the original query as Select Statement for all rows in certain order.
      *
      * @param pageNo   since 1.
      * @param pageSize a number
-     * @since 3.2.3
-     * @since 3.2.20 Public
      */
     Future<PaginationResult> queryForPagination(
             NamedMySQLConnection sqlConnection,

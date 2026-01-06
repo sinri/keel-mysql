@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.index;
 
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.TableAlterOption;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class TableAlterOptionToAddUniqueKey extends TableAlterOption {
     private final List<String> keyParts = new ArrayList<>();
     private @Nullable String constraintSymbol = null;
@@ -34,6 +35,7 @@ public class TableAlterOptionToAddUniqueKey extends TableAlterOption {
 
     /**
      * 设置索引名称
+     *
      * @param indexName 索引名称
      * @return 自身实例
      */
@@ -44,6 +46,7 @@ public class TableAlterOptionToAddUniqueKey extends TableAlterOption {
 
     /**
      * 设置索引类型
+     *
      * @param indexType 索引类型
      * @return 自身实例
      */
@@ -54,6 +57,7 @@ public class TableAlterOptionToAddUniqueKey extends TableAlterOption {
 
     /**
      * 设置索引选项
+     *
      * @param indexOption 索引选项
      * @return 自身实例
      */
@@ -64,10 +68,11 @@ public class TableAlterOptionToAddUniqueKey extends TableAlterOption {
 
     /**
      * 添加索引列
+     *
      * @param keyPart 索引列名称
      * @return 自身实例
      */
-    public TableAlterOptionToAddUniqueKey addPartKey(@NotNull String keyPart) {
+    public TableAlterOptionToAddUniqueKey addPartKey(String keyPart) {
         this.keyParts.add(keyPart);
         return this;
     }

@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -10,15 +10,16 @@ import org.jetbrains.annotations.Nullable;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class CaseOperatorPair {
-    private String whenExpression;
-    private String thenExpression;
+    private @Nullable String whenExpression;
+    private @Nullable String thenExpression;
 
     public CaseOperatorPair() {
 
     }
 
-    public CaseOperatorPair setThenAsNumber(@NotNull Number thenAsNumber) {
+    public CaseOperatorPair setThenAsNumber(Number thenAsNumber) {
         this.thenExpression = String.valueOf(thenAsNumber);
         return this;
     }
@@ -28,7 +29,7 @@ public class CaseOperatorPair {
         return this;
     }
 
-    public CaseOperatorPair setWhenAsNumber(@NotNull Number whenAsNumber) {
+    public CaseOperatorPair setWhenAsNumber(Number whenAsNumber) {
         this.whenExpression = String.valueOf(whenAsNumber);
         return this;
     }
@@ -38,22 +39,22 @@ public class CaseOperatorPair {
         return this;
     }
 
-    @NotNull
-    public String getWhenExpression() {
+
+    public @Nullable String getWhenExpression() {
         return whenExpression;
     }
 
-    public CaseOperatorPair setWhenExpression(@NotNull String whenExpression) {
+    public CaseOperatorPair setWhenExpression(String whenExpression) {
         this.whenExpression = whenExpression;
         return this;
     }
 
-    @NotNull
-    public String getThenExpression() {
+
+    public @Nullable String getThenExpression() {
         return thenExpression;
     }
 
-    public CaseOperatorPair setThenExpression(@NotNull String thenExpression) {
+    public CaseOperatorPair setThenExpression(String thenExpression) {
         this.thenExpression = thenExpression;
         return this;
     }

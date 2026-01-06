@@ -1,10 +1,13 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter;
 
+import org.jspecify.annotations.NullMarked;
+
 /**
  * ALTER TABLE分区选项类，用于处理表分区相关的操作
  *
  * @since 5.0.0
  */
+@NullMarked
 public class TableAlterPartitionOptions {
     private final String raw;
 

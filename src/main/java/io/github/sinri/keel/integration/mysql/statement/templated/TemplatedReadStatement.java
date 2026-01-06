@@ -3,7 +3,7 @@ package io.github.sinri.keel.integration.mysql.statement.templated;
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
 import io.vertx.core.Handler;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 
 /**
@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class TemplatedReadStatement extends AbstractStatement implements ReadStatementMixin, TemplatedStatement {
 
     private final String templateSql;
@@ -21,24 +22,25 @@ public class TemplatedReadStatement extends AbstractStatement implements ReadSta
      *
      * @param templateSql SQL模板字符串
      */
-    public TemplatedReadStatement(@NotNull String templateSql) {
+    public TemplatedReadStatement(String templateSql) {
         this.templateSql = templateSql;
         this.argumentMapping = new TemplateArgumentMapping();
     }
 
     /**
      * 绑定参数
+     *
      * @param binder 参数绑定器
      * @return 自身实例
      */
-    public TemplatedReadStatement bindArguments(@NotNull Handler<TemplateArgumentMapping> binder) {
+    public TemplatedReadStatement bindArguments(Handler<TemplateArgumentMapping> binder) {
         binder.handle(this.argumentMapping);
         return this;
     }
 
 
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         return this.build();
     }
 

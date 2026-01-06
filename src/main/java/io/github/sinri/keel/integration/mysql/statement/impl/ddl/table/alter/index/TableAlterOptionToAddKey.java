@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.index;
 
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.TableAlterOption;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  *
  * @since 5.0.0
  */
+@NullMarked
 public final class TableAlterOptionToAddKey extends TableAlterOption {
     private final List<String> keyParts = new ArrayList<>();
     private @Nullable String indexName = null;
@@ -33,6 +34,7 @@ public final class TableAlterOptionToAddKey extends TableAlterOption {
 
     /**
      * 设置索引类型
+     *
      * @param indexType 索引类型
      * @return 自身实例
      */
@@ -43,6 +45,7 @@ public final class TableAlterOptionToAddKey extends TableAlterOption {
 
     /**
      * 设置索引选项
+     *
      * @param indexOption 索引选项
      * @return 自身实例
      */
@@ -53,10 +56,11 @@ public final class TableAlterOptionToAddKey extends TableAlterOption {
 
     /**
      * 添加索引列
+     *
      * @param keyPart 索引列名称
      * @return 自身实例
      */
-    public TableAlterOptionToAddKey addKeyPart(@NotNull String keyPart) {
+    public TableAlterOptionToAddKey addKeyPart(String keyPart) {
         this.keyParts.add(keyPart);
         return this;
     }

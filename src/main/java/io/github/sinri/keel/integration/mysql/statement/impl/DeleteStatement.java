@@ -4,8 +4,8 @@ package io.github.sinri.keel.integration.mysql.statement.impl;
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.component.ConditionsComponent;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ModifyStatementMixin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,7 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class DeleteStatement extends AbstractStatement implements ModifyStatementMixin {
     final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
     final List<String> sortRules = new ArrayList<>();
@@ -28,9 +29,7 @@ public class DeleteStatement extends AbstractStatement implements ModifyStatemen
      * [LIMIT row_count]
      */
 
-    @Nullable
-    String schema;
-    @NotNull
+    @Nullable String schema;
     String table = "NOT-SET";
     long limit = 0;
 
@@ -38,13 +37,13 @@ public class DeleteStatement extends AbstractStatement implements ModifyStatemen
 
     }
 
-    public DeleteStatement from(@NotNull String table) {
+    public DeleteStatement from(String table) {
         this.schema = null;
         this.table = table;
         return this;
     }
 
-    public DeleteStatement from(@Nullable String schema, @NotNull String table) {
+    public DeleteStatement from(@Nullable String schema, String table) {
         this.schema = schema;
         this.table = table;
         return this;
@@ -55,17 +54,17 @@ public class DeleteStatement extends AbstractStatement implements ModifyStatemen
      * @return this
      * @since 1.4
      */
-    public DeleteStatement where(@NotNull Function<ConditionsComponent, ConditionsComponent> function) {
+    public DeleteStatement where(Function<ConditionsComponent, ConditionsComponent> function) {
         function.apply(whereConditionsComponent);
         return this;
     }
 
-    public DeleteStatement orderByAsc(@NotNull String x) {
+    public DeleteStatement orderByAsc(String x) {
         sortRules.add(x);
         return this;
     }
 
-    public DeleteStatement orderByDesc(@NotNull String x) {
+    public DeleteStatement orderByDesc(String x) {
         sortRules.add(x + " DESC");
         return this;
     }
@@ -75,7 +74,7 @@ public class DeleteStatement extends AbstractStatement implements ModifyStatemen
         return this;
     }
 
-    public @NotNull String toString() {
+    public String toString() {
         String sql = "DELETE FROM ";
         if (schema != null) {
             sql += schema + ".";

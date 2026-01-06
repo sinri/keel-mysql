@@ -1,15 +1,16 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.column;
 
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.TableAlterOption;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * 删除列选项类，用于构建ALTER TABLE DROP [COLUMN]语句
  *
  * @since 5.0.0
  */
+@NullMarked
 public final class TableAlterOptionToDropColumn extends TableAlterOption {
-    public @NotNull String columnName = "";
+    public String columnName = "";
 
     /**
      * 设置要删除的列名称
@@ -17,7 +18,7 @@ public final class TableAlterOptionToDropColumn extends TableAlterOption {
      * @param columnName 列名称
      * @return 自身实例
      */
-    public TableAlterOptionToDropColumn setColumnName(@NotNull String columnName) {
+    public TableAlterOptionToDropColumn setColumnName(String columnName) {
         this.columnName = columnName;
         return this;
     }

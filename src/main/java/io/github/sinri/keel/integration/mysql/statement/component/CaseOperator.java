@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,64 +18,63 @@ import java.util.Objects;
  * </p>
  *
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html#operator_case">
- * Case operator</a>
+ *         Case operator</a>
  * @since 5.0.0
  */
+@NullMarked
 public class CaseOperator {
     private final Collection<CaseOperatorPair> whenThenPairs;
-    private String caseValueExpression = null;
-    private String elseResultExpression = null;
+    private @Nullable String caseValueExpression = null;
+    private @Nullable String elseResultExpression = null;
 
     public CaseOperator() {
         this.whenThenPairs = new ArrayList<>();
     }
 
-    public CaseOperator setCaseValueAsNumber(@NotNull Number caseValueAsNumber) {
+    public CaseOperator setCaseValueAsNumber(Number caseValueAsNumber) {
         this.caseValueExpression = String.valueOf(caseValueAsNumber);
         return this;
     }
 
-    public CaseOperator setCaseValueAsString(@NotNull String caseValueAsString) {
+    public CaseOperator setCaseValueAsString(String caseValueAsString) {
         this.caseValueExpression = new Quoter(caseValueAsString).toString();
         return this;
     }
 
-    public CaseOperator setElseResultAsNumber(@NotNull String elseResultAsNumber) {
+    public CaseOperator setElseResultAsNumber(String elseResultAsNumber) {
         this.elseResultExpression = elseResultAsNumber;
         return this;
     }
 
-    public CaseOperator setElseResultAsString(@NotNull String elseResultAsString) {
+    public CaseOperator setElseResultAsString(String elseResultAsString) {
         this.elseResultExpression = new Quoter(elseResultAsString).toString();
         return this;
     }
 
-    public CaseOperator addWhenThenPair(@NotNull CaseOperatorPair caseOperatorPair) {
+    public CaseOperator addWhenThenPair(CaseOperatorPair caseOperatorPair) {
         this.whenThenPairs.add(caseOperatorPair);
         return this;
     }
 
-    @Nullable
-    public String getCaseValueExpression() {
+    public @Nullable String getCaseValueExpression() {
         return caseValueExpression;
     }
 
-    public CaseOperator setCaseValueExpression(@NotNull String caseValueExpression) {
+    public CaseOperator setCaseValueExpression(String caseValueExpression) {
         this.caseValueExpression = caseValueExpression;
         return this;
     }
 
-    @NotNull
+
     public Collection<CaseOperatorPair> getWhenThenPairs() {
         return whenThenPairs;
     }
 
-    @Nullable
-    public String getElseResultExpression() {
+    public @Nullable String getElseResultExpression() {
         return elseResultExpression;
     }
 
-    public CaseOperator setElseResultExpression(@NotNull String elseResultExpression) {
+    public CaseOperator setElseResultExpression(String elseResultExpression) {
         this.elseResultExpression = elseResultExpression;
         return this;
     }
@@ -87,7 +86,7 @@ public class CaseOperator {
             sb.append(" ").append(getCaseValueExpression());
         }
         getWhenThenPairs().forEach(pair -> sb.append(" WHEN ").append(pair.getWhenExpression())
-                                         .append(" THEN ").append(pair.getThenExpression()));
+                                             .append(" THEN ").append(pair.getThenExpression()));
         if (!(Objects.requireNonNullElse(getElseResultExpression(), "")).isBlank()) {
             sb.append(" ELSE ").append(getElseResultExpression());
         }

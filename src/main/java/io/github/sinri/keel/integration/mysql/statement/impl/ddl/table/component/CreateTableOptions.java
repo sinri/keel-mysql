@@ -1,5 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.component;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,6 +10,7 @@ import java.util.stream.Collectors;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class CreateTableOptions {
     private final Map<String, String> options = new HashMap<>();
 

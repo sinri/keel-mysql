@@ -1,6 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.component;
 
-import org.jetbrains.annotations.Nullable;
+
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.stream.Collectors;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public abstract class TableCreateIndexDefinition extends TableCreateDefinition {
     /**
      * Each as {@code key_part: {col_name [(length)] | (expr)} [ASC | DESC] }

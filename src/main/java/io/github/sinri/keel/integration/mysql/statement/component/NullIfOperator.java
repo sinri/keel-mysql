@@ -1,21 +1,23 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 
 /**
  * NULLIF函数操作符类，用于构建MySQL NULLIF函数
  * {@code NULLIF(expr1,expr2) }
  * <p>
- * Returns NULL if expr1 = expr2 is true, otherwise returns expr1. This is the same as CASE WHEN expr1 = expr2 THEN NULL ELSE expr1 END.
+ * Returns NULL if expr1 = expr2 is true, otherwise returns expr1. This is the same as CASE WHEN expr1 = expr2 THEN NULL
+ * ELSE expr1 END.
  *
  * @since 5.0.0
  */
+@NullMarked
 public class NullIfOperator {
-    private String baseExpression;
-    private String nullRefExpression;
+    private @Nullable String baseExpression;
+    private @Nullable String nullRefExpression;
 
 
     public NullIfOperator setBaseAsNumber(@Nullable Number number) {
@@ -28,7 +30,7 @@ public class NullIfOperator {
         return this;
     }
 
-    public NullIfOperator setBaseExpression(@NotNull String baseExpression) {
+    public NullIfOperator setBaseExpression(String baseExpression) {
         this.baseExpression = baseExpression;
         return this;
     }
@@ -43,7 +45,7 @@ public class NullIfOperator {
         return this;
     }
 
-    public NullIfOperator setNullRefExpression(@NotNull String nullRefExpression) {
+    public NullIfOperator setNullRefExpression(String nullRefExpression) {
         this.nullRefExpression = nullRefExpression;
         return this;
     }

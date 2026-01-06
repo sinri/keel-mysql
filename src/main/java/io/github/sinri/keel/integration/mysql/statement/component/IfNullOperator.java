@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -14,9 +14,10 @@ import org.jetbrains.annotations.Nullable;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class IfNullOperator {
-    private String conditionExpression;
-    private String expressionForNull;
+    private @Nullable String conditionExpression;
+    private @Nullable String expressionForNull;
 
 
     public IfNullOperator setConditionAsNumber(@Nullable Number number) {
@@ -44,7 +45,7 @@ public class IfNullOperator {
         return this;
     }
 
-    public IfNullOperator setExpressionForNull(@NotNull String expressionForNull) {
+    public IfNullOperator setExpressionForNull(String expressionForNull) {
         this.expressionForNull = expressionForNull;
         return this;
     }

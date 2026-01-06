@@ -3,7 +3,7 @@ package io.github.sinri.keel.integration.mysql.statement.templated;
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ModifyStatementMixin;
 import io.vertx.core.Handler;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 
 /**
@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class TemplatedModifyStatement extends AbstractStatement implements ModifyStatementMixin, TemplatedStatement {
     private final String templateSql;
     private final TemplateArgumentMapping argumentMapping;
@@ -20,13 +21,13 @@ public class TemplatedModifyStatement extends AbstractStatement implements Modif
      *
      * @param templateSql SQL模板字符串
      */
-    public TemplatedModifyStatement(@NotNull String templateSql) {
+    public TemplatedModifyStatement(String templateSql) {
         this.templateSql = templateSql;
         this.argumentMapping = new TemplateArgumentMapping();
     }
 
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         return this.build();
     }
 
@@ -42,10 +43,11 @@ public class TemplatedModifyStatement extends AbstractStatement implements Modif
 
     /**
      * 绑定参数
+     *
      * @param binder 参数绑定器
      * @return 自身实例
      */
-    public TemplatedModifyStatement bindArguments(@NotNull Handler<TemplateArgumentMapping> binder) {
+    public TemplatedModifyStatement bindArguments(Handler<TemplateArgumentMapping> binder) {
         binder.handle(this.argumentMapping);
         return this;
     }

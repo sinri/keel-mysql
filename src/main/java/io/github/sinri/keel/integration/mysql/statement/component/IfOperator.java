@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * IF函数操作符类，用于构建MySQL IF函数
@@ -11,21 +11,22 @@ import org.jetbrains.annotations.Nullable;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class IfOperator {
-    private String conditionExpression;
-    private String expressionForNonEmpty;
-    private String expressionForEmpty;
+    private @Nullable String conditionExpression;
+    private @Nullable String expressionForNonEmpty;
+    private @Nullable String expressionForEmpty;
 
     public IfOperator() {
 
     }
 
-    public IfOperator setConditionNumber(@NotNull Number conditionNumber) {
+    public IfOperator setConditionNumber(Number conditionNumber) {
         this.conditionExpression = String.valueOf(conditionNumber);
         return this;
     }
 
-    public IfOperator setConditionExpression(@NotNull String conditionExpression) {
+    public IfOperator setConditionExpression(String conditionExpression) {
         this.conditionExpression = conditionExpression;
         return this;
     }
@@ -45,7 +46,7 @@ public class IfOperator {
         return this;
     }
 
-    public IfOperator setExpressionForNonEmpty(@NotNull String expressionForNonEmpty) {
+    public IfOperator setExpressionForNonEmpty(String expressionForNonEmpty) {
         this.expressionForNonEmpty = expressionForNonEmpty;
         return this;
     }
@@ -65,7 +66,7 @@ public class IfOperator {
         return this;
     }
 
-    public IfOperator setExpressionForEmpty(@NotNull String expressionForEmpty) {
+    public IfOperator setExpressionForEmpty(String expressionForEmpty) {
         this.expressionForEmpty = expressionForEmpty;
         return this;
     }

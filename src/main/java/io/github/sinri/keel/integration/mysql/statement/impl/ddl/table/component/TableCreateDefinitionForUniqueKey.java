@@ -1,11 +1,13 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.component;
 
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @since 5.0.0
  */
+@NullMarked
 public final class TableCreateDefinitionForUniqueKey extends TableCreateIndexDefinition {
     private @Nullable String constraintSymbol;
     private @Nullable String indexName = null;

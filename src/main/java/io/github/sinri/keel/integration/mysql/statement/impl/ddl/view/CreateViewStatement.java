@@ -2,8 +2,8 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.view;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.SelectStatement;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
  * @see <a href="https://dev.mysql.com/doc/refman/8.0/en/create-view.html">CREATE VIEW Statement</a>
  * @since 5.0.0
  */
+@NullMarked
 public class CreateViewStatement extends AbstractStatement {
+    private final List<String> columns = new ArrayList<>();
     private boolean createOrReplace = false;
     /**
      * {@code UNDEFINED | MERGE | TEMPTABLE }
@@ -22,9 +24,8 @@ public class CreateViewStatement extends AbstractStatement {
     private @Nullable String algorithm = null;
     private @Nullable String definer = null;
     private @Nullable String sqlSecurity = null;
-    private @NotNull String viewName = "";
-    private final List<String> columns = new ArrayList<>();
-    private SelectStatement selectStatement;
+    private String viewName = "";
+    private @Nullable SelectStatement selectStatement;
     /**
      * {@code [WITH [CASCADED | LOCAL] CHECK OPTION]}
      */
@@ -60,18 +61,18 @@ public class CreateViewStatement extends AbstractStatement {
         return this;
     }
 
-    public CreateViewStatement setViewName(@NotNull String viewName) {
+    public CreateViewStatement setViewName(String viewName) {
         this.viewName = viewName;
         return this;
     }
 
-    public CreateViewStatement addColumns(@Nullable String columnName) {
+    public CreateViewStatement addColumns(String columnName) {
         this.columns.add(columnName);
         return this;
     }
 
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         /*
         CREATE
     [OR REPLACE]
