@@ -1,11 +1,12 @@
 package io.github.sinri.keel.integration.mysql.connection;
 
 import io.vertx.sqlclient.SqlConnection;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
+@NullMarked
 public abstract class AbstractNamedMySQLConnection implements NamedMySQLConnection {
-    private final @NotNull SqlConnection sqlConnection;
+    private final SqlConnection sqlConnection;
     private @Nullable String mysqlVersion;
 
     /**
@@ -13,7 +14,7 @@ public abstract class AbstractNamedMySQLConnection implements NamedMySQLConnecti
      *
      * @param sqlConnection SQL连接对象
      */
-    public AbstractNamedMySQLConnection(@NotNull SqlConnection sqlConnection) {
+    public AbstractNamedMySQLConnection(SqlConnection sqlConnection) {
         this.sqlConnection = sqlConnection;
     }
 
@@ -22,7 +23,7 @@ public abstract class AbstractNamedMySQLConnection implements NamedMySQLConnecti
      *
      * @return SQL连接对象
      */
-    public @NotNull SqlConnection getSqlConnection() {
+    public SqlConnection getSqlConnection() {
         return sqlConnection;
     }
 

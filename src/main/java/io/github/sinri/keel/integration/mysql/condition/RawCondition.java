@@ -1,15 +1,16 @@
 package io.github.sinri.keel.integration.mysql.condition;
 
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * 原始条件类，用于直接存储和生成SQL条件表达式
  *
  * @since 5.0.0
  */
+@NullMarked
 public class RawCondition implements MySQLCondition {
-    private @NotNull String rawConditionExpression;
+    private String rawConditionExpression;
 
     /**
      * 构造空的原始条件
@@ -23,24 +24,26 @@ public class RawCondition implements MySQLCondition {
      *
      * @param rawConditionExpression 原始条件表达式
      */
-    public RawCondition(@NotNull String rawConditionExpression) {
+    public RawCondition(String rawConditionExpression) {
         this.rawConditionExpression = rawConditionExpression;
     }
 
     /**
      * 设置原始条件表达式
+     *
      * @param rawConditionExpression 原始条件表达式
      */
-    public void setRawConditionExpression(@NotNull String rawConditionExpression) {
+    public void setRawConditionExpression(String rawConditionExpression) {
         this.rawConditionExpression = rawConditionExpression;
     }
 
     /**
      * 生成SQL的条件表达式文本
+     *
      * @return SQL条件表达式
      */
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         return rawConditionExpression;
     }
 }

@@ -6,8 +6,8 @@ import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
 import io.vertx.core.Vertx;
 import io.vertx.sqlclient.SqlConnection;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.io.Closeable;
 
@@ -17,16 +17,17 @@ import java.io.Closeable;
  *
  * @since 5.0.0
  */
+@NullMarked
 public interface NamedMySQLConnection extends Closeable {
 
-    @NotNull SqlConnection getSqlConnection();
+    SqlConnection getSqlConnection();
 
     /**
      * 获取提供SQL连接的数据源名称
      *
      * @return 数据源名称
      */
-    @NotNull String getDataSourceName();
+    String getDataSourceName();
 
     /**
      * 获取MySQL版本信息
@@ -91,7 +92,7 @@ public interface NamedMySQLConnection extends Closeable {
         return null != sqlConnection.transaction();
     }
 
-    default @NotNull Future<Void> closeSqlConnection() {
+    default Future<Void> closeSqlConnection() {
         return getSqlConnection().close();
     }
 

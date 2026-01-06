@@ -3,8 +3,8 @@ package io.github.sinri.keel.integration.mysql.condition;
 import io.github.sinri.keel.integration.mysql.Quoter;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLGenerateError;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -17,10 +17,11 @@ import java.util.Objects;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class AmongstCondition implements MySQLCondition {
     public static final String OP_IN = "IN";
-    protected final @NotNull List<@NotNull String> targetSet;
-    protected String element;
+    protected final List<String> targetSet;
+    protected @Nullable String element;
     protected boolean inverseOperator;
 
     public AmongstCondition() {
@@ -28,41 +29,41 @@ public class AmongstCondition implements MySQLCondition {
         this.targetSet = new ArrayList<>();
     }
 
-    public @NotNull AmongstCondition not() {
+    public AmongstCondition not() {
         this.inverseOperator = true;
         return this;
     }
 
-    public @NotNull AmongstCondition elementAsExpression(@NotNull String element) {
+    public AmongstCondition elementAsExpression(String element) {
         this.element = element;
         return this;
     }
 
-    public @NotNull AmongstCondition elementAsValue(@Nullable String element) {
+    public AmongstCondition elementAsValue(@Nullable String element) {
         this.element = new Quoter(element).toString();
         return this;
     }
 
-    public @NotNull AmongstCondition elementAsValue(@Nullable Number element) {
+    public AmongstCondition elementAsValue(@Nullable Number element) {
         this.element = new Quoter(element).toString();
         return this;
     }
 
-    public @NotNull AmongstCondition amongstLiteralValueList(@NotNull Iterable<?> targets) {
+    public AmongstCondition amongstLiteralValueList(Iterable<?> targets) {
         for (Object next : targets) {
             this.amongstLiteralValue(next);
         }
         return this;
     }
 
-    public @NotNull AmongstCondition amongstNumericValueList(@NotNull Iterable<? extends Number> targets) {
+    public AmongstCondition amongstNumericValueList(Iterable<? extends Number> targets) {
         for (Number next : targets) {
             this.amongstNumericValue(next);
         }
         return this;
     }
 
-    protected @NotNull AmongstCondition amongstLiteralValue(@Nullable Object value) {
+    protected AmongstCondition amongstLiteralValue(@Nullable Object value) {
         if (value == null) {
             this.targetSet.add("NULL");
         } else {
@@ -72,7 +73,7 @@ public class AmongstCondition implements MySQLCondition {
     }
 
 
-    protected @NotNull AmongstCondition amongstNumericValue(@Nullable Number value) {
+    protected AmongstCondition amongstNumericValue(@Nullable Number value) {
         if (value == null) {
             this.targetSet.add("NULL");
         } else {
@@ -85,12 +86,12 @@ public class AmongstCondition implements MySQLCondition {
         return this;
     }
 
-    protected @NotNull AmongstCondition amongstExpression(@NotNull String value) {
+    protected AmongstCondition amongstExpression(String value) {
         this.targetSet.add(Objects.requireNonNull(value));
         return this;
     }
 
-    public @NotNull AmongstCondition amongstExpressionList(@NotNull List<@NotNull String> values) {
+    public AmongstCondition amongstExpressionList(List<String> values) {
         values.forEach(x -> this.amongstExpression(Objects.requireNonNull(x)));
         return this;
     }
@@ -98,7 +99,7 @@ public class AmongstCondition implements MySQLCondition {
     /**
      * @param readStatement A READ Statement, such as SELECT.
      */
-    public @NotNull AmongstCondition amongstReadStatement(@NotNull ReadStatementMixin readStatement) {
+    public AmongstCondition amongstReadStatement(ReadStatementMixin readStatement) {
         return this.amongstExpression(readStatement.toString());
     }
 
@@ -108,7 +109,7 @@ public class AmongstCondition implements MySQLCondition {
      * @throws KeelSQLGenerateError sql generate error
      */
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         if (targetSet.isEmpty()) {
             throw new KeelSQLGenerateError("AmongstCondition Target Set Empty");
         }

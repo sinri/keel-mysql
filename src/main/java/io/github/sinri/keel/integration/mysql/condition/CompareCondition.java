@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.condition;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 
@@ -11,6 +11,7 @@ import java.math.BigDecimal;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class CompareCondition implements MySQLCondition {
     public static final String OP_EQ = "=";
     public static final String OP_NEQ = "<>";
@@ -21,9 +22,9 @@ public class CompareCondition implements MySQLCondition {
     public static final String OP_ELT = "<=";
     public static final String OP_IS = "IS";
     public static final String OP_LIKE = "LIKE";
-    protected String leftSide;
-    protected String operator;
-    protected String rightSide;
+    protected @Nullable String leftSide;
+    protected @Nullable String operator;
+    protected @Nullable String rightSide;
     protected boolean inverseOperator;
 
     public CompareCondition() {
@@ -33,7 +34,7 @@ public class CompareCondition implements MySQLCondition {
         this.inverseOperator = false;
     }
 
-    public CompareCondition(@NotNull String operator) {
+    public CompareCondition(String operator) {
         this.leftSide = null;
         this.operator = operator;
         this.rightSide = null;
@@ -42,6 +43,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为等于操作符
+     *
      * @return 自身实例
      */
     public CompareCondition beEqual() {
@@ -51,6 +53,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为不等于操作符
+     *
      * @return 自身实例
      */
     public CompareCondition beNotEqual() {
@@ -60,6 +63,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为空安全等于操作符
+     *
      * @return 自身实例
      */
     public CompareCondition beEqualNullSafe() {
@@ -69,6 +73,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为大于操作符
+     *
      * @return 自身实例
      */
     public CompareCondition beGreaterThan() {
@@ -78,6 +83,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为大于等于操作符
+     *
      * @return 自身实例
      */
     public CompareCondition beEqualOrGreaterThan() {
@@ -87,6 +93,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为小于操作符
+     *
      * @return 自身实例
      */
     public CompareCondition beLessThan() {
@@ -96,6 +103,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为小于等于操作符
+     *
      * @return 自身实例
      */
     public CompareCondition beEqualOrLessThan() {
@@ -115,16 +123,18 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置比较表达式（左操作数）
+     *
      * @param leftSide 左操作数
      * @return 自身实例
      */
-    public CompareCondition compareExpression(@NotNull Object leftSide) {
+    public CompareCondition compareExpression(Object leftSide) {
         this.leftSide = leftSide.toString();
         return this;
     }
 
     /**
      * 设置比较值（左操作数）
+     *
      * @param leftSide 左操作数
      * @return 自身实例
      */
@@ -135,26 +145,29 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置操作符
+     *
      * @param operator 操作符
      * @return 自身实例
      */
-    public CompareCondition operator(@NotNull String operator) {
+    public CompareCondition operator(String operator) {
         this.operator = operator;
         return this;
     }
 
     /**
      * 设置比较表达式（右操作数）
+     *
      * @param rightSide 右操作数
      * @return 自身实例
      */
-    public CompareCondition againstExpression(@NotNull String rightSide) {
+    public CompareCondition againstExpression(String rightSide) {
         this.rightSide = rightSide;
         return this;
     }
 
     /**
      * 设置字面量值（右操作数）
+     *
      * @param rightSide 右操作数
      * @return 自身实例
      */
@@ -165,10 +178,11 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置数值（右操作数）
+     *
      * @param rightSide 右操作数
      * @return 自身实例
      */
-    public CompareCondition againstNumericValue(@NotNull Number rightSide) {
+    public CompareCondition againstNumericValue(Number rightSide) {
         if (rightSide instanceof BigDecimal) {
             this.rightSide = ((BigDecimal) rightSide).toPlainString();
         } else {
@@ -179,6 +193,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为NULL比较
+     *
      * @return 自身实例
      */
     public CompareCondition isNull() {
@@ -189,6 +204,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为TRUE比较
+     *
      * @return 自身实例
      */
     public CompareCondition isTrue() {
@@ -199,6 +215,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为FALSE比较
+     *
      * @return 自身实例
      */
     public CompareCondition isFalse() {
@@ -209,6 +226,7 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为UNKNOWN比较
+     *
      * @return 自身实例
      */
     public CompareCondition isUnknown() {
@@ -219,10 +237,11 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为包含比较（LIKE）
+     *
      * @param rightSide 包含的字符串
      * @return 自身实例
      */
-    public CompareCondition contains(@NotNull String rightSide) {
+    public CompareCondition contains(String rightSide) {
         this.operator = OP_LIKE;
         String x = Quoter.escapeStringWithWildcards(rightSide);
         this.rightSide = "'%" + x + "%'";
@@ -231,10 +250,11 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为前缀比较（LIKE）
+     *
      * @param rightSide 前缀字符串
      * @return 自身实例
      */
-    public CompareCondition hasPrefix(@NotNull String rightSide) {
+    public CompareCondition hasPrefix(String rightSide) {
         this.operator = "like";
         String x = Quoter.escapeStringWithWildcards(rightSide);
         this.rightSide = "'" + x + "%'";
@@ -243,10 +263,11 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置为后缀比较（LIKE）
+     *
      * @param rightSide 后缀字符串
      * @return 自身实例
      */
-    public CompareCondition hasSuffix(@NotNull String rightSide) {
+    public CompareCondition hasSuffix(String rightSide) {
         this.operator = "like";
         String x = Quoter.escapeStringWithWildcards(rightSide);
         this.rightSide = "'%" + x + "'";
@@ -255,11 +276,12 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置表达式等于字面量值的快捷方法
+     *
      * @param expression 表达式
-     * @param value 值
+     * @param value      值
      * @return 自身实例
      */
-    public CompareCondition expressionEqualsLiteralValue(@NotNull String expression, @Nullable Object value) {
+    public CompareCondition expressionEqualsLiteralValue(String expression, @Nullable Object value) {
         if (value == null) {
             return this.compareExpression(expression).isNull();
         }
@@ -271,11 +293,12 @@ public class CompareCondition implements MySQLCondition {
 
     /**
      * 设置表达式等于数值值的快捷方法
+     *
      * @param expression 表达式
-     * @param value 数值
+     * @param value      数值
      * @return 自身实例
      */
-    public CompareCondition expressionEqualsNumericValue(@NotNull String expression, @NotNull Number value) {
+    public CompareCondition expressionEqualsNumericValue(String expression, Number value) {
         return this
                 .compareExpression(expression)
                 .beEqual()
@@ -286,7 +309,7 @@ public class CompareCondition implements MySQLCondition {
      * 生成SQL的条件表达式文本
      */
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         String x = leftSide + " " + operator + " " + rightSide;
         if (inverseOperator) {
             x = "NOT (" + x + ")";

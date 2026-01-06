@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.condition;
 
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLGenerateError;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,28 +11,29 @@ import java.util.List;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class GroupCondition implements MySQLCondition {
     public static final String JUNCTION_FOR_AND = "AND";
     public static final String JUNCTION_FOR_OR = "OR";
 
-    protected final @NotNull List<@NotNull MySQLCondition> conditions = new ArrayList<>();
+    protected final List<MySQLCondition> conditions = new ArrayList<>();
     protected final String junction;
 
-    public GroupCondition(@NotNull String junction) {
+    public GroupCondition(String junction) {
         this.junction = junction;
     }
 
-    public GroupCondition(@NotNull String junction, @NotNull List<@NotNull MySQLCondition> conditions) {
+    public GroupCondition(String junction, List<MySQLCondition> conditions) {
         this.junction = junction;
         this.conditions.addAll(conditions);
     }
 
-    public GroupCondition add(@NotNull MySQLCondition condition) {
+    public GroupCondition add(MySQLCondition condition) {
         this.conditions.add(condition);
         return this;
     }
 
-    public GroupCondition add(@NotNull List<@NotNull MySQLCondition> conditions) {
+    public GroupCondition add(List<MySQLCondition> conditions) {
         this.conditions.addAll(conditions);
         return this;
     }
@@ -43,7 +44,7 @@ public class GroupCondition implements MySQLCondition {
      * @throws KeelSQLGenerateError sql generate error
      */
     @Override
-    public @NotNull String toString() {
+    public String toString() {
         if (conditions.isEmpty()) {
             return "";
         }
