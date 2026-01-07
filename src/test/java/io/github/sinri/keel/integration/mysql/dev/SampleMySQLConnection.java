@@ -2,8 +2,9 @@ package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.integration.mysql.connection.AbstractNamedMySQLConnection;
 import io.vertx.sqlclient.SqlConnection;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 class SampleMySQLConnection extends AbstractNamedMySQLConnection {
 
     /**
@@ -11,12 +12,12 @@ class SampleMySQLConnection extends AbstractNamedMySQLConnection {
      *
      * @param sqlConnection SQL连接对象
      */
-    public SampleMySQLConnection(@NotNull SqlConnection sqlConnection) {
+    public SampleMySQLConnection(SqlConnection sqlConnection) {
         super(sqlConnection);
     }
 
     @Override
-    public @NotNull String getDataSourceName() {
+    public String getDataSourceName() {
         return "union";
     }
 }

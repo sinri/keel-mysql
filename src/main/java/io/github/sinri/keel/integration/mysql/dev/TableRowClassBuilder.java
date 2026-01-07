@@ -61,13 +61,12 @@ class TableRowClassBuilder {
         var className = getClassName();
         var vcsFriendly = options.isVcsFriendly();
         StringBuilder code = new StringBuilder();
-
         code.append("package ").append(options.getPackageName()).append(";").append("\n")
             .append("import ").append(AbstractTableRow.class.getName()).append(";\n")
             .append("import ").append(JsonObject.class.getName()).append(";\n")
             .append("\n")
-            .append("import org.jetbrains.annotations.NotNull;\n")
-            .append("import org.jetbrains.annotations.Nullable;")
+            .append("import org.jspecify.annotations.NullMarked;\n")
+            .append("import org.jspecify.annotations.Nullable;\n")
             .append("import java.util.Objects;\n")
             .append("\n")
             .append("/**\n")
@@ -89,6 +88,7 @@ class TableRowClassBuilder {
         if (tableDeprecated) {
             code.append("@Deprecated\n");
         }
+        code.append("@NullMarked\n");
         code.append("public class ").append(className).append(" extends AbstractTableRow {").append("\n");
 
         if (schema != null && !schema.isBlank()) {
@@ -111,7 +111,6 @@ class TableRowClassBuilder {
                 .append("\t}\n")
                 .append("\n")
                 .append("\t@Override\n")
-                .append("\t\n")
                 .append("\tpublic String sourceTableName() {\n")
                 .append("\t\treturn ").append(this.options.isProvideConstTable() ? "TABLE" : "\"" + table + "\"")
                 .append(";\n")

@@ -10,12 +10,12 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -207,15 +207,24 @@ public class TableRowClassSourceCodeGenerator implements KeelAsyncMixin {
      * Fetch comment of a table (in schema).
      */
     private Future<String> getCommentOfTable(String table, @Nullable String schema) {
-        String sql_for_table_comment = "SELECT TABLE_COMMENT " +
-                "FROM INFORMATION_SCHEMA.TABLES " +
-                "WHERE TABLE_NAME = '" + table + "' " +
-                (schema == null ? "" : ("AND TABLE_SCHEMA = '" + schema + "' "));
+        String sql_for_table_comment = """
+                                       SELECT TABLE_COMMENT
+                                       FROM INFORMATION_SCHEMA.TABLES
+                                       WHERE TABLE_NAME = '%s' %s
+                                       """
+                .formatted(
+                        table,
+                        schema == null ? "" : ("AND TABLE_SCHEMA = '" + schema + "' ")
+                );
         return sqlConnection.query(sql_for_table_comment).execute()
                             .compose(rows -> {
-                                AtomicReference<String> comment = new AtomicReference<>();
-                                rows.forEach(row -> comment.set(row.getString("TABLE_COMMENT")));
-                                return Future.succeededFuture(comment.get());
+                                LateObject<String> lateComment = new LateObject<>();
+                                for (Row row : rows) {
+                                    String s = row.getString("TABLE_COMMENT");
+                                    lateComment.set(s);
+                                    break;
+                                }
+                                return Future.succeededFuture(lateComment.get());
                             });
     }
 

@@ -3,9 +3,10 @@ package io.github.sinri.keel.integration.mysql.dev;
 import io.github.sinri.keel.integration.mysql.provider.KeelMySQLDataSourceProvider;
 import io.github.sinri.keel.tesuto.KeelInstantRunner;
 import io.vertx.core.Future;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
+@NullMarked
 public class MySQLSchemaTableClassFileGeneratorTest extends KeelInstantRunner implements MySQLSchemaTableClassFileGenerator {
     @Override
     public String getTablePackage() {
@@ -23,9 +24,9 @@ public class MySQLSchemaTableClassFileGeneratorTest extends KeelInstantRunner im
     }
 
     @Override
-    protected @NotNull Future<Void> run() throws Exception {
+    protected Future<Void> run() throws Exception {
         return rebuildTablesInSchema(
-                KeelMySQLDataSourceProvider.defaultMySQLDataSourceName(getKeel()),
+                KeelMySQLDataSourceProvider.defaultMySQLDataSourceName(),
                 SampleMySQLConnection::new,
                 "drydock_lesson"
         );
