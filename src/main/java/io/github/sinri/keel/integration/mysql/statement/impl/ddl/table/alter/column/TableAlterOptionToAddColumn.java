@@ -12,9 +12,9 @@ import org.jspecify.annotations.Nullable;
  */
 @NullMarked
 public final class TableAlterOptionToAddColumn extends TableAlterOption {
-    public String columnName = "";
-    public String columnDefinition = "";
-    public @Nullable String position;
+    private String columnName = "";
+    private String columnDefinition = "";
+    private @Nullable String position;
 
     /**
      * 设置列名称

@@ -63,13 +63,16 @@ public class KeelMySQLDataSourceProvider {
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
     ) {
         KeelMySQLConfiguration mySQLConfiguration = getMySQLConfiguration(dataSourceName);
-        var dataSource = new NamedMySQLDataSource<>(
+        NamedMySQLDataSource<C> dataSource = new NamedMySQLDataSource<>(
                 vertx,
                 mySQLConfiguration,
                 connectionSetUpFunction,
                 sqlConnectionWrapper
         );
-        return waitForLoading(vertx, dataSource).map(v -> dataSource);
+        return waitForLoading(vertx, dataSource)
+                .compose(v -> {
+                    return Future.succeededFuture(dataSource);
+                });
     }
 
 

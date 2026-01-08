@@ -7,6 +7,7 @@ import io.vertx.sqlclient.Transaction;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.io.Closeable;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -25,13 +26,14 @@ public class VirtualThreadExtension<C extends NamedMySQLConnection> {
     }
 
     public <T extends @Nullable Objects> T withConnection(Function<C, T> function) {
-        try (C c = fetchMySQLConnection()) {
-            return function.apply(c);
+        try (ClosableNamedMySQLConnection<C> closableNamedMySQLConnection = fetchClosableMySQLConnection()) {
+            return function.apply(closableNamedMySQLConnection.getNamedMySQLConnection());
         }
     }
 
     public <T extends @Nullable Objects> T withTransaction(Function<C, T> function) {
-        try (C c = fetchMySQLConnection()) {
+        try (ClosableNamedMySQLConnection<C> closableNamedMySQLConnection = fetchClosableMySQLConnection()) {
+            C c = closableNamedMySQLConnection.getNamedMySQLConnection();
             Transaction transaction = c.getSqlConnection().begin().await();
             T t;
             try {
@@ -48,8 +50,26 @@ public class VirtualThreadExtension<C extends NamedMySQLConnection> {
     /**
      * In virtual thread mode, fetch a closable named mysql connection (wrapper) to use in try-with closure.
      */
-    public C fetchMySQLConnection() {
+    public ClosableNamedMySQLConnection<C> fetchClosableMySQLConnection() {
         SqlConnection sqlConnection = getMappedDataSource().getPool().getConnection().await();
-        return getMappedDataSource().getSqlConnectionWrapper().apply(sqlConnection);
+        C c = getMappedDataSource().getSqlConnectionWrapper().apply(sqlConnection);
+        return new ClosableNamedMySQLConnection<>(c);
+    }
+
+    public static class ClosableNamedMySQLConnection<C extends NamedMySQLConnection> implements Closeable {
+        private final C namedMySQLConnection;
+
+        public ClosableNamedMySQLConnection(C namedMySQLConnection) {
+            this.namedMySQLConnection = namedMySQLConnection;
+        }
+
+        public C getNamedMySQLConnection() {
+            return namedMySQLConnection;
+        }
+
+        @Override
+        public void close() {
+            namedMySQLConnection.close().await();
+        }
     }
 }

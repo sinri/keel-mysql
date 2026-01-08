@@ -27,20 +27,20 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
     public static final String INSERT = "INSERT";
     public static final String REPLACE = "REPLACE";
 
-    final List<String> columns = new ArrayList<>();
+    private final List<String> columns = new ArrayList<>();
 
-    final List<List<String>> batchValues = new ArrayList<>();
+    private final List<List<String>> batchValues = new ArrayList<>();
 
-    final Map<String, String> onDuplicateKeyUpdateAssignmentMap = new HashMap<>();
+    private final Map<String, String> onDuplicateKeyUpdateAssignmentMap = new HashMap<>();
 
-    final String writeType;
+    private final String writeType;
 
-    String ignoreMark = "";
-    @Nullable String schema;
+    private String ignoreMark = "";
+    private @Nullable String schema;
 
-    String table = "TABLE-NOT-SET";
-    @Nullable String sourceSelectSQL;
-    @Nullable String sourceTableName;
+    private String table = "TABLE-NOT-SET";
+    private @Nullable String sourceSelectSQL;
+    private @Nullable String sourceTableName;
 
     public WriteIntoStatement() {
         this.writeType = INSERT;
@@ -72,8 +72,8 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
         return this;
     }
 
-    public WriteIntoStatement addDataMatrix(List<List<Object>> batch) {
-        for (List<Object> row : batch) {
+    public WriteIntoStatement addDataMatrix(List<List<@Nullable Object>> batch) {
+        for (List<@Nullable Object> row : batch) {
             this.addDataRow(row);
         }
         return this;
@@ -92,9 +92,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
         return this;
     }
 
-    /**
-     * @since 3.0.0
-     */
     public WriteIntoStatement macroWriteRows(Collection<RowToWrite> rows) {
         if (rows.isEmpty()) {
             throw new RuntimeException();
@@ -124,9 +121,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
         return this;
     }
 
-    /**
-     * @since 3.0.0
-     */
     public WriteIntoStatement macroWriteOneRow(RowToWrite row) {
         columns.clear();
         this.batchValues.clear();
@@ -139,9 +133,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
         return this;
     }
 
-    /**
-     * @since 3.0.0
-     */
     public WriteIntoStatement macroWriteOneRow(Handler<RowToWrite> rowEditor) {
         RowToWrite rowToWrite = new RowToWrite();
         rowEditor.handle(rowToWrite);
@@ -166,7 +157,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
     /**
      * @param fieldName the raw column name
      * @return as `onDuplicateKeyUpdate` does
-     * @since 1.10
      */
     public WriteIntoStatement onDuplicateKeyUpdateField(String fieldName) {
         return this.onDuplicateKeyUpdate(fieldName, "values(" + fieldName + ")");
@@ -175,7 +165,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
     /**
      * @param fieldNameList the raw column name list
      * @return as `onDuplicateKeyUpdate` does
-     * @since 1.10
      */
     public WriteIntoStatement onDuplicateKeyUpdateFields(List<String> fieldNameList) {
         for (var fieldName : fieldNameList) {
@@ -187,7 +176,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
     /**
      * @param fieldName the raw column name
      * @return as `onDuplicateKeyUpdate` does
-     * @since 1.10
      */
     public WriteIntoStatement onDuplicateKeyUpdateExceptField(String fieldName) {
         if (columns.isEmpty()) {
@@ -205,7 +193,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
     /**
      * @param fieldNameList the raw column name list
      * @return as `onDuplicateKeyUpdate` does
-     * @since 1.10
      */
     public WriteIntoStatement onDuplicateKeyUpdateExceptFields(List<String> fieldNameList) {
         if (columns.isEmpty()) {
@@ -254,8 +241,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
      *
      * @param chunkSize an integer
      * @return a list of WriteIntoStatement
-     * @since 2.3
-     * @since 3.2.21 changed signature
      */
     public List<WriteIntoStatementMixin> divide(int chunkSize) {
         if (sourceTableName != null || sourceSelectSQL != null) {
@@ -279,12 +264,12 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
         return list;
     }
 
+    @NullMarked
     public static class RowToWrite {
-        final Map<String, String> map = new TreeMap<>();
+        final Map<String, @Nullable String> map = new TreeMap<>();
 
         /**
          * @param jsonObject One row as a JsonObject
-         * @since 3.1.2
          */
         public static RowToWrite fromJsonObject(JsonObject jsonObject) {
             RowToWrite rowToWrite = new RowToWrite();
@@ -294,7 +279,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
 
         /**
          * @param jsonArray Rows in a JsonArray; each item of the array should be a JsonObject to be a row.
-         * @since 3.1.2
          */
         public static Collection<RowToWrite> fromJsonObjectArray(JsonArray jsonArray) {
             Collection<RowToWrite> rows = new ArrayList<>();
@@ -311,7 +295,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
 
         /**
          * @param jsonObjects each item to be a row.
-         * @since 3.1.2
          */
         public static Collection<RowToWrite> fromJsonObjectArray(List<JsonObject> jsonObjects) {
             Collection<RowToWrite> rows = new ArrayList<>();
@@ -322,9 +305,6 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
             return rows;
         }
 
-        /**
-         * @since 3.0.1
-         */
         public RowToWrite putNow(String columnName) {
             return this.putExpression(columnName, "now()");
         }
@@ -334,12 +314,10 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
             return this;
         }
 
-        /**
-         * @since 3.1.0
-         */
         public RowToWrite put(String columnName, @Nullable Object value) {
-            if (value == null) return this.putExpression(columnName, "NULL");
-            else if (value instanceof Number) {
+            if (value == null) {
+                return this.putExpression(columnName, "NULL");
+            } else if (value instanceof Number) {
                 return putExpression(columnName, String.valueOf(value));
             } else {
                 return putExpression(columnName, new Quoter(value.toString()).toString());

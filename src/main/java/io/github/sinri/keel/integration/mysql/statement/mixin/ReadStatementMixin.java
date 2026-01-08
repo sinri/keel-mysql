@@ -9,6 +9,7 @@ import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Cursor;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +31,7 @@ public interface ReadStatementMixin extends AnyStatement {
      * @param <T>                  type of result object
      * @return 查询到数据，异步返回第一行数据封装的指定类实例；查询不到时异步返回null。
      */
-    default <T extends ResultRow> Future<T> queryForOneRow(NamedMySQLConnection namedMySQLConnection, Class<T> classT) {
+    default <T extends ResultRow> Future<@Nullable T> queryForOneRow(NamedMySQLConnection namedMySQLConnection, Class<T> classT) {
         return execute(namedMySQLConnection)
                 .compose(resultMatrix -> {
                     try {

@@ -49,14 +49,14 @@ public class AmongstCondition implements MySQLCondition {
         return this;
     }
 
-    public AmongstCondition amongstLiteralValueList(Iterable<?> targets) {
+    public <T> AmongstCondition amongstLiteralValueList(Iterable<T> targets) {
         for (Object next : targets) {
             this.amongstLiteralValue(next);
         }
         return this;
     }
 
-    public AmongstCondition amongstNumericValueList(Iterable<? extends Number> targets) {
+    public <T extends Number> AmongstCondition amongstNumericValueList(Iterable<T> targets) {
         for (Number next : targets) {
             this.amongstNumericValue(next);
         }

@@ -4,6 +4,8 @@ import io.github.sinri.keel.integration.mysql.Quoter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Objects;
+
 
 /**
  * CASE操作符配对类，用于定义CASE语句中的WHEN-THEN对
@@ -40,8 +42,8 @@ public class CaseOperatorPair {
     }
 
 
-    public @Nullable String getWhenExpression() {
-        return whenExpression;
+    public String getWhenExpression() {
+        return Objects.requireNonNull(whenExpression);
     }
 
     public CaseOperatorPair setWhenExpression(String whenExpression) {
@@ -50,8 +52,8 @@ public class CaseOperatorPair {
     }
 
 
-    public @Nullable String getThenExpression() {
-        return thenExpression;
+    public String getThenExpression() {
+        return Objects.requireNonNull(thenExpression);
     }
 
     public CaseOperatorPair setThenExpression(String thenExpression) {

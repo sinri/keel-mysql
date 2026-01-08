@@ -25,23 +25,8 @@ public interface SelectStatementMixin extends ReadStatementMixin {
             long pageSize
     );
 
-    class PaginationResult {
-        private final long total;
-        private final ResultMatrix resultMatrix;
-
-        public PaginationResult(long total, ResultMatrix resultMatrix) {
-            this.total = total;
-            this.resultMatrix = resultMatrix;
-        }
-
-        public long getTotal() {
-            return total;
-        }
-
-        public ResultMatrix getResultMatrix() {
-            return resultMatrix;
-        }
-
+    @NullMarked
+    record PaginationResult(long total, ResultMatrix resultMatrix) {
         /**
          * @since 4.0.8
          */

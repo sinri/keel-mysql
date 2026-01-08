@@ -21,6 +21,11 @@ public class AlterTableStatement extends AbstractStatement {
     private String tableName = "";
     private @Nullable TableAlterPartitionOptions partitionOptions = null;
 
+    public AlterTableStatement addAlterOption(TableAlterOption alterOption) {
+        alterOptions.add(alterOption);
+        return this;
+    }
+
     /**
      * 设置模式名称
      *
@@ -69,7 +74,8 @@ public class AlterTableStatement extends AbstractStatement {
         //    [alter_option [, alter_option] ...]
         //    [partition_options]
         return "ALTER TABLE " + getTableExpression() + " " + SQL_COMPONENT_SEPARATOR
-                + alterOptions.stream().map(Object::toString)
+                + alterOptions.stream()
+                              .map(TableAlterOption::toString)
                               .reduce((a, b) -> a + "," + b) + " " + SQL_COMPONENT_SEPARATOR
                 + (partitionOptions == null ? "" : partitionOptions);
     }

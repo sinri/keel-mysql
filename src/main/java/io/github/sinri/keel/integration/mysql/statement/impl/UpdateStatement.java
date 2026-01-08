@@ -21,12 +21,9 @@ import java.util.function.Function;
  */
 @NullMarked
 public class UpdateStatement extends AbstractStatement implements ModifyStatementMixin {
-    /**
-     * @since 3.0.19 changed to use UpdateSetAssignmentComponent as item
-     */
-    final List<UpdateSetAssignmentComponent> assignments = new ArrayList<>();
-    final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
-    final List<String> sortRules = new ArrayList<>();
+    private final List<UpdateSetAssignmentComponent> assignments = new ArrayList<>();
+    private final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
+    private final List<String> sortRules = new ArrayList<>();
     /**
      * UPDATE [LOW_PRIORITY] [IGNORE] table_reference
      * SET assignment_list
@@ -36,11 +33,11 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
      */
 
 
-    String ignoreMark = "";
-    @Nullable String schema;
+    private String ignoreMark = "";
+    private @Nullable String schema;
 
-    String table = "TABLE-NOT-SET";
-    long limit = 0;
+    private String table = "TABLE-NOT-SET";
+    private long limit = 0;
 
     public UpdateStatement() {
     }
@@ -62,17 +59,11 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
         return this;
     }
 
-    /**
-     * @since 3.0.19 Technical Preview
-     */
     public UpdateStatement setWithAssignment(UpdateSetAssignmentComponent updateSetAssignmentComponent) {
         this.assignments.add(updateSetAssignmentComponent);
         return this;
     }
 
-    /**
-     * @since 3.0.19
-     */
     public UpdateStatement setWithAssignments(Collection<UpdateSetAssignmentComponent> updateSetAssignmentComponents) {
         this.assignments.addAll(updateSetAssignmentComponents);
         return this;
@@ -128,7 +119,6 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
         }
         sql += table;
 
-        // since 3.0.19
         List<String> setPairs = new ArrayList<>();
         assignments.forEach(assignment -> setPairs.add(assignment.toString()));
         sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "SET " + String.join(", ", setPairs);

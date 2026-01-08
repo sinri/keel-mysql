@@ -10,7 +10,7 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public final class TableAlterOptionToDropColumn extends TableAlterOption {
-    public String columnName = "";
+    private String columnName = "";
 
     /**
      * 设置要删除的列名称

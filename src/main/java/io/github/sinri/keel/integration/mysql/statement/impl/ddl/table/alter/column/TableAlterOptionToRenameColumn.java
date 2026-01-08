@@ -10,8 +10,8 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public final class TableAlterOptionToRenameColumn extends TableAlterOption {
-    public String columnName = "";
-    public String newColumnName = "";
+    private String columnName = "";
+    private String newColumnName = "";
 
     /**
      * 设置原列名称

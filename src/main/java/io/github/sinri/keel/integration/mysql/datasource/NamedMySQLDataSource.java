@@ -6,9 +6,9 @@ import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
-import io.vertx.core.AsyncResult;
+import io.vertx.core.Closeable;
+import io.vertx.core.Completable;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mysqlclient.MySQLBuilder;
@@ -30,7 +30,7 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 @NullMarked
-public class NamedMySQLDataSource<C extends NamedMySQLConnection> {
+public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Closeable {
 
     private final Pool pool;
     private final KeelMySQLConfiguration configuration;
@@ -201,8 +201,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> {
      *
      * @return MySQL版本信息，可能为null
      */
-    @Nullable
-    public String getFullVersionRef() {
+    public @Nullable String getFullVersionRef() {
         return fullVersionRef.get();
     }
 
@@ -259,7 +258,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> {
                                                            } else {
                                                                String error = "MySQLDataSource ROLLBACK Finished. Core Reason: "
                                                                        + err.getMessage();
-                                                               // since 3.0.3 rollback failure would be thrown directly to downstream.
+                                                               // rollback failure would be thrown directly to downstream.
                                                                return transaction.rollback()
                                                                                  .compose(rollbackDone -> Future
                                                                                          .failedFuture(new KeelMySQLException(error, err)));
@@ -286,18 +285,19 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     /**
      * 关闭数据源并处理结果
      *
-     * @param ar 异步结果处理器
+     * @param completion 异步结果处理器
      */
-    public void close(Handler<AsyncResult<Void>> ar) {
-        this.pool.close().onComplete(ar);
+    @Override
+    public void close(Completable<Void> completion) {
+        this.pool.close().onComplete(completion);
     }
+
 
     /**
      * 获取MySQL连接
      *
      * @return 连接Future
      */
-
     private Future<C> fetchMySQLConnection() {
         return Future.succeededFuture()
                      .compose(v -> pool.getConnection())
@@ -320,11 +320,6 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> {
                                              throwable))
                      );
     }
-
-    //    @Override
-    //    public Keel getKeel() {
-    //        return keel;
-    //    }
 
     Pool getPool() {
         return pool;

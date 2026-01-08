@@ -360,15 +360,12 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         }
     }
 
+    @NullMarked
     public static class ColumnComponent {
-        @Nullable
-        String schema;
-        @Nullable
-        String field = "NOT-SET";
-        @Nullable
-        String expression;
-        @Nullable
-        String alias;
+        @Nullable String schema;
+        @Nullable String field = "NOT-SET";
+        @Nullable String expression;
+        @Nullable String alias;
 
         public ColumnComponent field(String field) {
             this.field = field;

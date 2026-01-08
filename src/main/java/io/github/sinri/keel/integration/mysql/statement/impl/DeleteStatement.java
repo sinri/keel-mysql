@@ -19,8 +19,8 @@ import java.util.function.Function;
  */
 @NullMarked
 public class DeleteStatement extends AbstractStatement implements ModifyStatementMixin {
-    final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
-    final List<String> sortRules = new ArrayList<>();
+    private final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
+    private final List<String> sortRules = new ArrayList<>();
     /**
      * DELETE [LOW_PRIORITY] [QUICK] [IGNORE] FROM tbl_name [[AS] tbl_alias]
      * [PARTITION (partition_name [, partition_name] ...)]
@@ -29,9 +29,9 @@ public class DeleteStatement extends AbstractStatement implements ModifyStatemen
      * [LIMIT row_count]
      */
 
-    @Nullable String schema;
-    String table = "NOT-SET";
-    long limit = 0;
+    private @Nullable String schema;
+    private String table = "NOT-SET";
+    private long limit = 0;
 
     public DeleteStatement() {
 

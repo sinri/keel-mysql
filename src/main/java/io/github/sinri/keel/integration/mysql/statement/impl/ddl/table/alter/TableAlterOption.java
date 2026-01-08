@@ -9,5 +9,5 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public abstract class TableAlterOption {
-
+    public abstract String toString();
 }

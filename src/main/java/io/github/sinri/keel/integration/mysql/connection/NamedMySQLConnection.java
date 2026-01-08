@@ -1,15 +1,11 @@
 package io.github.sinri.keel.integration.mysql.connection;
 
-import io.github.sinri.keel.core.utils.ReflectionUtils;
-import io.vertx.core.Context;
+import io.vertx.core.Closeable;
+import io.vertx.core.Completable;
 import io.vertx.core.Future;
-import io.vertx.core.ThreadingModel;
-import io.vertx.core.Vertx;
 import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-
-import java.io.Closeable;
 
 
 /**
@@ -92,20 +88,25 @@ public interface NamedMySQLConnection extends Closeable {
         return null != sqlConnection.transaction();
     }
 
-    default Future<Void> closeSqlConnection() {
+    default Future<Void> close() {
         return getSqlConnection().close();
     }
 
-    @Override
-    default void close() {
-        Future<Void> future = closeSqlConnection();
+    //    @Override
+    //    default void close() {
+    //        Future<Void> future = closeSqlConnection();
+    //
+    //        Context currentContext = Vertx.currentContext();
+    //        if (currentContext != null
+    //                && currentContext.threadingModel() == ThreadingModel.VIRTUAL_THREAD
+    //                && ReflectionUtils.isVirtualThreadsAvailable()
+    //        ) {
+    //            future.await();
+    //        }
+    //    }
 
-        Context currentContext = Vertx.currentContext();
-        if (currentContext != null
-                && currentContext.threadingModel() == ThreadingModel.VIRTUAL_THREAD
-                && ReflectionUtils.isVirtualThreadsAvailable()
-        ) {
-            future.await();
-        }
+    @Override
+    default void close(Completable<Void> completion) {
+        close().andThen(completion);
     }
 }
