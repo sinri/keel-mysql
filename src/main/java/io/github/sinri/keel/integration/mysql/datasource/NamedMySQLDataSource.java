@@ -1,6 +1,8 @@
 package io.github.sinri.keel.integration.mysql.datasource;
 
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.core.utils.ReflectionUtils;
+import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
@@ -212,7 +214,41 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @param function 连接操作函数
      * @return 操作结果Future
      */
+    @TechnicalPreview(since = "5.0.0")
+    public <T extends @Nullable Object> Future<ValueBox<T>> executeInConnection(Function<C, Future<T>> function) {
+        return Future.succeededFuture().compose(
+                v -> fetchMySQLConnection()
+                        .compose(sqlConnectionWrapper -> {
+                            borrowedConnectionCounter.incrementAndGet();
+                            return Future.succeededFuture()
+                                         .compose(vv -> function.apply(sqlConnectionWrapper))
+                                         .andThen(tAsyncResult -> Future
+                                                 .succeededFuture()
+                                                 .compose(vv -> sqlConnectionWrapper
+                                                         .getSqlConnection()
+                                                         .close()
+                                                 )
+                                                 .andThen(ar -> {
+                                                     borrowedConnectionCounter.decrementAndGet();
+                                                 }))
+                                         .compose(t -> {
+                                             ValueBox<T> valueBox = new ValueBox<>(t);
+                                             return Future.succeededFuture(valueBox);
+                                         }, throwable -> {
+                                             return Future.failedFuture(new KeelMySQLException(
+                                                     "MySQLDataSource Failed Within SqlConnection: " + throwable,
+                                                     throwable));
+                                         });
+                        })
+        );
+    }
 
+    /**
+     * 使用连接执行操作
+     *
+     * @param function 连接操作函数
+     * @return 操作结果Future
+     */
     public <T extends @Nullable Object> Future<@Nullable T> withConnection(Function<C, Future<@Nullable T>> function) {
         return Future.succeededFuture().compose(
                 v -> fetchMySQLConnection()
@@ -240,7 +276,49 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @param function 事务操作函数
      * @return 事务结果Future
      */
+    @TechnicalPreview(since = "5.0.0")
+    public <T extends @Nullable Object> Future<ValueBox<T>> executeInTransaction(Function<C, Future<T>> function) {
+        return executeInConnection(c -> {
+            return Future.succeededFuture()
+                         .compose(v -> c.getSqlConnection().begin())
+                         .compose(transaction -> Future.succeededFuture()
+                                                       .compose(v -> {
+                                                           // execute and commit
+                                                           return function.apply(c)
+                                                                          .compose(t -> transaction.commit()
+                                                                                                   .compose(committed -> Future.succeededFuture(t)));
+                                                       })
+                                                       .compose(
+                                                               Future::succeededFuture,
+                                                               err -> {
+                                                                   if (err instanceof TransactionRollbackException) {
+                                                                       // already rollback
+                                                                       String error = "MySQLDataSource ROLLBACK Done Manually.";
+                                                                       return Future.failedFuture(new KeelMySQLException(error, err));
+                                                                   } else {
+                                                                       String error = "MySQLDataSource ROLLBACK Finished. Core Reason: "
+                                                                               + err.getMessage();
+                                                                       // rollback failure would be thrown directly to downstream.
+                                                                       return transaction.rollback()
+                                                                                         .compose(rollbackDone -> Future
+                                                                                                 .failedFuture(new KeelMySQLException(error, err)));
+                                                                   }
+                                                               }),
+                                 beginFailure -> Future.failedFuture(new KeelMySQLConnectionException(
+                                         "MySQLDataSource Failed to get SqlConnection for transaction From Pool: "
+                                                 + beginFailure,
+                                         beginFailure))
+                         )
+                         .compose(Future::succeededFuture);
+        });
+    }
 
+    /**
+     * 在事务中使用连接执行操作
+     *
+     * @param function 事务操作函数
+     * @return 事务结果Future
+     */
     public <T extends @Nullable Object> Future<@Nullable T> withTransaction(Function<C, Future<@Nullable T>> function) {
         return withConnection(c -> {
             return Future.succeededFuture()
