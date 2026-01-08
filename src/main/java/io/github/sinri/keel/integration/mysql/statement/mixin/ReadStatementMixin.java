@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
-import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.async.KeelAsyncMixin;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
 import io.github.sinri.keel.integration.mysql.result.row.ResultRow;
@@ -92,7 +92,7 @@ public interface ReadStatementMixin extends AnyStatement {
 
 
     default Future<Void> stream(
-            Keel keel,
+            KeelAsyncMixin keelAsyncMixin,
             NamedMySQLConnection namedMySQLConnection,
             ResultStreamReader resultStreamReader
     ) {
@@ -101,17 +101,17 @@ public interface ReadStatementMixin extends AnyStatement {
                                    .compose(preparedStatement -> {
                                        Cursor cursor = preparedStatement.cursor();
 
-                                       return keel.asyncCallRepeatedly(routineResult -> {
-                                                      if (!cursor.hasMore()) {
-                                                          routineResult.stop();
-                                                          return Future.succeededFuture();
-                                                      }
+                                       return keelAsyncMixin.asyncCallRepeatedly(routineResult -> {
+                                                                if (!cursor.hasMore()) {
+                                                                    routineResult.stop();
+                                                                    return Future.succeededFuture();
+                                                                }
 
-                                                      return cursor.read(1)
-                                                                   .compose(rows -> keel.asyncCallIteratively(rows, resultStreamReader::read));
-                                                  })
-                                                  .eventually(cursor::close)
-                                                  .eventually(preparedStatement::close);
+                                                                return cursor.read(1)
+                                                                             .compose(rows -> keelAsyncMixin.asyncCallIteratively(rows, resultStreamReader::read));
+                                                            })
+                                                            .eventually(cursor::close)
+                                                            .eventually(preparedStatement::close);
                                    });
     }
 

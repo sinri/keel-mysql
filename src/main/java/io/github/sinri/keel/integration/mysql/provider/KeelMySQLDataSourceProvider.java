@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.provider;
 
-import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.NotConfiguredException;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
 import io.github.sinri.keel.integration.mysql.connection.DynamicNamedMySQLConnection;
@@ -37,7 +37,7 @@ public class KeelMySQLDataSourceProvider {
      */
     public static String defaultMySQLDataSourceName() {
         try {
-            return Keel.SHARED_CONFIGURATION.readString(List.of("mysql", "default_data_source_name"));
+            return ConfigElement.root().readString(List.of("mysql", "default_data_source_name"));
         } catch (NotConfiguredException e) {
             return "default";
         }
@@ -50,7 +50,7 @@ public class KeelMySQLDataSourceProvider {
 
 
     public static KeelMySQLConfiguration getMySQLConfiguration(String dataSourceName) {
-        var configuration = Keel.SHARED_CONFIGURATION.extract("mysql", dataSourceName);
+        var configuration = ConfigElement.root().extract("mysql", dataSourceName);
         Objects.requireNonNull(configuration);
         return new KeelMySQLConfiguration(configuration);
     }
