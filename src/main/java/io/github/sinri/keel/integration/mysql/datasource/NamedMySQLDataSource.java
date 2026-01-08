@@ -6,6 +6,7 @@ import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.vertx.core.Closeable;
 import io.vertx.core.Completable;
 import io.vertx.core.Future;
@@ -19,7 +20,6 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 
@@ -34,7 +34,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
 
     private final Pool pool;
     private final KeelMySQLConfiguration configuration;
-    private final @Nullable VirtualThreadExtension<C> virtualThreadExtension;
+    //private final @Nullable VirtualThreadExtension<C> virtualThreadExtension;
+    private final LateObject<VirtualThreadExtension<C>> lateVirtualThreadExtension = new LateObject<>();
 
     /**
      * 记录初始化到池中的连接数
@@ -51,7 +52,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     private final Function<SqlConnection, C> sqlConnectionWrapper;
 
 
-    private final AtomicReference<String> fullVersionRef = new AtomicReference<>(null);
+    private final LateObject<String> lateFullVersion = new LateObject<>();
 
     /**
      * 构造命名MySQL数据源
@@ -90,11 +91,11 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                                 .using(vertx)
                                 .withConnectHandler(sqlConnection -> initializeConnection(sqlConnection, connectionSetUpFunction))
                                 .build();
-        if (ReflectionUtils.isVirtualThreadsAvailable()) {
-            this.virtualThreadExtension = new VirtualThreadExtension<>(this);
-        } else {
-            this.virtualThreadExtension = null;
-        }
+        //        if (ReflectionUtils.isVirtualThreadsAvailable()) {
+        //            this.virtualThreadExtension = new VirtualThreadExtension<>(this);
+        //        } else {
+        //            this.virtualThreadExtension = null;
+        //        }
     }
 
     /**
@@ -139,11 +140,11 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                   }
               })
               .compose(v -> {
-                  if (fullVersionRef.get() == null) {
+                  if (!lateFullVersion.isInitialized()) {
                       return checkMySQLVersion(sqlConnection)
                               .compose(ver -> {
                                   if (ver != null) {
-                                      fullVersionRef.set(ver);
+                                      lateFullVersion.set(ver);
                                   }
                                   return Future.succeededFuture();
                               });
@@ -201,8 +202,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      *
      * @return MySQL版本信息，可能为null
      */
-    public @Nullable String getFullVersionRef() {
-        return fullVersionRef.get();
+    public @Nullable String getFullVersion() {
+        return lateFullVersion.get();
     }
 
     /**
@@ -212,7 +213,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @return 操作结果Future
      */
 
-    public <T> Future<T> withConnection(Function<C, Future<T>> function) {
+    public <T extends @Nullable Object> Future<T> withConnection(Function<C, Future<T>> function) {
         return Future.succeededFuture().compose(
                 v -> fetchMySQLConnection()
                         .compose(sqlConnectionWrapper -> {
@@ -239,7 +240,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @return 事务结果Future
      */
 
-    public <T> Future<T> withTransaction(Function<C, Future<T>> function) {
+    public <T extends @Nullable Object> Future<T> withTransaction(Function<C, Future<T>> function) {
         return withConnection(c -> {
             return Future.succeededFuture()
                          .compose(v -> c.getSqlConnection().begin())
@@ -305,8 +306,10 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                              sqlConnection -> {
                                  C c = this.sqlConnectionWrapper.apply(sqlConnection);
 
-                                 // since 3.1.0: add mysql version to c;
-                                 c.setMysqlVersion(this.fullVersionRef.get());
+                                 // add mysql version to c;
+                                 if (this.lateFullVersion.isInitialized()) {
+                                     c.setMysqlVersion(lateFullVersion.get());
+                                 }
 
                                  return Future.succeededFuture(c);
                              },
@@ -331,9 +334,10 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
 
 
     public VirtualThreadExtension<C> inVirtualThread() {
-        if (virtualThreadExtension == null) {
+        if (ReflectionUtils.isVirtualThreadsAvailable()) {
+            return lateVirtualThreadExtension.ensure(() -> new VirtualThreadExtension<>(this));
+        } else {
             throw new UnsupportedOperationException("Virtual Thread Extension Not Available!");
         }
-        return virtualThreadExtension;
     }
 }
