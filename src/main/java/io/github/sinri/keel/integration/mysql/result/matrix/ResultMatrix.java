@@ -36,6 +36,14 @@ public interface ResultMatrix {
         return new ResultMatrixImpl(rowSet);
     }
 
+    private static <T> List<T> nonnullizeList(List<@Nullable T> list) {
+        List<T> nonNullList = new ArrayList<>();
+        for (var item : list) {
+            nonNullList.add(Objects.requireNonNull(item));
+        }
+        return nonNullList;
+    }
+
     /**
      * 获取结果行列表
      *
@@ -107,6 +115,10 @@ public interface ResultMatrix {
      */
     @Nullable String getOneColumnOfFirstRowAsDateTime(String columnName) throws KeelSQLResultRowIndexError;
 
+    default String getOneColumnOfFirstRowAsNonNullDateTime(String columnName) throws KeelSQLResultRowIndexError {
+        return Objects.requireNonNull(getOneColumnOfFirstRowAsDateTime(columnName));
+    }
+
     /**
      * 获取第一行指定列的字符串值
      *
@@ -115,6 +127,10 @@ public interface ResultMatrix {
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
     @Nullable String getOneColumnOfFirstRowAsString(String columnName) throws KeelSQLResultRowIndexError;
+
+    default String getOneColumnOfFirstRowAsNonNullString(String columnName) throws KeelSQLResultRowIndexError {
+        return Objects.requireNonNull(getOneColumnOfFirstRowAsString(columnName));
+    }
 
     /**
      * 获取第一行指定列的数值对象
@@ -125,6 +141,10 @@ public interface ResultMatrix {
      */
     @Nullable Numeric getOneColumnOfFirstRowAsNumeric(String columnName) throws KeelSQLResultRowIndexError;
 
+    default Numeric getOneColumnOfFirstRowAsNonNullNumeric(String columnName) throws KeelSQLResultRowIndexError {
+        return Objects.requireNonNull(getOneColumnOfFirstRowAsNumeric(columnName));
+    }
+
     /**
      * 获取第一行指定列的整数值
      *
@@ -133,6 +153,10 @@ public interface ResultMatrix {
      * @throws KeelSQLResultRowIndexError 行索引错误时抛出
      */
     @Nullable Integer getOneColumnOfFirstRowAsInteger(String columnName) throws KeelSQLResultRowIndexError;
+
+    default int getOneColumnOfFirstRowAsNonNullInteger(String columnName) throws KeelSQLResultRowIndexError {
+        return Objects.requireNonNull(getOneColumnOfFirstRowAsInteger(columnName));
+    }
 
     /**
      * 获取第一行指定列的长整数值
@@ -143,6 +167,10 @@ public interface ResultMatrix {
      */
     @Nullable Long getOneColumnOfFirstRowAsLong(String columnName) throws KeelSQLResultRowIndexError;
 
+    default long getOneColumnOfFirstRowAsNonNullLong(String columnName) throws KeelSQLResultRowIndexError {
+        return Objects.requireNonNull(getOneColumnOfFirstRowAsLong(columnName));
+    }
+
     /**
      * 获取指定列的所有日期时间值
      *
@@ -150,6 +178,10 @@ public interface ResultMatrix {
      * @return 日期时间值列表
      */
     List<@Nullable String> getOneColumnAsDateTime(String columnName);
+
+    default List<String> getOneColumnAsNonNullDateTime(String columnName) {
+        return nonnullizeList(getOneColumnAsDateTime(columnName));
+    }
 
     /**
      * 获取指定列的所有字符串值
@@ -159,6 +191,10 @@ public interface ResultMatrix {
      */
     List<@Nullable String> getOneColumnAsString(String columnName);
 
+    default List<String> getOneColumnAsNonNullString(String columnName) {
+        return nonnullizeList(getOneColumnAsString(columnName));
+    }
+
     /**
      * 获取指定列的所有数值对象
      *
@@ -166,6 +202,10 @@ public interface ResultMatrix {
      * @return 数值对象列表
      */
     List<@Nullable Numeric> getOneColumnAsNumeric(String columnName);
+
+    default List<Numeric> getOneColumnAsNonNullNumeric(String columnName) {
+        return nonnullizeList(getOneColumnAsNumeric(columnName));
+    }
 
     /**
      * 获取指定列的所有长整数值
@@ -175,6 +215,10 @@ public interface ResultMatrix {
      */
     List<@Nullable Long> getOneColumnAsLong(String columnName);
 
+    default List<Long> getOneColumnAsNonNullLong(String columnName) {
+        return nonnullizeList(getOneColumnAsLong(columnName));
+    }
+
     /**
      * 获取指定列的所有整数值
      *
@@ -182,6 +226,10 @@ public interface ResultMatrix {
      * @return 整数值列表
      */
     List<@Nullable Integer> getOneColumnAsInteger(String columnName);
+
+    default List<Integer> getOneColumnAsNonNullInteger(String columnName) {
+        return nonnullizeList(getOneColumnAsInteger(columnName));
+    }
 
     /**
      * 构建所有表行对象列表
