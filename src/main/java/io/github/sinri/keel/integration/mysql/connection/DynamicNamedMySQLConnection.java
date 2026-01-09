@@ -10,7 +10,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public class DynamicNamedMySQLConnection extends AbstractNamedMySQLConnection {
+public final class DynamicNamedMySQLConnection extends AbstractNamedMySQLConnection {
     private final String dataSourceName;
 
     /**

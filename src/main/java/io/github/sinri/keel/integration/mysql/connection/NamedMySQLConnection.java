@@ -88,25 +88,16 @@ public interface NamedMySQLConnection extends Closeable {
         return null != sqlConnection.transaction();
     }
 
-    default Future<Void> close() {
+    default void close() {
+        asyncClose();
+    }
+
+    default Future<Void> asyncClose() {
         return getSqlConnection().close();
     }
 
-    //    @Override
-    //    default void close() {
-    //        Future<Void> future = closeSqlConnection();
-    //
-    //        Context currentContext = Vertx.currentContext();
-    //        if (currentContext != null
-    //                && currentContext.threadingModel() == ThreadingModel.VIRTUAL_THREAD
-    //                && ReflectionUtils.isVirtualThreadsAvailable()
-    //        ) {
-    //            future.await();
-    //        }
-    //    }
-
     @Override
     default void close(Completable<Void> completion) {
-        close().andThen(completion);
+        asyncClose().andThen(completion);
     }
 }

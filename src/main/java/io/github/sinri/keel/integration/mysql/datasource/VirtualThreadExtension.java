@@ -1,13 +1,13 @@
 package io.github.sinri.keel.integration.mysql.datasource;
 
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
+import io.github.sinri.keel.integration.mysql.connection.ClosableNamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Transaction;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.io.Closeable;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -56,20 +56,4 @@ public class VirtualThreadExtension<C extends NamedMySQLConnection> {
         return new ClosableNamedMySQLConnection<>(c);
     }
 
-    public static class ClosableNamedMySQLConnection<C extends NamedMySQLConnection> implements Closeable {
-        private final C namedMySQLConnection;
-
-        public ClosableNamedMySQLConnection(C namedMySQLConnection) {
-            this.namedMySQLConnection = namedMySQLConnection;
-        }
-
-        public C getNamedMySQLConnection() {
-            return namedMySQLConnection;
-        }
-
-        @Override
-        public void close() {
-            namedMySQLConnection.close().await();
-        }
-    }
 }
