@@ -36,32 +36,17 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
 
     private final Pool pool;
     private final KeelMySQLConfiguration configuration;
-    @Deprecated(since = "5.0.0", forRemoval = true)
-    private final LateObject<VirtualThreadExtension<C>> lateVirtualThreadExtension = new LateObject<>();
 
     /**
      * 记录初始化到池中的连接数
      */
-
     private final AtomicInteger initializedConnectionCounter = new AtomicInteger(0);
     /**
      * 记录当前正在使用的连接数
      */
-
     private final AtomicInteger borrowedConnectionCounter = new AtomicInteger(0);
-
-
     private final Function<SqlConnection, C> sqlConnectionWrapper;
-
-
     private final LateObject<String> lateFullVersion = new LateObject<>();
-
-    {
-    }
-
-    {
-
-    }
 
     /**
      * 构造命名MySQL数据源
@@ -100,11 +85,6 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                                 .using(vertx)
                                 .withConnectHandler(sqlConnection -> initializeConnection(sqlConnection, connectionSetUpFunction))
                                 .build();
-        //        if (ReflectionUtils.isVirtualThreadsAvailable()) {
-        //            this.virtualThreadExtension = new VirtualThreadExtension<>(this);
-        //        } else {
-        //            this.virtualThreadExtension = null;
-        //        }
     }
 
     /**
@@ -415,15 +395,6 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
 
     Function<SqlConnection, C> getSqlConnectionWrapper() {
         return sqlConnectionWrapper;
-    }
-
-    @Deprecated(since = "5.0.0", forRemoval = true)
-    public VirtualThreadExtension<C> inVirtualThread() {
-        if (ReflectionUtils.isVirtualThreadsAvailable()) {
-            return lateVirtualThreadExtension.ensure(() -> new VirtualThreadExtension<>(this));
-        } else {
-            throw new UnsupportedOperationException("Virtual Thread Extension Not Available!");
-        }
     }
 
     public C fetchConnectionInVirtualThread() {
