@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
+import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.integration.mysql.provider.KeelMySQLDataSourceProvider;
 import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.tesuto.KeelInstantRunner;
@@ -24,7 +25,7 @@ public class GenDevTest extends KeelInstantRunner {
                            .compose(dataSource -> {
                                return dataSource.withConnection(sampleMySQLConnection -> {
                                    TableRowClassSourceCodeGenerator tableRowClassSourceCodeGenerator = new TableRowClassSourceCodeGenerator(getVertx(), sampleMySQLConnection);
-                                   String packagePath = getConfiguration().readString("table.package.path");
+                                   String packagePath = ConfigElement.root().readString("table.package.path");
                                    Objects.requireNonNull(packagePath);
                                    return tableRowClassSourceCodeGenerator
                                            .generate(

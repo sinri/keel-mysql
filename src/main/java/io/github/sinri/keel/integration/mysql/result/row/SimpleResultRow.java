@@ -12,7 +12,6 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public class SimpleResultRow extends JsonifiableDataUnitImpl implements ResultRow {
-    private JsonObject row;
 
     /**
      * 构造简单结果行对象
@@ -20,26 +19,6 @@ public class SimpleResultRow extends JsonifiableDataUnitImpl implements ResultRo
      * @param tableRow 表格行JSON对象
      */
     public SimpleResultRow(JsonObject tableRow) {
-        this.reloadData(tableRow);
-    }
-
-    /**
-     * 转换为JSON对象
-     *
-     * @return JSON对象
-     */
-    @Override
-    public final JsonObject toJsonObject() {
-        return row;
-    }
-
-    /**
-     * 重新加载数据
-     *
-     * @param jsonObject JSON对象
-     */
-    @Override
-    public final void reloadData(JsonObject jsonObject) {
-        this.row = jsonObject;
+        super(tableRow);
     }
 }
