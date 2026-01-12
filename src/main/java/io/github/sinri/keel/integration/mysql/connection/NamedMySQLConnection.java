@@ -1,11 +1,12 @@
 package io.github.sinri.keel.integration.mysql.connection;
 
-import io.vertx.core.Closeable;
-import io.vertx.core.Completable;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;
+import io.vertx.sqlclient.Transaction;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+
+import java.io.Closeable;
 
 
 /**
@@ -88,16 +89,27 @@ public interface NamedMySQLConnection extends Closeable {
         return null != sqlConnection.transaction();
     }
 
+    default @Nullable Transaction getTransaction() {
+        return getSqlConnection().transaction();
+    }
+
+    default Future<Transaction> beginTransaction() {
+        return getSqlConnection().begin();
+    }
+
+    default Future<Void> commitTransaction() {
+        return getSqlConnection().transaction().commit();
+    }
+
+    default Future<Void> rollbackTransaction() {
+        return getSqlConnection().transaction().rollback();
+    }
+
     default void close() {
         asyncClose();
     }
 
     default Future<Void> asyncClose() {
         return getSqlConnection().close();
-    }
-
-    @Override
-    default void close(Completable<Void> completion) {
-        asyncClose().andThen(completion);
     }
 }

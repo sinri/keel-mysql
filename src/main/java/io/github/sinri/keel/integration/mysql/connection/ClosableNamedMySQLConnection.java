@@ -6,6 +6,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.Closeable;
 
+@Deprecated(since = "5.0.0", forRemoval = true)
 @NullMarked
 public final class ClosableNamedMySQLConnection<C extends NamedMySQLConnection> implements NamedMySQLConnection, Closeable {
     private final C namedMySQLConnection;

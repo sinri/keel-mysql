@@ -36,7 +36,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
 
     private final Pool pool;
     private final KeelMySQLConfiguration configuration;
-    //private final @Nullable VirtualThreadExtension<C> virtualThreadExtension;
+    @Deprecated(since = "5.0.0", forRemoval = true)
     private final LateObject<VirtualThreadExtension<C>> lateVirtualThreadExtension = new LateObject<>();
 
     /**
@@ -55,6 +55,13 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
 
 
     private final LateObject<String> lateFullVersion = new LateObject<>();
+
+    {
+    }
+
+    {
+
+    }
 
     /**
      * 构造命名MySQL数据源
@@ -372,7 +379,6 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
         this.pool.close().onComplete(completion);
     }
 
-
     /**
      * 获取MySQL连接
      *
@@ -411,12 +417,20 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
         return sqlConnectionWrapper;
     }
 
-
+    @Deprecated(since = "5.0.0", forRemoval = true)
     public VirtualThreadExtension<C> inVirtualThread() {
         if (ReflectionUtils.isVirtualThreadsAvailable()) {
             return lateVirtualThreadExtension.ensure(() -> new VirtualThreadExtension<>(this));
         } else {
             throw new UnsupportedOperationException("Virtual Thread Extension Not Available!");
         }
+    }
+
+    public C fetchConnectionInVirtualThread() {
+        if (!ReflectionUtils.isVirtualThreadsAvailable()) {
+            throw new UnsupportedOperationException("Not in Virtual Thread!");
+        }
+        var sqlConnection = getPool().getConnection().await();
+        return getSqlConnectionWrapper().apply(sqlConnection);
     }
 }
