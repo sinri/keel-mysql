@@ -9,7 +9,7 @@ import org.jspecify.annotations.Nullable;
  * @since 5.0.0
  */
 @NullMarked
-public class TruncateTableStatement extends AbstractStatement {
+public class TruncateTableStatement extends AbstractStatement<TruncateTableStatement> {
     private @Nullable String schemaName = null;
     private String tableName = "";
 
@@ -38,7 +38,7 @@ public class TruncateTableStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public String buildSql() {
         return "TRUNCATE TABLE " + getTableExpression();
     }
 }

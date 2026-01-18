@@ -9,7 +9,7 @@ import org.jspecify.annotations.Nullable;
  * @since 5.0.0
  */
 @NullMarked
-public abstract class CreateTableStatementBase<T> extends AbstractStatement implements SelfInterface<T> {
+public abstract class CreateTableStatementBase<T> extends AbstractStatement<T> implements SelfInterface<T> {
     private boolean temporary = false;
     private boolean ifNotExists = false;
     private @Nullable String schemaName = null;
@@ -57,9 +57,4 @@ public abstract class CreateTableStatementBase<T> extends AbstractStatement impl
         return (schemaName == null ? "" : ("`" + schemaName + "`.")) + ("`" + tableName + "`");
     }
 
-    /**
-     * @return the generated DDL SQL.
-     */
-    @Override
-    abstract public String toString();
 }

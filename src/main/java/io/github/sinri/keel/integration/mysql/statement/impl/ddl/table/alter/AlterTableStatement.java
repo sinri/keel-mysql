@@ -15,7 +15,7 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-public class AlterTableStatement extends AbstractStatement {
+public class AlterTableStatement extends AbstractStatement<AlterTableStatement> {
     private final List<TableAlterOption> alterOptions = new ArrayList<>();
     private @Nullable String schemaName = null;
     private String tableName = "";
@@ -69,7 +69,7 @@ public class AlterTableStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public String buildSql() {
         // ALTER TABLE tbl_name
         //    [alter_option [, alter_option] ...]
         //    [partition_options]

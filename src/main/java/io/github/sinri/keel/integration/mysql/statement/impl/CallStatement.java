@@ -14,7 +14,7 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-public class CallStatement extends AbstractStatement {
+public class CallStatement extends AbstractStatement<CallStatement> {
     private final List<String> parameters = new ArrayList<>();
     private @Nullable String storedProcedureName = null;
 
@@ -41,7 +41,7 @@ public class CallStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public String buildSql() {
         String s = "CALL " + storedProcedureName;
         s += "(";
         if (!parameters.isEmpty()) {

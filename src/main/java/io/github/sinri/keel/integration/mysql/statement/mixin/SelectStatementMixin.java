@@ -12,7 +12,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public interface SelectStatementMixin extends ReadStatementMixin {
+public interface SelectStatementMixin<S> extends ReadStatementMixin<S> {
     /**
      * Call from this instance, as the original query as Select Statement for all rows in certain order.
      *
@@ -24,6 +24,12 @@ public interface SelectStatementMixin extends ReadStatementMixin {
             long pageNo,
             long pageSize
     );
+    default Future<PaginationResult> queryForPagination(
+            long pageNo,
+            long pageSize
+    ){
+        return queryForPagination(getNamedMySQLConnection(), pageNo, pageSize);
+    }
 
     @NullMarked
     record PaginationResult(long total, ResultMatrix resultMatrix) {

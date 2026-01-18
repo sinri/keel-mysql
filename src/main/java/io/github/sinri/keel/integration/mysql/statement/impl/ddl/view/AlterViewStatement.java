@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * @since 5.0.0
  */
 @NullMarked
-public class AlterViewStatement extends AbstractStatement {
+public class AlterViewStatement extends AbstractStatement<AlterViewStatement> {
     private final List<String> columns = new ArrayList<>();
     /**
      * {@code UNDEFINED | MERGE | TEMPTABLE }
@@ -66,7 +66,7 @@ public class AlterViewStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public String buildSql() {
         /*
         ALTER
     [ALGORITHM = {UNDEFINED | MERGE | TEMPTABLE}]

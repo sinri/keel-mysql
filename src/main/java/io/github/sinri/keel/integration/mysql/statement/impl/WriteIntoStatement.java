@@ -18,7 +18,7 @@ import java.util.*;
  * @since 5.0.0
  */
 @NullMarked
-public class WriteIntoStatement extends AbstractStatement implements WriteIntoStatementMixin {
+public class WriteIntoStatement extends AbstractStatement<WriteIntoStatement> implements WriteIntoStatementMixin<WriteIntoStatement> {
     /**
      * insert [ignore] into schema.table (column...) values (value...),... ON DUPLICATE KEY UPDATE assignment_list
      * insert [ignore] into schema.table (column...) [select ...| table ...] ON DUPLICATE KEY UPDATE assignment_list
@@ -205,7 +205,8 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
         return this;
     }
 
-    public String toString() {
+    @Override
+    public String buildSql() {
         String sql = writeType + " " + ignoreMark + " INTO ";
         if (schema != null) {
             sql += schema + ".";
@@ -242,12 +243,12 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
      * @param chunkSize an integer
      * @return a list of WriteIntoStatement
      */
-    public List<WriteIntoStatementMixin> divide(int chunkSize) {
+    public List<WriteIntoStatementMixin<WriteIntoStatement>> divide(int chunkSize) {
         if (sourceTableName != null || sourceSelectSQL != null) {
             return List.of(this);
         }
 
-        List<WriteIntoStatementMixin> list = new ArrayList<>();
+        List<WriteIntoStatementMixin<WriteIntoStatement>> list = new ArrayList<>();
         int size = this.batchValues.size();
         for (int chunkStartIndex = 0; chunkStartIndex < size; chunkStartIndex += chunkSize) {
             WriteIntoStatement chunkWIS = new WriteIntoStatement(this.writeType);

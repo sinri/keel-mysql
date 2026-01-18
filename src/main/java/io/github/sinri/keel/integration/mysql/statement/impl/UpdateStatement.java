@@ -20,7 +20,7 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 @NullMarked
-public class UpdateStatement extends AbstractStatement implements ModifyStatementMixin {
+public class UpdateStatement extends AbstractStatement<UpdateStatement> implements ModifyStatementMixin<UpdateStatement> {
     private final List<UpdateSetAssignmentComponent> assignments = new ArrayList<>();
     private final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
     private final List<String> sortRules = new ArrayList<>();
@@ -112,7 +112,8 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
         return this;
     }
 
-    public String toString() {
+    @Override
+    public String buildSql() {
         String sql = "UPDATE " + ignoreMark;
         if (schema != null) {
             sql += " " + schema + ".";

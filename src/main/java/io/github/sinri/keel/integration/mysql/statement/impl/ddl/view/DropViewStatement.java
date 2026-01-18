@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * @since 5.0.0
  */
 @NullMarked
-public class DropViewStatement extends AbstractStatement {
+public class DropViewStatement extends AbstractStatement<DropViewStatement> {
     private final List<String> viewNames = new ArrayList<>();
     private boolean ifExists = false;
 
@@ -28,7 +28,7 @@ public class DropViewStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public String buildSql() {
         /*
         DROP VIEW [IF EXISTS]
     view_name [, view_name] ...

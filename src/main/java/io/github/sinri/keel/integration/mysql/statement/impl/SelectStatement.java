@@ -28,7 +28,7 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 @NullMarked
-public class SelectStatement extends AbstractStatement implements SelectStatementMixin {
+public final class SelectStatement extends AbstractStatement<SelectStatement> implements SelectStatementMixin<SelectStatement> {
     final ConditionsComponent whereConditionsComponent;
     final ConditionsComponent havingConditionsComponent;
     private final List<String> tables;
@@ -93,10 +93,7 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         return this;
     }
 
-    /**
-     * @since 2.8
-     */
-    public SelectStatement from(ReadStatementMixin subQuery, String alias) {
+    public SelectStatement from(ReadStatementMixin<?> subQuery, String alias) {
         if (alias.isBlank()) {
             throw new KeelSQLGenerateError("Sub Query without alias");
         }
@@ -213,7 +210,8 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         return this;
     }
 
-    public String toString() {
+    @Override
+    public String buildSql() {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
 

@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql.statement.templated;
 
 
 import io.github.sinri.keel.core.utils.FileUtils;
+import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import org.jspecify.annotations.NullMarked;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.util.regex.Matcher;
  * @since 5.0.0
  */
 @NullMarked
-public interface TemplatedStatement {
+public interface TemplatedStatement<S> extends AnyStatement<S> {
     /**
      * 从文件加载模板生成读取语句
      *
@@ -74,7 +75,7 @@ public interface TemplatedStatement {
      *
      * @return 构建后的SQL字符串
      */
-    default String build() {
+    default String buildSql() {
         AtomicReference<String> sqlRef = new AtomicReference<>(getSqlTemplate());
 
         getArguments().forEach((argumentName, argumentValue) -> {

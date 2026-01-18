@@ -1,13 +1,13 @@
 package io.github.sinri.keel.integration.mysql.statement;
 
+import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.github.sinri.keel.logger.api.LateObject;
-import io.github.sinri.keel.logger.api.factory.LoggerFactory;
-import io.github.sinri.keel.logger.api.factory.SilentLoggerFactory;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -17,23 +17,12 @@ import java.util.UUID;
  * @since 5.0.0
  */
 @NullMarked
-abstract public class AbstractStatement implements AnyStatement {
+abstract public class AbstractStatement<S> implements AnyStatement<S> {
     protected static String SQL_COMPONENT_SEPARATOR = " ";//"\n";
-    /**
-     * SQL审计日志记录器
-     */
-    protected static SpecificLogger<MySQLAuditSpecificLog> sqlAuditLogger;
-
-    static {
-        sqlAuditLogger = buildSqlAuditLogger(SilentLoggerFactory.getInstance());
-    }
-
     protected final String statement_uuid;
+    private final ValueBox<NamedMySQLConnection> connectionBox = new ValueBox<>();
     private String remarkAsComment = "";
-    /**
-     * @since 4.0.7
-     */
-    private boolean withoutPrepare = false;
+    private boolean prepareStatement = true;
 
     /**
      * 构造抽象语句，生成唯一标识符
@@ -42,43 +31,16 @@ abstract public class AbstractStatement implements AnyStatement {
         this.statement_uuid = UUID.randomUUID().toString();
     }
 
-    /**
-     * 获取SQL审计日志记录器
-     *
-     * @return SQL审计日志记录器
-     */
-
-    public static SpecificLogger<MySQLAuditSpecificLog> getSqlAuditLogger() {
-        return sqlAuditLogger;
+    @Override
+    public S setNamedMySQLConnection(@Nullable NamedMySQLConnection connection) {
+        this.connectionBox.setValue(connection);
+        return getImplementation();
     }
 
-
-    /**
-     * 构建SQL审计日志记录器
-     *
-     * @param loggerFactory 日志工厂
-     * @return SQL审计日志记录器
-     */
-    private static SpecificLogger<MySQLAuditSpecificLog> buildSqlAuditLogger(LoggerFactory loggerFactory) {
-        return loggerFactory.createLogger(MySQLAuditSpecificLog.AttributeMysqlAudit, MySQLAuditSpecificLog::new);
-    }
-
-    /**
-     * 重新加载SQL审计问题记录器
-     *
-     * @param issueRecordCenter SQL审计发送到的记录中心
-     */
-    public static synchronized void reloadSqlAuditIssueRecording(LoggerFactory issueRecordCenter) {
-        sqlAuditLogger = buildSqlAuditLogger(issueRecordCenter);
-    }
-
-    /**
-     * 设置SQL组件分隔符
-     *
-     * @param sqlComponentSeparator SQL组件分隔符
-     */
-    public static void setSqlComponentSeparator(String sqlComponentSeparator) {
-        SQL_COMPONENT_SEPARATOR = sqlComponentSeparator;
+    @Override
+    public NamedMySQLConnection getNamedMySQLConnection() {
+        if (connectionBox.isValueSetAndNotNull()) return connectionBox.getNonNullValue();
+        else throw new IllegalStateException();
     }
 
     /**
@@ -86,7 +48,6 @@ abstract public class AbstractStatement implements AnyStatement {
      *
      * @return 备注注释
      */
-
     protected String getRemarkAsComment() {
         return remarkAsComment;
     }
@@ -97,10 +58,20 @@ abstract public class AbstractStatement implements AnyStatement {
      * @param remarkAsComment 备注注释
      * @return 自身实例
      */
-    public AbstractStatement setRemarkAsComment(String remarkAsComment) {
+    @Override
+    public S setRemarkAsComment(String remarkAsComment) {
         remarkAsComment = remarkAsComment.replaceAll("[\\r\\n]+", "¦");
         this.remarkAsComment = remarkAsComment;
-        return this;
+        return getImplementation();
+    }
+
+    @Override
+    public Future<ResultMatrix> execute() {
+        if (connectionBox.isValueSetAndNotNull()) {
+            return execute(connectionBox.getNonNullValue());
+        } else {
+            throw new IllegalStateException("Connection is not set for this statement.");
+        }
     }
 
     /**
@@ -141,14 +112,24 @@ abstract public class AbstractStatement implements AnyStatement {
                      });
     }
 
+    @Override
+    public S setPrepareStatement(boolean prepareStatement) {
+        this.prepareStatement = prepareStatement;
+        return getImplementation();
+    }
+
+    public boolean isPrepareStatement() {
+        return prepareStatement;
+    }
+
     /**
      * 判断是否不使用预处理语句
      *
      * @return 是否不使用预处理语句
      */
-    @Override
+    @Deprecated(forRemoval = true)
     public boolean isWithoutPrepare() {
-        return withoutPrepare;
+        return !prepareStatement;
     }
 
     /**
@@ -157,8 +138,20 @@ abstract public class AbstractStatement implements AnyStatement {
      * @param withoutPrepare 是否不使用预处理语句
      * @return 自身实例
      */
-    public AbstractStatement setWithoutPrepare(boolean withoutPrepare) {
-        this.withoutPrepare = withoutPrepare;
-        return this;
+    @Deprecated(forRemoval = true)
+    public S setWithoutPrepare(boolean withoutPrepare) {
+        this.prepareStatement = !withoutPrepare;
+        return getImplementation();
+    }
+
+    abstract public String buildSql();
+
+    @Override
+    final public String toString() {
+        return buildSql();
+    }
+
+    protected SpecificLogger<MySQLAuditSpecificLog> getSqlAuditLogger() {
+        return StatementAuditorHolder.getInstance().getSqlAuditLogger();
     }
 }

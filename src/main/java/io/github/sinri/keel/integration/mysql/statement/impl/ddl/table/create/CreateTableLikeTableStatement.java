@@ -21,7 +21,7 @@ public final class CreateTableLikeTableStatement extends CreateTableStatementBas
     }
 
     @Override
-    public String toString() {
+    public String buildSql() {
         return "CREATE " + (useTemporary() ? "TEMPORARY " : " ") + "TABLE "
                 + (useIfNotExists() ? "IF NOT EXISTS " : " ")
                 + getTableExpression()

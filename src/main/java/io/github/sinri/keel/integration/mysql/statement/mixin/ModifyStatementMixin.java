@@ -11,7 +11,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public interface ModifyStatementMixin extends AnyStatement {
+public interface ModifyStatementMixin<S> extends AnyStatement<S> {
 
     /**
      *
@@ -23,5 +23,9 @@ public interface ModifyStatementMixin extends AnyStatement {
                     var afx = resultMatrix.getTotalAffectedRows();
                     return Future.succeededFuture(afx);
                 });
+    }
+
+    default Future<Integer> executeForAffectedRows(){
+        return executeForAffectedRows(getNamedMySQLConnection());
     }
 }

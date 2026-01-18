@@ -1,5 +1,8 @@
 package io.github.sinri.keel.integration.mysql.connection;
 
+import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
+import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import io.github.sinri.keel.integration.mysql.statement.StatementFactory;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;
 import io.vertx.sqlclient.Transaction;
@@ -15,7 +18,7 @@ import java.io.Closeable;
  * @since 5.0.0
  */
 @NullMarked
-public interface NamedMySQLConnection extends Closeable {
+public interface NamedMySQLConnection extends StatementFactory, Closeable {
 
     SqlConnection getSqlConnection();
 
@@ -111,5 +114,14 @@ public interface NamedMySQLConnection extends Closeable {
 
     default Future<Void> asyncClose() {
         return getSqlConnection().close();
+    }
+
+    default Future<ResultMatrix> execute(AbstractStatement<?> statement) {
+        return statement.execute(this);
+    }
+
+    @Override
+    default @Nullable NamedMySQLConnection getNamedMySQLConnectionInScope() {
+        return this;
     }
 }

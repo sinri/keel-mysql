@@ -12,7 +12,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public class TemplatedReadStatement extends AbstractStatement implements ReadStatementMixin, TemplatedStatement {
+public class TemplatedReadStatement extends AbstractStatement<TemplatedReadStatement> implements ReadStatementMixin<TemplatedReadStatement>, TemplatedStatement<TemplatedReadStatement> {
 
     private final String templateSql;
     private final TemplateArgumentMapping argumentMapping;
@@ -38,12 +38,6 @@ public class TemplatedReadStatement extends AbstractStatement implements ReadSta
         return this;
     }
 
-
-    @Override
-    public String toString() {
-        return this.build();
-    }
-
     @Override
     public String getSqlTemplate() {
         return templateSql;
@@ -54,4 +48,8 @@ public class TemplatedReadStatement extends AbstractStatement implements ReadSta
         return argumentMapping;
     }
 
+    @Override
+    public String buildSql() {
+        return TemplatedStatement.super.buildSql();
+    }
 }

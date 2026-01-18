@@ -12,7 +12,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public class TemplatedModifyStatement extends AbstractStatement implements ModifyStatementMixin, TemplatedStatement {
+public class TemplatedModifyStatement extends AbstractStatement<TemplatedModifyStatement> implements ModifyStatementMixin<TemplatedModifyStatement>, TemplatedStatement<TemplatedModifyStatement> {
     private final String templateSql;
     private final TemplateArgumentMapping argumentMapping;
 
@@ -27,8 +27,8 @@ public class TemplatedModifyStatement extends AbstractStatement implements Modif
     }
 
     @Override
-    public String toString() {
-        return this.build();
+    public String buildSql() {
+        return TemplatedStatement.super.buildSql();
     }
 
     @Override

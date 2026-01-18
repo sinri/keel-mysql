@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * @since 5.0.0
  */
 @NullMarked
-public class CreateViewStatement extends AbstractStatement {
+public class CreateViewStatement extends AbstractStatement<CreateViewStatement> {
     private final List<String> columns = new ArrayList<>();
     private boolean createOrReplace = false;
     /**
@@ -72,7 +72,7 @@ public class CreateViewStatement extends AbstractStatement {
     }
 
     @Override
-    public String toString() {
+    public String buildSql() {
         /*
         CREATE
     [OR REPLACE]

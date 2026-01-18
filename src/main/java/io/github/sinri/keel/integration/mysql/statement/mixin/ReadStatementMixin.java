@@ -24,7 +24,7 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 @NullMarked
-public interface ReadStatementMixin extends AnyStatement {
+public interface ReadStatementMixin<S> extends AnyStatement<S> {
     /**
      * @param namedMySQLConnection NamedMySQLConnection
      * @param classT               class of type of result object
@@ -43,6 +43,10 @@ public interface ReadStatementMixin extends AnyStatement {
                 });
     }
 
+    default <T extends ResultRow> Future<@Nullable T> queryForOneRow(Class<T> classT) {
+        return queryForOneRow(getNamedMySQLConnection(), classT);
+    }
+
     /**
      * @param classT class of type of result object
      * @param <T>    type of result object
@@ -54,6 +58,10 @@ public interface ReadStatementMixin extends AnyStatement {
                     List<T> ts = resultMatrix.buildTableRowList(classT);
                     return Future.succeededFuture(ts);
                 });
+    }
+
+    default <T extends ResultRow> Future<List<T>> queryForRowList(Class<T> classT) {
+        return queryForRowList(getNamedMySQLConnection(), classT);
     }
 
     default <K, T extends ResultRow> Future<Map<K, List<T>>> queryForCategorizedMap(
@@ -72,6 +80,12 @@ public interface ReadStatementMixin extends AnyStatement {
                 });
     }
 
+    default <K, T extends ResultRow> Future<Map<K, List<T>>> queryForCategorizedMap(
+            Class<T> classT,
+            Function<T, K> categoryGenerator
+    ) {
+        return queryForCategorizedMap(getNamedMySQLConnection(), classT, categoryGenerator);
+    }
 
     default <K, T extends ResultRow> Future<Map<K, T>> queryForUniqueKeyBoundMap(
             NamedMySQLConnection namedMySQLConnection,
@@ -90,6 +104,12 @@ public interface ReadStatementMixin extends AnyStatement {
                 });
     }
 
+    default <K, T extends ResultRow> Future<Map<K, T>> queryForUniqueKeyBoundMap(
+            Class<T> classT,
+            Function<T, K> uniqueKeyGenerator
+    ) {
+        return queryForUniqueKeyBoundMap(getNamedMySQLConnection(), classT, uniqueKeyGenerator);
+    }
 
     default Future<Void> stream(
             KeelAsyncMixin keelAsyncMixin,
@@ -115,5 +135,10 @@ public interface ReadStatementMixin extends AnyStatement {
                                    });
     }
 
-
+    default Future<Void> stream(
+            KeelAsyncMixin keelAsyncMixin,
+            ResultStreamReader resultStreamReader
+    ) {
+        return stream(keelAsyncMixin, getNamedMySQLConnection(), resultStreamReader);
+    }
 }

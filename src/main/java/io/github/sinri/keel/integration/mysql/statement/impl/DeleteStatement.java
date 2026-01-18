@@ -18,7 +18,7 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 @NullMarked
-public class DeleteStatement extends AbstractStatement implements ModifyStatementMixin {
+public class DeleteStatement extends AbstractStatement<DeleteStatement> implements ModifyStatementMixin<DeleteStatement> {
     private final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
     private final List<String> sortRules = new ArrayList<>();
     /**
@@ -74,7 +74,8 @@ public class DeleteStatement extends AbstractStatement implements ModifyStatemen
         return this;
     }
 
-    public String toString() {
+    @Override
+    public String buildSql() {
         String sql = "DELETE FROM ";
         if (schema != null) {
             sql += schema + ".";

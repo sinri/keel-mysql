@@ -14,7 +14,7 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-public class UnionStatement extends AbstractStatement implements ReadStatementMixin {
+public final class UnionStatement extends AbstractStatement<UnionStatement> implements ReadStatementMixin<UnionStatement> {
     final List<String> selections = new ArrayList<>();
 
     public UnionStatement() {
@@ -57,7 +57,8 @@ public class UnionStatement extends AbstractStatement implements ReadStatementMi
         return this;
     }
 
-    public String toString() {
+    @Override
+    public String buildSql() {
         return String.join(" ", selections) + (getRemarkAsComment().isEmpty() ? "" : ("\n-- " + getRemarkAsComment()));
     }
 

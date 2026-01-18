@@ -12,7 +12,7 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-public interface WriteIntoStatementMixin extends ModifyStatementMixin {
+public interface WriteIntoStatementMixin<S> extends ModifyStatementMixin<S> {
     /**
      * @return future with last inserted id; if any error occurs, failed future returned instead.
      * @since 3.0.11
@@ -23,6 +23,10 @@ public interface WriteIntoStatementMixin extends ModifyStatementMixin {
                 .compose(resultMatrix -> Future.succeededFuture(resultMatrix.getLastInsertedID()));
     }
 
+    default Future<Long> executeForLastInsertedID(){
+        return executeForLastInsertedID(getNamedMySQLConnection());
+    }
+
     /**
      * 按照最大块尺寸分裂！
      *
@@ -30,5 +34,5 @@ public interface WriteIntoStatementMixin extends ModifyStatementMixin {
      * @return a list of WriteIntoStatement
      * @since 2.3
      */
-    List<WriteIntoStatementMixin> divide(int chunkSize);
+    List<WriteIntoStatementMixin<S>> divide(int chunkSize);
 }

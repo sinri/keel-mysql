@@ -38,27 +38,27 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
      * IGNORE or REPLACE
      */
     private @Nullable String asSourceType = null;
-    private @Nullable ReadStatementMixin readStatement = null;
+    private @Nullable ReadStatementMixin<?> readStatement = null;
 
-    public CreateTableStatement asReadStatement(ReadStatementMixin readStatement) {
+    public CreateTableStatement asReadStatement(ReadStatementMixin<?> readStatement) {
         this.readStatement = readStatement;
         return getImplementation();
     }
 
-    public CreateTableStatement asReadStatementWithIgnore(ReadStatementMixin readStatement) {
+    public CreateTableStatement asReadStatementWithIgnore(ReadStatementMixin<?> readStatement) {
         this.asSourceType = "IGNORE";
         this.readStatement = readStatement;
         return getImplementation();
     }
 
-    public CreateTableStatement asReadStatementWithReplace(ReadStatementMixin readStatement) {
+    public CreateTableStatement asReadStatementWithReplace(ReadStatementMixin<?> readStatement) {
         this.asSourceType = "REPLACE";
         this.readStatement = readStatement;
         return getImplementation();
     }
 
     @Override
-    public String toString() {
+    public String buildSql() {
         var ds = definitions.stream().map(Object::toString).collect(Collectors.toList());
         var sql = "CREATE " + (useTemporary() ? "TEMPORARY " : " ") + "TABLE "
                 + (useIfNotExists() ? "IF NOT EXISTS " : " ")
