@@ -20,7 +20,7 @@ import io.vertx.core.Handler;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-public interface RunnableStatementFactory extends SqlConnectionHolder {
+interface RunnableStatementFactory extends SqlConnectionHolder {
 
     /**
      * 创建原始 SQL 语句
