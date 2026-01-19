@@ -12,7 +12,8 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public class TemplatedReadStatement extends AbstractStatement<TemplatedReadStatement> implements ReadStatementMixin<TemplatedReadStatement>, TemplatedStatement<TemplatedReadStatement> {
+public final class TemplatedReadStatement extends AbstractStatement<TemplatedReadStatement>
+        implements ReadStatementMixin<TemplatedReadStatement>, TemplatedStatement<TemplatedReadStatement> {
 
     private final String templateSql;
     private final TemplateArgumentMapping argumentMapping;

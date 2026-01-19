@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.view;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
@@ -13,7 +14,8 @@ import java.util.stream.Collectors;
  * @since 5.0.0
  */
 @NullMarked
-public class DropViewStatement extends AbstractStatement<DropViewStatement> {
+public class DropViewStatement extends AbstractStatement<DropViewStatement>
+        implements SpecialStatementMixin<DropViewStatement> {
     private final List<String> viewNames = new ArrayList<>();
     private boolean ifExists = false;
 

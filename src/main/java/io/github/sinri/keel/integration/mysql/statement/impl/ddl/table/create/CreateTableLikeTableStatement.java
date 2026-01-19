@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create;
 
 
+import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -12,7 +13,8 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public final class CreateTableLikeTableStatement extends CreateTableStatementBase<CreateTableLikeTableStatement> {
+public final class CreateTableLikeTableStatement extends CreateTableStatementBase<CreateTableLikeTableStatement>
+implements SpecialStatementMixin<CreateTableLikeTableStatement> {
     private String anotherTableExpression = "";
 
     public CreateTableLikeTableStatement setAnotherTableExpression(String anotherTableExpression) {

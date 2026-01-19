@@ -10,6 +10,7 @@ import org.jspecify.annotations.Nullable;
  */
 @NullMarked
 public abstract class CreateTableStatementBase<T> extends AbstractStatement<T> implements SelfInterface<T> {
+
     private boolean temporary = false;
     private boolean ifNotExists = false;
     private @Nullable String schemaName = null;

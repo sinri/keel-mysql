@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -15,7 +16,8 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-public class AlterTableStatement extends AbstractStatement<AlterTableStatement> {
+public class AlterTableStatement extends AbstractStatement<AlterTableStatement>
+        implements SpecialStatementMixin<AlterTableStatement> {
     private final List<TableAlterOption> alterOptions = new ArrayList<>();
     private @Nullable String schemaName = null;
     private String tableName = "";

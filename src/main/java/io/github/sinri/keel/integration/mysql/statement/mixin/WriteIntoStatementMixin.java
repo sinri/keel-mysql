@@ -1,7 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
-import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
-import io.vertx.core.Future;
+import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForWrite;
+import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
+import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
@@ -12,19 +13,12 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-public interface WriteIntoStatementMixin<S> extends ModifyStatementMixin<S> {
-    /**
-     * @return future with last inserted id; if any error occurs, failed future returned instead.
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
-     */
-    default Future<Long> executeForLastInsertedID(NamedMySQLConnection namedMySQLConnection) {
-        return execute(namedMySQLConnection)
-                .compose(resultMatrix -> Future.succeededFuture(resultMatrix.getLastInsertedID()));
-    }
+public non-sealed interface WriteIntoStatementMixin<S> extends AnyStatement<S> {
 
-    default Future<Long> executeForLastInsertedID(){
-        return executeForLastInsertedID(getNamedMySQLConnection());
+    default RunnableStatementForWrite attachToConnection(SqlConnection sqlConnection) {
+        RunnableStatementForWrite runnableStatement = new RunnableStatementForWrite(this);
+        runnableStatement.setSQLConnection(sqlConnection);
+        return runnableStatement;
     }
 
     /**
@@ -32,7 +26,6 @@ public interface WriteIntoStatementMixin<S> extends ModifyStatementMixin<S> {
      *
      * @param chunkSize an integer
      * @return a list of WriteIntoStatement
-     * @since 2.3
      */
     List<WriteIntoStatementMixin<S>> divide(int chunkSize);
 }

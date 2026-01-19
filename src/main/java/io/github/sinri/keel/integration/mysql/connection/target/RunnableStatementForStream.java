@@ -10,19 +10,19 @@ import io.vertx.sqlclient.Cursor;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-public class StreamableStatement extends AnyStatementWithSqlConnection {
+public class RunnableStatementForStream extends AnyStatementWithSqlConnection {
     private final LateObject<KeelAsyncMixin> lateKeelAsyncMixin = new LateObject<>();
 
-    public StreamableStatement(AnyStatement<?> statement) {
+    public RunnableStatementForStream(AnyStatement<?> statement) {
         super(statement);
     }
 
-    public StreamableStatement attach(Vertx vertx) {
+    public RunnableStatementForStream attach(Vertx vertx) {
         lateKeelAsyncMixin.set(KeelAsyncMixin.wrap(vertx));
         return this;
     }
 
-    public StreamableStatement attach(KeelAsyncMixin keelAsyncMixin) {
+    public RunnableStatementForStream attach(KeelAsyncMixin keelAsyncMixin) {
         lateKeelAsyncMixin.set(keelAsyncMixin);
         return this;
     }

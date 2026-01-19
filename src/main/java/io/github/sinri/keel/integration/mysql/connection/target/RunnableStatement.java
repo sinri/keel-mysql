@@ -1,16 +1,10 @@
-package io.github.sinri.keel.integration.mysql.connection;
+package io.github.sinri.keel.integration.mysql.connection.target;
 
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
-import io.github.sinri.keel.integration.mysql.statement.MySQLAuditSpecificLog;
-import io.github.sinri.keel.integration.mysql.statement.StatementAuditorHolder;
-import io.github.sinri.keel.logger.api.LateObject;
-import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
-
-import java.util.UUID;
 
 /**
  * 可执行的 SQL 语句
@@ -20,36 +14,22 @@ import java.util.UUID;
  * @since 5.0.0
  */
 @NullMarked
-public final class RunnableStatement {
-    private final AnyStatement<?> statement;
-    private final LateObject<SqlConnection> lateConnection;
-    private final String runnableStatementUUID;
+public class RunnableStatement extends AnyStatementWithSqlConnection {
 
     public RunnableStatement(AnyStatement<?> statement) {
-        this.statement = statement;
-        this.runnableStatementUUID = UUID.randomUUID().toString();
-        this.lateConnection = new LateObject<>();
-    }
-
-    private SqlConnection getSqlConnection() {
-        return lateConnection.get();
-    }
-
-    public RunnableStatement setSQLConnection(SqlConnection connection) {
-        lateConnection.set(connection);
-        return this;
+        super(statement);
     }
 
     public Future<ResultMatrix> execute() {
-        String sql = statement.buildSql();
-        boolean toPrepareStatement = statement.isToPrepareStatement();
+        String sql = getStatement().buildSql();
+        boolean toPrepareStatement = getStatement().isToPrepareStatement();
         return Future.succeededFuture()
                      .compose(v -> {
                          if (!toPrepareStatement) {
-                             getSqlAuditLogger().info(r -> r.setQuery(runnableStatementUUID, sql));
+                             getSqlAuditLogger().info(r -> r.setQuery(getUuid(), sql));
                              return getSqlConnection().query(sql).execute();
                          } else {
-                             getSqlAuditLogger().info(r -> r.setPreparation(runnableStatementUUID, sql));
+                             getSqlAuditLogger().info(r -> r.setPreparation(getUuid(), sql));
                              return getSqlConnection().preparedQuery(sql).execute();
                          }
                      })
@@ -58,16 +38,12 @@ public final class RunnableStatement {
                          return Future.succeededFuture(resultMatrix);
                      })
                      .compose(resultMatrix -> {
-                         getSqlAuditLogger().info(r -> r.setForDone(runnableStatementUUID, sql, resultMatrix.getTotalAffectedRows(), resultMatrix.getTotalFetchedRows()));
+                         getSqlAuditLogger().info(r -> r.setForDone(getUuid(), sql, resultMatrix.getTotalAffectedRows(), resultMatrix.getTotalFetchedRows()));
                          return Future.succeededFuture(resultMatrix);
                      }, throwable -> {
-                         getSqlAuditLogger().error(r -> r.setForFailed(runnableStatementUUID, sql)
+                         getSqlAuditLogger().error(r -> r.setForFailed(getUuid(), sql)
                                                          .exception(throwable));
                          return Future.failedFuture(throwable);
                      });
-    }
-
-    private SpecificLogger<MySQLAuditSpecificLog> getSqlAuditLogger() {
-        return StatementAuditorHolder.getInstance().getSqlAuditLogger();
     }
 }

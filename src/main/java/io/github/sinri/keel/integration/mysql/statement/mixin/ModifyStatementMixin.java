@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
-import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForModify;
 import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
-import io.vertx.core.Future;
+import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -11,21 +11,10 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public interface ModifyStatementMixin<S> extends AnyStatement<S> {
-
-    /**
-     *
-     * @return future with affected rows; failed future when failed
-     */
-    default Future<Integer> executeForAffectedRows(NamedMySQLConnection namedMySQLConnection) {
-        return execute(namedMySQLConnection)
-                .compose(resultMatrix -> {
-                    var afx = resultMatrix.getTotalAffectedRows();
-                    return Future.succeededFuture(afx);
-                });
-    }
-
-    default Future<Integer> executeForAffectedRows(){
-        return executeForAffectedRows(getNamedMySQLConnection());
+public non-sealed interface ModifyStatementMixin<S> extends AnyStatement<S> {
+    default RunnableStatementForModify attachToConnection(SqlConnection sqlConnection) {
+        RunnableStatementForModify runnableStatement = new RunnableStatementForModify(this);
+        runnableStatement.setSQLConnection(sqlConnection);
+        return runnableStatement;
     }
 }

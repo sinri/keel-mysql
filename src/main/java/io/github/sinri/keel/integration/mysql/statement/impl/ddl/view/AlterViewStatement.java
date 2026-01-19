@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.view;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.SelectStatement;
+import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -15,7 +16,8 @@ import java.util.stream.Collectors;
  * @since 5.0.0
  */
 @NullMarked
-public class AlterViewStatement extends AbstractStatement<AlterViewStatement> {
+public class AlterViewStatement extends AbstractStatement<AlterViewStatement>
+implements SpecialStatementMixin<AlterViewStatement> {
     private final List<String> columns = new ArrayList<>();
     /**
      * {@code UNDEFINED | MERGE | TEMPTABLE }

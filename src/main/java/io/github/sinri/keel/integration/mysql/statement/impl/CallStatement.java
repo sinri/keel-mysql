@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -14,7 +15,8 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-public class CallStatement extends AbstractStatement<CallStatement> {
+public class CallStatement extends AbstractStatement<CallStatement>
+implements SpecialStatementMixin<CallStatement> {
     private final List<String> parameters = new ArrayList<>();
     private @Nullable String storedProcedureName = null;
 

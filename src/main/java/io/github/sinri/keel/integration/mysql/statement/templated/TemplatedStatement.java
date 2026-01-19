@@ -23,7 +23,8 @@ import java.util.regex.Matcher;
  * @since 5.0.0
  */
 @NullMarked
-public interface TemplatedStatement<S> extends AnyStatement<S> {
+public sealed interface TemplatedStatement<S> extends AnyStatement<S>
+        permits TemplatedModifyStatement, TemplatedReadStatement {
     /**
      * 从文件加载模板生成读取语句
      *

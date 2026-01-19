@@ -4,15 +4,11 @@ import io.github.sinri.keel.integration.mysql.condition.CompareCondition;
 import io.github.sinri.keel.integration.mysql.condition.GroupCondition;
 import io.github.sinri.keel.integration.mysql.condition.MySQLCondition;
 import io.github.sinri.keel.integration.mysql.condition.RawCondition;
-import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLGenerateError;
-import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
-import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.component.ConditionsComponent;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
-import io.github.sinri.keel.integration.mysql.statement.mixin.SelectStatementMixin;
-import io.vertx.core.Future;
+import io.github.sinri.keel.integration.mysql.statement.mixin.PaginatableStatementMixin;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -28,7 +24,7 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 @NullMarked
-public final class SelectStatement extends AbstractStatement<SelectStatement> implements SelectStatementMixin<SelectStatement> {
+public final class SelectStatement extends AbstractStatement<SelectStatement> implements PaginatableStatementMixin<SelectStatement> {
     final ConditionsComponent whereConditionsComponent;
     final ConditionsComponent havingConditionsComponent;
     private final List<String> tables;
@@ -182,12 +178,7 @@ public final class SelectStatement extends AbstractStatement<SelectStatement> im
         return this;
     }
 
-    public SelectStatement limit(long limit) {
-        this.offset = 0;
-        this.limit = limit;
-        return this;
-    }
-
+    @Override
     public SelectStatement limit(long limit, long offset) {
         this.offset = offset;
         this.limit = limit;
@@ -257,49 +248,6 @@ public final class SelectStatement extends AbstractStatement<SelectStatement> im
             sql.append("\n-- ").append(getRemarkAsComment()).append("\n");
         }
         return String.valueOf(sql);
-    }
-
-
-    /**
-     * Call from this instance, as the original query as Select Statement for all rows in certain order.
-     *
-     * @param pageNo   since 1.
-     * @param pageSize a number
-     * @since 3.2.3
-     * @since 3.2.20 Public
-     */
-    @Override
-    public Future<PaginationResult> queryForPagination(
-            NamedMySQLConnection sqlConnection,
-            long pageNo,
-            long pageSize
-    ) {
-        if (pageSize <= 0) throw new IllegalArgumentException("page size <= 0");
-        if (pageNo < 1) throw new IllegalArgumentException("page no < 1");
-        var countStatement = new SelectStatement(this)
-                .resetColumns()
-                .columnWithAlias("count(*)", "total")
-                .limit(0, 0);
-        this.limit(pageSize, (pageNo - 1) * pageSize);
-
-        return Future.all(
-                             countStatement.execute(sqlConnection)
-                                           .compose(resultMatrix -> {
-                                               try {
-                                                   Long total = resultMatrix.getOneColumnOfFirstRowAsLong("total");
-                                                   Objects.requireNonNull(total);
-                                                   return Future.succeededFuture(total);
-                                               } catch (KeelSQLResultRowIndexError e) {
-                                                   throw new RuntimeException(e);
-                                               }
-                                           }),
-                             this.execute(sqlConnection)
-                     )
-                     .compose(compositeFuture -> {
-                         Long total = compositeFuture.resultAt(0);
-                         ResultMatrix resultMatrix = compositeFuture.resultAt(1);
-                         return Future.succeededFuture(new PaginationResult(total, resultMatrix));
-                     });
     }
 
     public static class JoinComponent {

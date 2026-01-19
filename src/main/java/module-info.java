@@ -6,6 +6,7 @@ module io.github.sinri.keel.integration.mysql {
     requires transitive io.vertx.sql.client;
     requires transitive io.vertx.sql.client.mysql;
     requires static org.jspecify;
+    requires io.netty.codec.http;
 
     // 默认导出所有包
     exports io.github.sinri.keel.integration.mysql;
@@ -35,4 +36,6 @@ module io.github.sinri.keel.integration.mysql {
     exports io.github.sinri.keel.integration.mysql.provider;
 
     opens io.github.sinri.keel.integration.mysql.dev;
+    exports io.github.sinri.keel.integration.mysql.connection.target;
+    exports io.github.sinri.keel.integration.mysql.result.pagination;
 }

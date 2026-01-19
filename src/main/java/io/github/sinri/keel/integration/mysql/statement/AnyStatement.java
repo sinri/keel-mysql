@@ -1,11 +1,13 @@
 package io.github.sinri.keel.integration.mysql.statement;
 
 import io.github.sinri.keel.base.annotations.SelfInterface;
-import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
-import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
-import io.vertx.core.Future;
+import io.github.sinri.keel.integration.mysql.connection.target.AnyStatementWithSqlConnection;
+import io.github.sinri.keel.integration.mysql.statement.mixin.*;
+import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedStatement;
+import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
+
+import java.lang.reflect.InvocationTargetException;
 
 
 /**
@@ -14,7 +16,8 @@ import org.jspecify.annotations.Nullable;
  * @since 5.0.0
  */
 @NullMarked
-public interface AnyStatement<S> extends SelfInterface<S> {
+public sealed interface AnyStatement<S> extends SelfInterface<S>
+        permits AbstractStatement, ModifyStatementMixin, ReadStatementMixin, PaginatableStatementMixin, SpecialStatementMixin, WriteIntoStatementMixin, TemplatedStatement {
     static String getSqlComponentSeparator() {
         return AbstractStatement.SQL_COMPONENT_SEPARATOR;
     }
@@ -28,31 +31,32 @@ public interface AnyStatement<S> extends SelfInterface<S> {
         AbstractStatement.SQL_COMPONENT_SEPARATOR = sqlComponentSeparator;
     }
 
-    S setNamedMySQLConnection(@Nullable NamedMySQLConnection connection);
-
-    NamedMySQLConnection getNamedMySQLConnection() throws IllegalStateException;
-
     S setRemarkAsComment(String remarkAsComment);
 
-    /**
-     * 在方法 {@link AnyStatement#setNamedMySQLConnection(NamedMySQLConnection)} 指定的MySQL连接上执行SQL语句
-     */
-    Future<ResultMatrix> execute();
+    default <R extends AnyStatementWithSqlConnection> R attachToConnectionForCertainRunnableStatement(SqlConnection sqlConnection, Class<R> clazz) {
+        try {
+            R r = clazz.getConstructor(AnyStatement.class)
+                       .newInstance(this);
+            r.setSQLConnection(sqlConnection);
+            return r;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
+                 NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    /**
-     * 在指定的 MySQL 连接上执行SQL语句
-     *
-     * @param namedSqlConnection MySQL 命名连接
-     * @return 执行结果的 Future
-     */
-    Future<ResultMatrix> execute(NamedMySQLConnection namedSqlConnection);
+    //    default RunnableStatement attachToConnection(SqlConnection sqlConnection) {
+    //        return attachToConnectionForCertainRunnableStatement(sqlConnection, RunnableStatement.class);
+    //    }
 
-    S setPrepareStatement(boolean prepareStatement);
+    S setToPrepareStatement(boolean toPrepareStatement);
+
+    String buildSql();
 
     /**
      * 判断是否使用预处理语句
      *
      * @return 是否使用预处理语句
      */
-    boolean isPrepareStatement();
+    boolean isToPrepareStatement();
 }

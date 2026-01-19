@@ -1,5 +1,7 @@
 package io.github.sinri.keel.integration.mysql.connection;
 
+import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatement;
+import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForRead;
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.*;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.TruncateTableStatement;
@@ -9,6 +11,7 @@ import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create.Cr
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.AlterViewStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.CreateViewStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.DropViewStatement;
+import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplateArgumentMapping;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedModifyStatement;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedReadStatement;
@@ -47,7 +50,19 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param statementHandler SELECT语句处理器
      * @return SELECT语句对象
      */
-    default RunnableStatement select(Handler<SelectStatement> statementHandler) {
+    default RunnableStatementForRead pagination(Handler<SelectStatement> statementHandler) {
+        SelectStatement selectStatement = new SelectStatement();
+        statementHandler.handle(selectStatement);
+        return selectStatement.attachToConnection(getSqlConnection());
+    }
+
+    /**
+     * 创建SELECT语句
+     *
+     * @param statementHandler SELECT语句处理器
+     * @return SELECT语句对象
+     */
+    default RunnableStatementForRead select(Handler<SelectStatement> statementHandler) {
         SelectStatement selectStatement = new SelectStatement();
         statementHandler.handle(selectStatement);
         return selectStatement.attachToConnection(getSqlConnection());
@@ -237,7 +252,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
         return templatedModifyStatement.attachToConnection(getSqlConnection());
     }
 
-    class RawStatement extends AbstractStatement<RawStatement> {
+    class RawStatement extends AbstractStatement<RawStatement> implements SpecialStatementMixin<RawStatement> {
         private final String sql;
 
         public RawStatement(String sql, boolean prepareStatment) {

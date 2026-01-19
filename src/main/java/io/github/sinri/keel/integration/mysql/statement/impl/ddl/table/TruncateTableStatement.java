@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table;
 
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -9,7 +10,8 @@ import org.jspecify.annotations.Nullable;
  * @since 5.0.0
  */
 @NullMarked
-public class TruncateTableStatement extends AbstractStatement<TruncateTableStatement> {
+public class TruncateTableStatement extends AbstractStatement<TruncateTableStatement>
+implements SpecialStatementMixin<TruncateTableStatement> {
     private @Nullable String schemaName = null;
     private String tableName = "";
 

@@ -12,7 +12,8 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public class TemplatedModifyStatement extends AbstractStatement<TemplatedModifyStatement> implements ModifyStatementMixin<TemplatedModifyStatement>, TemplatedStatement<TemplatedModifyStatement> {
+public final class TemplatedModifyStatement extends AbstractStatement<TemplatedModifyStatement>
+        implements ModifyStatementMixin<TemplatedModifyStatement>, TemplatedStatement<TemplatedModifyStatement> {
     private final String templateSql;
     private final TemplateArgumentMapping argumentMapping;
 

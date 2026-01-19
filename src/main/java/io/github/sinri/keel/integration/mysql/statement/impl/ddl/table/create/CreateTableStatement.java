@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create;
 
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.component.*;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
+import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
 import io.vertx.core.Handler;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -30,7 +31,8 @@ import java.util.stream.Collectors;
  * @since 5.0.0
  */
 @NullMarked
-public class CreateTableStatement extends CreateTableStatementBase<CreateTableStatement> {
+public class CreateTableStatement extends CreateTableStatementBase<CreateTableStatement>
+implements SpecialStatementMixin<CreateTableStatement> {
     private final List<TableCreateDefinition> definitions = new ArrayList<>();
     private final CreateTableOptions tableOptions = new CreateTableOptions();
     private @Nullable CreateTablePartitionOptions partitionOptions;
