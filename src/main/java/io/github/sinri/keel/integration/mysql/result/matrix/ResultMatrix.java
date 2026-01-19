@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -50,6 +51,10 @@ public interface ResultMatrix<R extends ResultRow> extends Iterable<R> {
     }
 
     Stream<R> stream();
+
+    default <T> List<@Nullable T> column(Function<R, @Nullable T> extractor) {
+        return stream().map(extractor).toList();
+    }
 
     /**
      * 构建分类行映射图。
@@ -99,8 +104,8 @@ public interface ResultMatrix<R extends ResultRow> extends Iterable<R> {
      * @param rowToMapHandler 行到映射处理器
      * @return 自定义映射图
      */
-    default <K, V> Future<Map<K, V>> buildCustomizedMap(BiConsumer<Map<K, V>, R> rowToMapHandler) {
-        Map<K, V> map = new HashMap<>();
+    default <K, V> Future<Map<K, @Nullable V>> buildCustomizedMap(BiConsumer<Map<K, @Nullable V>, R> rowToMapHandler) {
+        Map<K, @Nullable V> map = new HashMap<>();
         for (var r : this) {
             rowToMapHandler.accept(map, r);
         }

@@ -84,12 +84,12 @@ public class RunnableStatementForRead extends RunnableStatement {
                 .compose(statementExecuteResult -> Future.succeededFuture(statementExecuteResult.toMatrix(mapper)));
     }
 
-    public <K> Future<Map<K, List<SimpleResultRow>>> queryForCategorizedMap(Function<SimpleResultRow, K> categoryGenerator) {
+    public <K> Future<Map<K, List<SimpleResultRow>>> executeForCategorizedMap(Function<SimpleResultRow, K> categoryGenerator) {
         return executeForResultMatrix()
                 .compose(resultMatrix -> resultMatrix.buildCategorizedRowsMap(categoryGenerator));
     }
 
-    public <K, T extends ResultRow> Future<Map<K, List<T>>> queryForCategorizedMap(
+    public <K, T extends ResultRow> Future<Map<K, List<T>>> executeForCategorizedMap(
             Class<T> classT,
             Function<T, K> categoryGenerator
     ) {
@@ -97,7 +97,7 @@ public class RunnableStatementForRead extends RunnableStatement {
                 .compose(resultMatrix -> resultMatrix.buildCategorizedRowsMap(categoryGenerator));
     }
 
-    public <K, T extends ResultRow> Future<Map<K, T>> queryForUniqueKeyBoundMap(
+    public <K, T extends ResultRow> Future<Map<K, T>> executeForUniqueKeyBoundMap(
             Class<T> classT,
             Function<T, K> uniqueKeyGenerator
     ) {
@@ -106,4 +106,10 @@ public class RunnableStatementForRead extends RunnableStatement {
     }
 
 
+    public <K> Future<Map<K, SimpleResultRow>> executeForUniqueKeyBoundMap(
+            Function<SimpleResultRow, K> uniqueKeyGenerator
+    ) {
+        return executeForResultMatrix()
+                .compose(resultMatrix -> resultMatrix.buildUniqueKeyBoundRowMap(uniqueKeyGenerator));
+    }
 }

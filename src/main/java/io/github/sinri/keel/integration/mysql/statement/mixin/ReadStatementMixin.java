@@ -1,8 +1,9 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
-import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForModify;
 import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForRead;
+import io.github.sinri.keel.integration.mysql.connection.target.StreamableStatement;
 import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
+import io.vertx.core.Vertx;
 import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 
@@ -17,6 +18,13 @@ public non-sealed interface ReadStatementMixin<S> extends AnyStatement<S> {
     default RunnableStatementForRead attachToConnection(SqlConnection sqlConnection) {
         RunnableStatementForRead runnableStatement = new RunnableStatementForRead(this);
         runnableStatement.setSQLConnection(sqlConnection);
+        return runnableStatement;
+    }
+
+    default StreamableStatement attachToConnectionForStream(Vertx vertx, SqlConnection sqlConnection) {
+        StreamableStatement runnableStatement = new StreamableStatement(this);
+        runnableStatement.setSQLConnection(sqlConnection);
+        runnableStatement.setVertx(vertx);
         return runnableStatement;
     }
 }
