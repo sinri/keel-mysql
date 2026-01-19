@@ -2,7 +2,7 @@ package io.github.sinri.keel.integration.mysql.connection;
 
 import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatement;
 import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForRead;
-import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import io.github.sinri.keel.integration.mysql.statement.RawStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.*;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.TruncateTableStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.AlterTableStatement;
@@ -11,7 +11,6 @@ import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create.Cr
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.AlterViewStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.CreateViewStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.DropViewStatement;
-import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplateArgumentMapping;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedModifyStatement;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedReadStatement;
@@ -20,7 +19,7 @@ import io.vertx.core.Handler;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-interface RunnableStatementFactory extends SqlConnectionHolder {
+public interface RunnableStatementFactory extends SqlConnectionHolder {
 
     /**
      * 创建原始 SQL 语句
@@ -250,21 +249,6 @@ interface RunnableStatementFactory extends SqlConnectionHolder {
         TemplateArgumentMapping arguments = templatedModifyStatement.getArguments();
         templatedModifyStatementHandler.handle(arguments);
         return templatedModifyStatement.attachToConnection(getSqlConnection());
-    }
-
-    class RawStatement extends AbstractStatement<RawStatement> implements SpecialStatementMixin<RawStatement> {
-        private final String sql;
-
-        public RawStatement(String sql, boolean prepareStatment) {
-            super();
-            this.sql = sql;
-            this.setToPrepareStatement(prepareStatment);
-        }
-
-        @Override
-        public String buildSql() {
-            return sql;
-        }
     }
 
 }

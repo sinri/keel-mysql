@@ -1,27 +1,26 @@
-package io.github.sinri.keel.integration.mysql.action;
+package io.github.sinri.keel.integration.mysql.action.single;
 
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import org.jspecify.annotations.NullMarked;
 
 
 /**
- * 抽象命名Mixin动作基类，实现了NamedActionMixinInterface接口用于处理mixin风格的命名MySQL连接
+ * 抽象命名动作基类，实现了NamedActionInterface接口用于处理命名MySQL连接
  * 该类提供了构造函数来初始化命名MySQL连接，并实现了getNamedSqlConnection方法返回连接
  *
- * @param <C> 扩展NamedMySQLConnection的特定连接类
- * @param <W> 表示mixin或附加上下文的泛型类型
+ * @param <C> 扩展 NamedMySQLConnection 的特定连接类
  * @since 5.0.0
  */
 @NullMarked
-public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W> implements NamedActionMixinInterface<C, W> {
+public abstract class AbstractNamedAction<C extends NamedMySQLConnection> implements NamedActionInterface<C> {
     private final C namedSqlConnection;
 
     /**
-     * 构造具有指定命名MySQL连接的抽象命名Mixin动作
+     * 构造具有指定命名MySQL连接的抽象命名动作
      *
      * @param namedSqlConnection 与此动作关联的命名MySQL连接实例，不能为null
      */
-    public AbstractNamedMixinAction(C namedSqlConnection) {
+    public AbstractNamedAction(C namedSqlConnection) {
         this.namedSqlConnection = namedSqlConnection;
     }
 
@@ -31,7 +30,7 @@ public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W
      * @return 与此动作关联的命名MySQL连接实例，永不为null
      */
     @Override
-    public final C getNamedSqlConnection() {
+    public C getNamedSqlConnection() {
         return namedSqlConnection;
     }
 }
