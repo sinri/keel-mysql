@@ -3,18 +3,18 @@ package io.github.sinri.keel.integration.mysql.result.matrix;
 
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
 import io.github.sinri.keel.integration.mysql.result.row.ResultRow;
+import io.github.sinri.keel.integration.mysql.result.row.SimpleResultRow;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.data.Numeric;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 
 /**
@@ -24,306 +24,96 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 @NullMarked
-public interface ResultMatrix {
-
-    /**
-     * 从RowSet创建结果矩阵
-     *
-     * @param rowSet SQL行集合
-     * @return 结果矩阵
-     */
-    static ResultMatrix create(RowSet<Row> rowSet) {
-        return new ResultMatrixImpl(rowSet);
+public interface ResultMatrix<R extends ResultRow> extends Iterable<R> {
+    static ResultMatrix<SimpleResultRow> createSimple(RowSet<Row> rowSet) {
+        return new SimpleResultMatrix(rowSet);
     }
 
-    private static <T> List<T> nonnullizeList(List<@Nullable T> list) {
-        List<T> nonNullList = new ArrayList<>();
-        for (var item : list) {
-            nonNullList.add(Objects.requireNonNull(item));
+    static <T extends ResultRow> ResultMatrix<T> createSpecific(RowSet<Row> rowSet, Function<JsonObject, T> mapper) {
+        return new SpecificResultMatrix<>(rowSet, mapper);
+    }
+
+    int size();
+
+    R getFirstRow() throws KeelSQLResultRowIndexError;
+
+    R getRowByIndex(int index) throws KeelSQLResultRowIndexError;
+
+    List<R> getRowList();
+
+    default JsonArray toJsonArray() {
+        JsonArray array = new JsonArray();
+        for (var r : this) {
+            array.add(r.getRow());
         }
-        return nonNullList;
+        return array;
     }
 
-    /**
-     * 获取结果行列表
-     *
-     * @return 结果行列表
-     */
-    List<JsonObject> getRowList();
+    Stream<R> stream();
 
     /**
-     * 获取获取的总行数
-     *
-     * @return 总行数
-     */
-    int getTotalFetchedRows();
-
-    /**
-     * 获取影响的总行数
-     *
-     * @return 影响的行数
-     */
-    int getTotalAffectedRows();
-
-    /**
-     * 获取最后插入的ID
-     *
-     * @return 最后插入的ID
-     */
-    long getLastInsertedID();
-
-    /**
-     * 转换为JSON数组
-     *
-     * @return JSON数组
-     */
-    JsonArray toJsonArray();
-
-    /**
-     * 获取第一行数据
-     *
-     * @return 第一行数据
-     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
-     */
-    JsonObject getFirstRow() throws KeelSQLResultRowIndexError;
-
-    /**
-     * 根据索引获取行数据
-     *
-     * @param index 行索引
-     * @return 指定行的数据
-     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
-     */
-    JsonObject getRowByIndex(int index) throws KeelSQLResultRowIndexError;
-
-    /**
-     * 根据索引构建表行对象
-     *
-     * @param index           行索引
-     * @param classOfTableRow 表行类
-     * @return 表行对象
-     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
-     */
-    <T extends ResultRow> T buildTableRowByIndex(int index, Class<T> classOfTableRow) throws KeelSQLResultRowIndexError;
-
-    /**
-     * 获取第一行指定列的日期时间值
-     *
-     * @param columnName 列名
-     * @return 日期时间值
-     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
-     */
-    @Nullable String getOneColumnOfFirstRowAsDateTime(String columnName) throws KeelSQLResultRowIndexError;
-
-    default String getOneColumnOfFirstRowAsNonNullDateTime(String columnName) throws KeelSQLResultRowIndexError {
-        return Objects.requireNonNull(getOneColumnOfFirstRowAsDateTime(columnName));
-    }
-
-    /**
-     * 获取第一行指定列的字符串值
-     *
-     * @param columnName 列名
-     * @return 字符串值
-     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
-     */
-    @Nullable String getOneColumnOfFirstRowAsString(String columnName) throws KeelSQLResultRowIndexError;
-
-    default String getOneColumnOfFirstRowAsNonNullString(String columnName) throws KeelSQLResultRowIndexError {
-        return Objects.requireNonNull(getOneColumnOfFirstRowAsString(columnName));
-    }
-
-    /**
-     * 获取第一行指定列的数值对象
-     *
-     * @param columnName 列名
-     * @return 数值对象
-     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
-     */
-    @Nullable Numeric getOneColumnOfFirstRowAsNumeric(String columnName) throws KeelSQLResultRowIndexError;
-
-    default Numeric getOneColumnOfFirstRowAsNonNullNumeric(String columnName) throws KeelSQLResultRowIndexError {
-        return Objects.requireNonNull(getOneColumnOfFirstRowAsNumeric(columnName));
-    }
-
-    /**
-     * 获取第一行指定列的整数值
-     *
-     * @param columnName 列名
-     * @return 整数值
-     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
-     */
-    @Nullable Integer getOneColumnOfFirstRowAsInteger(String columnName) throws KeelSQLResultRowIndexError;
-
-    default int getOneColumnOfFirstRowAsNonNullInteger(String columnName) throws KeelSQLResultRowIndexError {
-        return Objects.requireNonNull(getOneColumnOfFirstRowAsInteger(columnName));
-    }
-
-    /**
-     * 获取第一行指定列的长整数值
-     *
-     * @param columnName 列名
-     * @return 长整数值
-     * @throws KeelSQLResultRowIndexError 行索引错误时抛出
-     */
-    @Nullable Long getOneColumnOfFirstRowAsLong(String columnName) throws KeelSQLResultRowIndexError;
-
-    default long getOneColumnOfFirstRowAsNonNullLong(String columnName) throws KeelSQLResultRowIndexError {
-        return Objects.requireNonNull(getOneColumnOfFirstRowAsLong(columnName));
-    }
-
-    /**
-     * 获取指定列的所有日期时间值
-     *
-     * @param columnName 列名
-     * @return 日期时间值列表
-     */
-    List<@Nullable String> getOneColumnAsDateTime(String columnName);
-
-    default List<String> getOneColumnAsNonNullDateTime(String columnName) {
-        return nonnullizeList(getOneColumnAsDateTime(columnName));
-    }
-
-    /**
-     * 获取指定列的所有字符串值
-     *
-     * @param columnName 列名
-     * @return 字符串值列表
-     */
-    List<@Nullable String> getOneColumnAsString(String columnName);
-
-    default List<String> getOneColumnAsNonNullString(String columnName) {
-        return nonnullizeList(getOneColumnAsString(columnName));
-    }
-
-    /**
-     * 获取指定列的所有数值对象
-     *
-     * @param columnName 列名
-     * @return 数值对象列表
-     */
-    List<@Nullable Numeric> getOneColumnAsNumeric(String columnName);
-
-    default List<Numeric> getOneColumnAsNonNullNumeric(String columnName) {
-        return nonnullizeList(getOneColumnAsNumeric(columnName));
-    }
-
-    /**
-     * 获取指定列的所有长整数值
-     *
-     * @param columnName 列名
-     * @return 长整数值列表
-     */
-    List<@Nullable Long> getOneColumnAsLong(String columnName);
-
-    default List<Long> getOneColumnAsNonNullLong(String columnName) {
-        return nonnullizeList(getOneColumnAsLong(columnName));
-    }
-
-    /**
-     * 获取指定列的所有整数值
-     *
-     * @param columnName 列名
-     * @return 整数值列表
-     */
-    List<@Nullable Integer> getOneColumnAsInteger(String columnName);
-
-    default List<Integer> getOneColumnAsNonNullInteger(String columnName) {
-        return nonnullizeList(getOneColumnAsInteger(columnName));
-    }
-
-    /**
-     * 构建所有表行对象列表
-     *
-     * @param classOfTableRow 表行类
-     * @return 表行对象列表
-     * @throws RuntimeException 封装类时可能抛出异常
-     */
-    <T extends ResultRow> List<T> buildTableRowList(Class<T> classOfTableRow);
-
-    /**
-     * 构建分类行映射图
+     * 构建分类行映射图。
+     * <p>
+     * 从每一行 R 中，找出一个类别 K 值，构建以 K 为键、拥有 K 对应类别的 R 构成的列表为值的映射 Map。
      *
      * @param categoryGenerator 分类生成器
      * @return 分类行映射图
      */
-    default <K> Future<Map<K, List<JsonObject>>> buildCategorizedRowsMap(Function<JsonObject, K> categoryGenerator) {
-        Map<K, List<JsonObject>> map = new HashMap<>();
-        var list = getRowList();
-        list.forEach(item -> {
-            K category = categoryGenerator.apply(item);
-            map.computeIfAbsent(category, k -> new ArrayList<>()).add(item);
+    default <K> Future<Map<K, List<R>>> buildCategorizedRowsMap(Function<R, K> categoryGenerator) {
+        Map<K, List<R>> map = new HashMap<>();
+        this.forEach(r -> {
+            K category = categoryGenerator.apply(r);
+            map.computeIfAbsent(category, k -> new ArrayList<>()).add(r);
         });
         return Future.succeededFuture(map);
     }
 
     /**
-     * 构建唯一键绑定行映射图
+     * 构建唯一键绑定行映射图。
+     * <p>
+     * 从每一行 R 中，找出一个唯一键 K 值，构建以 K 为键、拥有 K 对应 R 为值的映射 Map。
      *
      * @param uniqueKeyGenerator 唯一键生成器
      * @return 唯一键绑定行映射图
+     * @throws IllegalStateException 如果唯一键重复
      */
-    default <K> Future<Map<K, JsonObject>> buildUniqueKeyBoundRowMap(Function<JsonObject, K> uniqueKeyGenerator) {
-        Map<K, JsonObject> map = new HashMap<>();
-        var list = getRowList();
-        list.forEach(item -> {
-            K uniqueKey = uniqueKeyGenerator.apply(item);
-            map.put(uniqueKey, item);
-        });
-        return Future.succeededFuture(map);
-    }
-
-    /**
-     * 构建分类表行映射图（分类映射到表行列表）
-     *
-     * @param classOfTableRow   表行类
-     * @param categoryGenerator 分类生成器
-     * @return 分类表行映射图
-     */
-    default <K, T extends ResultRow> Future<Map<K, List<T>>> buildCategorizedRowsMap(Class<T> classOfTableRow, Function<T, K> categoryGenerator) {
-        Map<K, List<T>> map = new HashMap<>();
-        var list = buildTableRowList(classOfTableRow);
-        list.forEach(item -> {
-            K category = categoryGenerator.apply(item);
-            map.computeIfAbsent(category, k -> new ArrayList<>()).add(item);
-        });
-        return Future.succeededFuture(map);
-    }
-
-    /**
-     * 构建唯一键绑定表行映射图（一个唯一键映射到一个结果行）
-     * 警告：如果uniqueKeyGenerator提供重复键，映射值将不确定
-     *
-     * @param classOfTableRow    表行类
-     * @param uniqueKeyGenerator 唯一键生成器
-     * @return 唯一键绑定表行映射图
-     */
-    default <K, T extends ResultRow> Future<Map<K, T>> buildUniqueKeyBoundRowMap(Class<T> classOfTableRow, Function<T, K> uniqueKeyGenerator) {
-        Map<K, T> map = new HashMap<>();
-        var list = buildTableRowList(classOfTableRow);
-        list.forEach(item -> {
-            K category = uniqueKeyGenerator.apply(item);
-            map.put(category, item);
-        });
+    default <K> Future<Map<K, R>> buildUniqueKeyBoundRowMap(Function<R, K> uniqueKeyGenerator) {
+        Map<K, R> map = new HashMap<>();
+        for (var r : this) {
+            K uniqueKey = uniqueKeyGenerator.apply(r);
+            if (map.containsKey(uniqueKey)) {
+                throw new IllegalStateException("Duplicate unique key " + uniqueKey + " in result matrix");
+            } else {
+                map.put(uniqueKey, r);
+            }
+        }
         return Future.succeededFuture(map);
     }
 
     /**
      * 构建自定义映射图（类似矩阵转置）
+     * <p>
+     * 从每一行 R 中，构建一个 K-V 映射，K 为映射键，V 为映射值。
+     * 映射键和映射值的生成由 rowToMapHandler 处理。
      *
      * @param rowToMapHandler 行到映射处理器
      * @return 自定义映射图
      */
-    default <K, V> Future<Map<K, V>> buildCustomizedMap(
-            BiConsumer<Map<K, V>, JsonObject> rowToMapHandler
-    ) {
+    default <K, V> Future<Map<K, V>> buildCustomizedMap(BiConsumer<Map<K, V>, R> rowToMapHandler) {
         Map<K, V> map = new HashMap<>();
-        var list = getRowList();
-        list.forEach(item -> rowToMapHandler.accept(map, item));
+        for (var r : this) {
+            rowToMapHandler.accept(map, r);
+        }
         return Future.succeededFuture(map);
     }
 
     /**
-     * 构建收缩列表（根据一组键收缩结果矩阵）
+     * 构建收缩列表（根据一组键收缩结果矩阵）。
+     * <p>
+     * 对于每一行 R，构建一个键实体 JsonObject 和一个主体实体 JsonObject。
+     * 键实体包含不收缩的字段键，主体实体包含收缩的字段键。
+     * 然后，将键实体和主体实体分别映射到键映射 Map 和主体映射 Map。
+     * 最后，将主体映射 Map 转换为列表 List<JsonObject>。
      *
      * @param shrinkByKeys      不收缩的字段键
      * @param shrinkBodyListKey 结果中收缩主体的键
@@ -335,12 +125,12 @@ public interface ResultMatrix {
     ) {
         Map<String, JsonObject> keyMap = new HashMap<>();
         Map<String, List<JsonObject>> bodyMap = new HashMap<>();
-        List<JsonObject> rowList = getRowList();
-        rowList.forEach(item -> {
+
+        for (R r : this) {
             JsonObject keyEntity = new JsonObject();
             JsonObject bodyEntity = new JsonObject();
 
-            item.forEach(entry -> {
+            r.forEach(entry -> {
                 if (shrinkByKeys.contains(entry.getKey())) {
                     keyEntity.put(entry.getKey(), entry.getValue());
                 } else {
@@ -358,7 +148,7 @@ public interface ResultMatrix {
             keyMap.put(skEntityHash, keyEntity);
             bodyMap.computeIfAbsent(skEntityHash, s -> new ArrayList<>())
                    .add(bodyEntity);
-        });
+        }
         List<JsonObject> resultList = new ArrayList<>();
         new TreeMap<>(bodyMap).forEach((k, v) -> {
             JsonObject x = new JsonObject();

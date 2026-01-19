@@ -1,7 +1,6 @@
 package io.github.sinri.keel.integration.mysql.connection;
 
-import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatement;
-import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForRead;
+import io.github.sinri.keel.integration.mysql.connection.target.*;
 import io.github.sinri.keel.integration.mysql.statement.RawStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.*;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.TruncateTableStatement;
@@ -49,7 +48,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param statementHandler SELECT语句处理器
      * @return SELECT语句对象
      */
-    default RunnableStatementForRead pagination(Handler<SelectStatement> statementHandler) {
+    default RunnableStatementForReadAndPagination pagination(Handler<SelectStatement> statementHandler) {
         SelectStatement selectStatement = new SelectStatement();
         statementHandler.handle(selectStatement);
         return selectStatement.attachToConnection(getSqlConnection());
@@ -61,7 +60,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param statementHandler SELECT语句处理器
      * @return SELECT语句对象
      */
-    default RunnableStatementForRead select(Handler<SelectStatement> statementHandler) {
+    default RunnableStatementForReadAndPagination select(Handler<SelectStatement> statementHandler) {
         SelectStatement selectStatement = new SelectStatement();
         statementHandler.handle(selectStatement);
         return selectStatement.attachToConnection(getSqlConnection());
@@ -73,7 +72,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param unionStatementHandler UNION语句处理器
      * @return UNION 语句对象
      */
-    default RunnableStatement union(Handler<UnionStatement> unionStatementHandler) {
+    default RunnableStatementForRead union(Handler<UnionStatement> unionStatementHandler) {
         UnionStatement unionStatement = new UnionStatement();
         unionStatementHandler.handle(unionStatement);
         return unionStatement.attachToConnection(getSqlConnection());
@@ -85,7 +84,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param updateStatementHandler UPDATE语句处理器
      * @return UPDATE语句对象
      */
-    default RunnableStatement update(Handler<UpdateStatement> updateStatementHandler) {
+    default RunnableStatementForModify update(Handler<UpdateStatement> updateStatementHandler) {
         UpdateStatement updateStatement = new UpdateStatement();
         updateStatementHandler.handle(updateStatement);
         return updateStatement.attachToConnection(getSqlConnection());
@@ -97,7 +96,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param deleteStatementHandler DELETE语句处理器
      * @return DELETE语句对象
      */
-    default RunnableStatement delete(Handler<DeleteStatement> deleteStatementHandler) {
+    default RunnableStatementForModify delete(Handler<DeleteStatement> deleteStatementHandler) {
         DeleteStatement deleteStatement = new DeleteStatement();
         deleteStatementHandler.handle(deleteStatement);
         return deleteStatement.attachToConnection(getSqlConnection());
@@ -109,7 +108,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param statementHandler INSERT语句处理器
      * @return INSERT语句对象
      */
-    default RunnableStatement insert(Handler<WriteIntoStatement> statementHandler) {
+    default RunnableStatementForWrite insert(Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.INSERT);
         statementHandler.handle(writeIntoStatement);
         return writeIntoStatement.attachToConnection(getSqlConnection());
@@ -121,7 +120,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param statementHandler REPLACE语句处理器
      * @return REPLACE语句对象
      */
-    default RunnableStatement replace(Handler<WriteIntoStatement> statementHandler) {
+    default RunnableStatementForWrite replace(Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.REPLACE);
         statementHandler.handle(writeIntoStatement);
         return writeIntoStatement.attachToConnection(getSqlConnection());
@@ -230,7 +229,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param templatedReadStatementHandler 模板参数映射处理器
      * @return 模板化读取语句对象
      */
-    default RunnableStatement templatedRead(String path, Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
+    default RunnableStatementForRead templatedRead(String path, Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
         TemplatedReadStatement readStatement = TemplatedStatement.loadTemplateToRead(path);
         TemplateArgumentMapping arguments = readStatement.getArguments();
         templatedReadStatementHandler.handle(arguments);
@@ -244,7 +243,7 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
      * @param templatedModifyStatementHandler 模板参数映射处理器
      * @return 模板化修改语句对象
      */
-    default RunnableStatement templatedModify(String path, Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
+    default RunnableStatementForModify templatedModify(String path, Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
         TemplatedModifyStatement templatedModifyStatement = TemplatedStatement.loadTemplateToModify(path);
         TemplateArgumentMapping arguments = templatedModifyStatement.getArguments();
         templatedModifyStatementHandler.handle(arguments);

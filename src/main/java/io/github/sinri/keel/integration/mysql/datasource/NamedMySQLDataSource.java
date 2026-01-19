@@ -13,7 +13,6 @@ import io.vertx.core.Closeable;
 import io.vertx.core.Completable;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.SqlConnection;
@@ -97,11 +96,12 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     private static Future<@Nullable String> checkMySQLVersion(SqlConnection sqlConnection) {
         return sqlConnection.preparedQuery("SELECT VERSION() as v; ")
                             .execute()
-                            .compose(rows -> Future.succeededFuture(ResultMatrix.create(rows)))
+                            .compose(rows -> {
+                                return Future.succeededFuture(ResultMatrix.createSimple(rows));
+                            })
                             .compose(resultMatrix -> {
                                 try {
-                                    JsonObject firstRow = resultMatrix.getFirstRow();
-                                    String versionExp = firstRow.getString("v");
+                                    String versionExp = resultMatrix.getFirstRow().readStringRequired("v");
                                     return Future.succeededFuture(versionExp);
                                 } catch (Throwable e) {
                                     // Keel.getLogger().exception(e);

@@ -6,6 +6,7 @@ import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.ConfigPropertiesBuilder;
 import io.github.sinri.keel.base.configuration.NotConfiguredException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
+import io.github.sinri.keel.integration.mysql.result.row.SimpleResultRow;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.mysqlclient.MySQLBuilder;
@@ -256,8 +257,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
      * @param sql 确认已过滤的SQL语句
      */
     @TechnicalPreview(since = "5.0.0")
-
-    public Future<ResultMatrix> instantQuery(Vertx vertx, String sql) {
+    public Future<ResultMatrix<SimpleResultRow>> instantQuery(Vertx vertx, String sql) {
         var sqlClient = MySQLBuilder.client()
                                     .with(this.getPoolOptions())
                                     .connectingTo(this.getConnectOptions())
@@ -266,7 +266,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
         return Future.succeededFuture()
                      .compose(v -> sqlClient.preparedQuery(sql)
                                             .execute()
-                                            .compose(rows -> Future.succeededFuture(ResultMatrix.create(rows))))
+                                            .compose(rows -> Future.succeededFuture(ResultMatrix.createSimple(rows))))
                      .andThen(ar -> sqlClient.close());
     }
 

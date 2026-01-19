@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
-import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForPagination;
+import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForReadAndPagination;
 import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
@@ -18,8 +18,8 @@ public non-sealed interface PaginatableStatementMixin<S> extends AnyStatement<S>
 
     S limit(long limit, long offset);
 
-    default RunnableStatementForPagination attachToConnection(SqlConnection sqlConnection) {
-        RunnableStatementForPagination runnableStatement = new RunnableStatementForPagination(this);
+    default RunnableStatementForReadAndPagination attachToConnection(SqlConnection sqlConnection) {
+        RunnableStatementForReadAndPagination runnableStatement = new RunnableStatementForReadAndPagination(this);
         runnableStatement.setSQLConnection(sqlConnection);
         return runnableStatement;
     }

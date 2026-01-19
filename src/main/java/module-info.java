@@ -34,8 +34,10 @@ module io.github.sinri.keel.integration.mysql {
     exports io.github.sinri.keel.integration.mysql.connection;
     exports io.github.sinri.keel.integration.mysql.datasource;
     exports io.github.sinri.keel.integration.mysql.provider;
-
-    opens io.github.sinri.keel.integration.mysql.dev;
     exports io.github.sinri.keel.integration.mysql.connection.target;
     exports io.github.sinri.keel.integration.mysql.result.pagination;
+    exports io.github.sinri.keel.integration.mysql.result;
+
+    opens io.github.sinri.keel.integration.mysql.dev;
+
 }

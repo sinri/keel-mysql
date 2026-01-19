@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonObject;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
-public record PaginationResult(long total, ResultMatrix resultMatrix) {
+public record PaginationResult(long total, ResultMatrix<?> resultMatrix) {
     /**
      * @since 4.0.8
      */

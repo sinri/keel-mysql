@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.connection.target;
 
-import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
+import io.github.sinri.keel.integration.mysql.result.StatementExecuteResult;
 import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;
@@ -20,7 +20,7 @@ public class RunnableStatement extends AnyStatementWithSqlConnection {
         super(statement);
     }
 
-    public Future<ResultMatrix> execute() {
+    public Future<StatementExecuteResult> execute() {
         String sql = getStatement().buildSql();
         boolean toPrepareStatement = getStatement().isToPrepareStatement();
         return Future.succeededFuture()
@@ -34,12 +34,14 @@ public class RunnableStatement extends AnyStatementWithSqlConnection {
                          }
                      })
                      .compose(rows -> {
-                         ResultMatrix resultMatrix = ResultMatrix.create(rows);
-                         return Future.succeededFuture(resultMatrix);
-                     })
-                     .compose(resultMatrix -> {
-                         getSqlAuditLogger().info(r -> r.setForDone(getUuid(), sql, resultMatrix.getTotalAffectedRows(), resultMatrix.getTotalFetchedRows()));
-                         return Future.succeededFuture(resultMatrix);
+                         StatementExecuteResult result = new StatementExecuteResult(rows);
+                         getSqlAuditLogger().info(r -> r.setForDone(
+                                 getUuid(),
+                                 sql,
+                                 result.getTotalAffectedRows(),
+                                 result.getTotalFetchedRows()
+                         ));
+                         return Future.succeededFuture(result);
                      }, throwable -> {
                          getSqlAuditLogger().error(r -> r.setForFailed(getUuid(), sql)
                                                          .exception(throwable));

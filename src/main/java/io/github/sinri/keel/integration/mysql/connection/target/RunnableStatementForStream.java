@@ -32,11 +32,14 @@ public class RunnableStatementForStream extends AnyStatementWithSqlConnection {
     }
 
     public final Future<Void> stream(ResultStreamReader resultStreamReader) {
+        return stream(resultStreamReader, 1);
+    }
+
+    public final Future<Void> stream(ResultStreamReader resultStreamReader, int batch) {
         return getSqlConnection()
                 .prepare(toString())
                 .compose(preparedStatement -> {
                     Cursor cursor = preparedStatement.cursor();
-
 
                     return getKeelAsyncMixin()
                             .asyncCallRepeatedly(routineResult -> {
@@ -45,7 +48,7 @@ public class RunnableStatementForStream extends AnyStatementWithSqlConnection {
                                     return Future.succeededFuture();
                                 }
 
-                                return cursor.read(1)
+                                return cursor.read(batch)
                                              .compose(rows -> getKeelAsyncMixin().asyncCallIteratively(rows, resultStreamReader::read));
                             })
                             .eventually(cursor::close)

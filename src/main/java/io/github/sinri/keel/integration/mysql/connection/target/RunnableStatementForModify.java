@@ -16,8 +16,8 @@ public class RunnableStatementForModify extends RunnableStatement {
      */
     public Future<Integer> executeForAffectedRows() {
         return execute()
-                .compose(resultMatrix -> {
-                    var afx = resultMatrix.getTotalAffectedRows();
+                .compose(statementExecuteResult -> {
+                    var afx = statementExecuteResult.getTotalAffectedRows();
                     return Future.succeededFuture(afx);
                 });
     }
