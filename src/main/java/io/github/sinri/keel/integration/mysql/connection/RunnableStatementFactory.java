@@ -1,6 +1,6 @@
-package io.github.sinri.keel.integration.mysql.statement;
+package io.github.sinri.keel.integration.mysql.connection;
 
-import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.*;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.TruncateTableStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.AlterTableStatement;
@@ -9,42 +9,36 @@ import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create.Cr
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.AlterViewStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.CreateViewStatement;
 import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.DropViewStatement;
-import io.github.sinri.keel.integration.mysql.statement.mixin.ModifyStatementMixin;
-import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
-import io.github.sinri.keel.integration.mysql.statement.mixin.SelectStatementMixin;
-import io.github.sinri.keel.integration.mysql.statement.mixin.WriteIntoStatementMixin;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplateArgumentMapping;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedModifyStatement;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedReadStatement;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedStatement;
 import io.vertx.core.Handler;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 @NullMarked
-public interface StatementFactory {
-    @Nullable NamedMySQLConnection getNamedMySQLConnectionInScope();
+public interface RunnableStatementFactory extends SqlConnectionHolder {
 
     /**
-     * 创建原始SQL语句
+     * 创建原始 SQL 语句
      *
-     * @param sql 原始SQL语句
-     * @return SQL语句对象
+     * @param sql 原始 SQL 语句
+     * @return 可执行的 SQL 语句对象
      */
-    default RawStatement rawForPreparedQuery(String sql) {
+    default RunnableStatement rawForPreparedQuery(String sql) {
         return new RawStatement(sql, true)
-                .setNamedMySQLConnection(getNamedMySQLConnectionInScope());
+                .attachToConnection(getSqlConnection());
     }
 
     /**
-     * 创建原始SQL语句，支持指定是否使用预处理语句
+     * 创建原始 SQL 语句，支持指定是否使用预处理语句
      *
-     * @param sql 原始SQL语句
-     * @return SQL语句对象
+     * @param sql 原始 SQL 语句
+     * @return 可执行的 SQL 语句对象
      */
-    default RawStatement rawForDirectQuery(String sql) {
+    default RunnableStatement rawForDirectQuery(String sql) {
         return new RawStatement(sql, false)
-                .setNamedMySQLConnection(getNamedMySQLConnectionInScope());
+                .attachToConnection(getSqlConnection());
     }
 
     /**
@@ -53,24 +47,22 @@ public interface StatementFactory {
      * @param statementHandler SELECT语句处理器
      * @return SELECT语句对象
      */
-    default SelectStatementMixin select(Handler<SelectStatement> statementHandler) {
+    default RunnableStatement select(Handler<SelectStatement> statementHandler) {
         SelectStatement selectStatement = new SelectStatement();
         statementHandler.handle(selectStatement);
-        selectStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return selectStatement;
+        return selectStatement.attachToConnection(getSqlConnection());
     }
 
     /**
      * 创建UNION语句
      *
      * @param unionStatementHandler UNION语句处理器
-     * @return UNION语句对象
+     * @return UNION 语句对象
      */
-    default ReadStatementMixin union(Handler<UnionStatement> unionStatementHandler) {
+    default RunnableStatement union(Handler<UnionStatement> unionStatementHandler) {
         UnionStatement unionStatement = new UnionStatement();
         unionStatementHandler.handle(unionStatement);
-        unionStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return unionStatement;
+        return unionStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -79,11 +71,10 @@ public interface StatementFactory {
      * @param updateStatementHandler UPDATE语句处理器
      * @return UPDATE语句对象
      */
-    default ModifyStatementMixin update(Handler<UpdateStatement> updateStatementHandler) {
+    default RunnableStatement update(Handler<UpdateStatement> updateStatementHandler) {
         UpdateStatement updateStatement = new UpdateStatement();
         updateStatementHandler.handle(updateStatement);
-        updateStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return updateStatement;
+        return updateStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -92,11 +83,10 @@ public interface StatementFactory {
      * @param deleteStatementHandler DELETE语句处理器
      * @return DELETE语句对象
      */
-    default ModifyStatementMixin delete(Handler<DeleteStatement> deleteStatementHandler) {
+    default RunnableStatement delete(Handler<DeleteStatement> deleteStatementHandler) {
         DeleteStatement deleteStatement = new DeleteStatement();
         deleteStatementHandler.handle(deleteStatement);
-        deleteStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return deleteStatement;
+        return deleteStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -105,11 +95,10 @@ public interface StatementFactory {
      * @param statementHandler INSERT语句处理器
      * @return INSERT语句对象
      */
-    default WriteIntoStatementMixin insert(Handler<WriteIntoStatement> statementHandler) {
+    default RunnableStatement insert(Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.INSERT);
         statementHandler.handle(writeIntoStatement);
-        writeIntoStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return writeIntoStatement;
+        return writeIntoStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -118,11 +107,10 @@ public interface StatementFactory {
      * @param statementHandler REPLACE语句处理器
      * @return REPLACE语句对象
      */
-    default WriteIntoStatementMixin replace(Handler<WriteIntoStatement> statementHandler) {
+    default RunnableStatement replace(Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.REPLACE);
         statementHandler.handle(writeIntoStatement);
-        writeIntoStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return writeIntoStatement;
+        return writeIntoStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -131,11 +119,10 @@ public interface StatementFactory {
      * @param statementHandler CALL语句处理器
      * @return CALL语句对象
      */
-    default CallStatement call(Handler<CallStatement> statementHandler) {
+    default RunnableStatement call(Handler<CallStatement> statementHandler) {
         CallStatement callStatement = new CallStatement();
         statementHandler.handle(callStatement);
-        callStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return callStatement;
+        return callStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -144,11 +131,10 @@ public interface StatementFactory {
      * @param statementHandler TRUNCATE TABLE语句处理器
      * @return TRUNCATE TABLE语句对象
      */
-    default TruncateTableStatement truncateTable(Handler<TruncateTableStatement> statementHandler) {
+    default RunnableStatement truncateTable(Handler<TruncateTableStatement> statementHandler) {
         TruncateTableStatement truncateTableStatement = new TruncateTableStatement();
         statementHandler.handle(truncateTableStatement);
-        truncateTableStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return truncateTableStatement;
+        return truncateTableStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -157,11 +143,10 @@ public interface StatementFactory {
      * @param statementHandler CREATE TABLE语句处理器
      * @return CREATE TABLE语句对象
      */
-    default CreateTableStatement createTable(Handler<CreateTableStatement> statementHandler) {
+    default RunnableStatement createTable(Handler<CreateTableStatement> statementHandler) {
         CreateTableStatement createTableStatement = new CreateTableStatement();
         statementHandler.handle(createTableStatement);
-        createTableStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return createTableStatement;
+        return createTableStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -170,11 +155,10 @@ public interface StatementFactory {
      * @param statementHandler CREATE TABLE LIKE语句处理器
      * @return CREATE TABLE LIKE语句对象
      */
-    default CreateTableLikeTableStatement createTableLikeTable(Handler<CreateTableLikeTableStatement> statementHandler) {
+    default RunnableStatement createTableLikeTable(Handler<CreateTableLikeTableStatement> statementHandler) {
         CreateTableLikeTableStatement createTableStatement = new CreateTableLikeTableStatement();
         statementHandler.handle(createTableStatement);
-        createTableStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return createTableStatement;
+        return createTableStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -183,11 +167,10 @@ public interface StatementFactory {
      * @param statementHandler ALTER TABLE语句处理器
      * @return ALTER TABLE语句对象
      */
-    default AlterTableStatement alterTable(Handler<AlterTableStatement> statementHandler) {
+    default RunnableStatement alterTable(Handler<AlterTableStatement> statementHandler) {
         AlterTableStatement alterTableStatement = new AlterTableStatement();
         statementHandler.handle(alterTableStatement);
-        alterTableStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return alterTableStatement;
+        return alterTableStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -196,11 +179,10 @@ public interface StatementFactory {
      * @param statementHandler CREATE VIEW语句处理器
      * @return CREATE VIEW语句对象
      */
-    default CreateViewStatement createView(Handler<CreateViewStatement> statementHandler) {
+    default RunnableStatement createView(Handler<CreateViewStatement> statementHandler) {
         CreateViewStatement createViewStatement = new CreateViewStatement();
         statementHandler.handle(createViewStatement);
-        createViewStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return createViewStatement;
+        return createViewStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -209,11 +191,10 @@ public interface StatementFactory {
      * @param statementHandler ALTER VIEW语句处理器
      * @return ALTER VIEW语句对象
      */
-    default AlterViewStatement alterView(Handler<AlterViewStatement> statementHandler) {
+    default RunnableStatement alterView(Handler<AlterViewStatement> statementHandler) {
         AlterViewStatement alterViewStatement = new AlterViewStatement();
         statementHandler.handle(alterViewStatement);
-        alterViewStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return alterViewStatement;
+        return alterViewStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -222,11 +203,10 @@ public interface StatementFactory {
      * @param statementHandler DROP VIEW语句处理器
      * @return DROP VIEW语句对象
      */
-    default DropViewStatement dropView(Handler<DropViewStatement> statementHandler) {
+    default RunnableStatement dropView(Handler<DropViewStatement> statementHandler) {
         DropViewStatement dropViewStatement = new DropViewStatement();
         statementHandler.handle(dropViewStatement);
-        dropViewStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return dropViewStatement;
+        return dropViewStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -236,12 +216,11 @@ public interface StatementFactory {
      * @param templatedReadStatementHandler 模板参数映射处理器
      * @return 模板化读取语句对象
      */
-    default TemplatedReadStatement templatedRead(String path, Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
+    default RunnableStatement templatedRead(String path, Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
         TemplatedReadStatement readStatement = TemplatedStatement.loadTemplateToRead(path);
         TemplateArgumentMapping arguments = readStatement.getArguments();
         templatedReadStatementHandler.handle(arguments);
-        readStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return readStatement;
+        return readStatement.attachToConnection(getSqlConnection());
     }
 
     /**
@@ -251,22 +230,20 @@ public interface StatementFactory {
      * @param templatedModifyStatementHandler 模板参数映射处理器
      * @return 模板化修改语句对象
      */
-    default TemplatedModifyStatement templatedModify(String path, Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
+    default RunnableStatement templatedModify(String path, Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
         TemplatedModifyStatement templatedModifyStatement = TemplatedStatement.loadTemplateToModify(path);
         TemplateArgumentMapping arguments = templatedModifyStatement.getArguments();
         templatedModifyStatementHandler.handle(arguments);
-        templatedModifyStatement.setNamedMySQLConnection(getNamedMySQLConnectionInScope());
-        return templatedModifyStatement;
+        return templatedModifyStatement.attachToConnection(getSqlConnection());
     }
 
-    @NullMarked
     class RawStatement extends AbstractStatement<RawStatement> {
         private final String sql;
 
         public RawStatement(String sql, boolean prepareStatment) {
             super();
             this.sql = sql;
-            this.setPrepareStatement(prepareStatment);
+            this.setToPrepareStatement(prepareStatment);
         }
 
         @Override
