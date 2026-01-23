@@ -9,6 +9,7 @@ module io.github.sinri.keel.integration.mysql {
     requires io.netty.codec.http;
 
     // 默认导出所有包
+    exports io.github.sinri.keel.integration.mysql;
     exports io.github.sinri.keel.integration.mysql.action.mix;
     exports io.github.sinri.keel.integration.mysql.action.single;
     exports io.github.sinri.keel.integration.mysql.condition;

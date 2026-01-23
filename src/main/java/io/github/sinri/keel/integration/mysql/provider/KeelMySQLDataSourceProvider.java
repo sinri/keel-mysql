@@ -15,7 +15,6 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 
 
@@ -44,14 +43,13 @@ public class KeelMySQLDataSourceProvider {
     }
 
 
-    public static KeelMySQLConfiguration getDefaultMySQLConfiguration() {
+    public static KeelMySQLConfiguration getDefaultMySQLConfiguration() throws NotConfiguredException {
         return getMySQLConfiguration(defaultMySQLDataSourceName());
     }
 
 
-    public static KeelMySQLConfiguration getMySQLConfiguration(String dataSourceName) {
+    public static KeelMySQLConfiguration getMySQLConfiguration(String dataSourceName) throws NotConfiguredException {
         var configuration = ConfigElement.root().extract("mysql", dataSourceName);
-        Objects.requireNonNull(configuration);
         return new KeelMySQLConfiguration(configuration);
     }
 
@@ -62,7 +60,12 @@ public class KeelMySQLDataSourceProvider {
             Function<SqlConnection, C> sqlConnectionWrapper,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
     ) {
-        KeelMySQLConfiguration mySQLConfiguration = getMySQLConfiguration(dataSourceName);
+        KeelMySQLConfiguration mySQLConfiguration = null;
+        try {
+            mySQLConfiguration = getMySQLConfiguration(dataSourceName);
+        } catch (NotConfiguredException e) {
+            return Future.failedFuture(e);
+        }
         NamedMySQLDataSource<C> dataSource = new NamedMySQLDataSource<>(
                 vertx,
                 mySQLConfiguration,

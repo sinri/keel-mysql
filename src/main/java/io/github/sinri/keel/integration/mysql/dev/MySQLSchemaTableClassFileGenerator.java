@@ -42,7 +42,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelAsyncMixin {
      * @throws RuntimeException if the configuration property is not set or blank
      */
     default String getTablePackagePath() {
-        var p = ConfigElement.root().readString("table.package.path");
+        var p = ConfigElement.root().readProperty("table.package.path");
         if (p == null || p.isBlank()) {
             throw new RuntimeException("The table package path not set in config as `table.package.path`!");
         }
