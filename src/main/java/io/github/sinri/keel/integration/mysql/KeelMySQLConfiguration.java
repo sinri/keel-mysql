@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql;
 
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
-import io.github.sinri.keel.base.async.KeelAsyncMixin;
+import io.github.sinri.keel.base.async.Keel;
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.ConfigPropertiesBuilder;
 import io.github.sinri.keel.base.configuration.NotConfiguredException;
@@ -280,13 +280,13 @@ public class KeelMySQLConfiguration extends ConfigElement {
      * @param readWindowFunction the async handler of the read rows
      */
 
-    public Future<Void> instantQueryForStream(KeelAsyncMixin keelAsyncMixin, String sql, int readWindowSize, Function<RowSet<Row>, Future<Void>> readWindowFunction) {
+    public Future<Void> instantQueryForStream(Keel keel, String sql, int readWindowSize, Function<RowSet<Row>, Future<Void>> readWindowFunction) {
         return Future.succeededFuture()
                      .compose(v -> {
                          Pool pool = MySQLBuilder.pool()
                                                  .with(this.getPoolOptions())
                                                  .connectingTo(this.getConnectOptions())
-                                                 .using(keelAsyncMixin.getVertx())
+                                                 .using(keel)
                                                  .build();
                          return Future.succeededFuture(pool);
                      })
@@ -297,17 +297,17 @@ public class KeelMySQLConfiguration extends ConfigElement {
                                      .compose(preparedStatement -> {
                                          Cursor cursor = preparedStatement.cursor();
 
-                                         return keelAsyncMixin.asyncCallRepeatedly(routineResult -> cursor
-                                                                      .read(readWindowSize)
-                                                                      .compose(readWindowFunction)
-                                                                      .compose(v -> {
-                                                                          if (!cursor.hasMore()) {
-                                                                              routineResult.stop();
-                                                                              return Future.succeededFuture();
-                                                                          }
-                                                                          return Future.succeededFuture();
-                                                                      }))
-                                                              .eventually(cursor::close);
+                                         return keel.asyncCallRepeatedly(routineResult -> cursor
+                                                            .read(readWindowSize)
+                                                            .compose(readWindowFunction)
+                                                            .compose(v -> {
+                                                                if (!cursor.hasMore()) {
+                                                                    routineResult.stop();
+                                                                    return Future.succeededFuture();
+                                                                }
+                                                                return Future.succeededFuture();
+                                                            }))
+                                                    .eventually(cursor::close);
                                      })
                                      .eventually(sqlConnection::close))
                              .eventually(pool::close));

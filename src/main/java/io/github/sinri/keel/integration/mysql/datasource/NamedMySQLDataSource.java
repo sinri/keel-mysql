@@ -202,7 +202,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @return 操作结果Future
      */
     @TechnicalPreview(since = "5.0.0")
-    public <T extends @Nullable Object> Future<ValueBox<T>> executeInConnection(Function<C, Future<T>> function) {
+    public <T> Future<ValueBox<T>> executeInConnection(Function<C, Future<T>> function) {
         return Future.succeededFuture().compose(
                 v -> fetchMySQLConnection()
                         .compose(sqlConnectionWrapper -> {
@@ -236,7 +236,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @param function 连接操作函数
      * @return 操作结果Future
      */
-    public <T extends @Nullable Object> Future<@Nullable T> withConnection(Function<C, Future<@Nullable T>> function) {
+    public <T> Future<@Nullable T> withConnection(Function<C, Future<@Nullable T>> function) {
         return Future.succeededFuture().compose(
                 v -> fetchMySQLConnection()
                         .compose(sqlConnectionWrapper -> {
@@ -264,7 +264,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @return 事务结果Future
      */
     @TechnicalPreview(since = "5.0.0")
-    public <T extends @Nullable Object> Future<ValueBox<T>> executeInTransaction(Function<C, Future<T>> function) {
+    public <T> Future<ValueBox<T>> executeInTransaction(Function<C, Future<T>> function) {
         return executeInConnection(c -> {
             return Future.succeededFuture()
                          .compose(v -> c.getSqlConnection().begin())
@@ -306,7 +306,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @param function 事务操作函数
      * @return 事务结果Future
      */
-    public <T extends @Nullable Object> Future<@Nullable T> withTransaction(Function<C, Future<@Nullable T>> function) {
+    public <T> Future<@Nullable T> withTransaction(Function<C, Future<@Nullable T>> function) {
         return withConnection(c -> {
             return Future.succeededFuture()
                          .compose(v -> c.getSqlConnection().begin())

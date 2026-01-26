@@ -21,19 +21,21 @@ public class GenDevTest extends KeelInstantRunner {
 
     @Override
     protected Future<Void> run() throws Exception {
-        return lateProvider.get().loadDefault(getVertx())
+        return lateProvider.get().loadDefault(getKeel())
                            .compose(dataSource -> {
                                return dataSource.withConnection(sampleMySQLConnection -> {
-                                   TableRowClassSourceCodeGenerator tableRowClassSourceCodeGenerator = new TableRowClassSourceCodeGenerator(getVertx(), sampleMySQLConnection);
-                                   String packagePath = ConfigElement.root().readString("table.package.path");
-                                   Objects.requireNonNull(packagePath);
-                                   return tableRowClassSourceCodeGenerator
-                                           .generate(
-                                                   "io.github.sinri.keel.integration.mysql.dev.runtime",
-                                                   packagePath
-                                           );
-                               });
-
+                                                    TableRowClassSourceCodeGenerator tableRowClassSourceCodeGenerator = new TableRowClassSourceCodeGenerator(getKeel(), sampleMySQLConnection);
+                                                    String packagePath = ConfigElement.root().readProperty("table.package.path");
+                                                    Objects.requireNonNull(packagePath);
+                                                    return tableRowClassSourceCodeGenerator
+                                                            .generate(
+                                                                    "io.github.sinri.keel.integration.mysql.dev.runtime",
+                                                                    packagePath
+                                                            );
+                                                })
+                                                .compose(v -> {
+                                                    return Future.succeededFuture();
+                                                });
                            });
 
     }

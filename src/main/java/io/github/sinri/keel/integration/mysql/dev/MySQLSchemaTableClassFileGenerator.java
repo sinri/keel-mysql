@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.base.async.KeelAsyncMixin;
+import io.github.sinri.keel.base.async.Keel;
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.logger.logger.StdoutLogger;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
@@ -25,7 +25,9 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 @NullMarked
-public interface MySQLSchemaTableClassFileGenerator extends KeelAsyncMixin {
+public interface MySQLSchemaTableClassFileGenerator {
+
+    Keel getKeel();
 
     default Logger getUnitLogger() {
         return new StdoutLogger(getClass().getName());
@@ -189,8 +191,8 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelAsyncMixin {
             @Nullable List<String> tables
     ) {
         KeelMySQLDataSourceProvider provider = new KeelMySQLDataSourceProvider();
-        FileSystem fs = getVertx().fileSystem();
-        return provider.load(getVertx(), dataSourceName, sqlConnectionWrapper)
+        FileSystem fs = getKeel().fileSystem();
+        return provider.load(getKeel(), dataSourceName, sqlConnectionWrapper)
                        .compose(mySQLDataSource -> {
                            var dir = getTablePackagePath() + "/" + dataSourceName + "/" + schemaPackageName;
                            return fs.exists(dir)
@@ -205,7 +207,7 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelAsyncMixin {
                                         getUnitLogger().debug("Table Row Class Directory Ensured as " + dir);
                                         return this.stashOldClassFiles(dir)
                                                    .compose((Void v) -> mySQLDataSource.withConnection(sqlConnection -> {
-                                                       var x = new TableRowClassSourceCodeGenerator(getVertx(), sqlConnection)
+                                                       var x = new TableRowClassSourceCodeGenerator(getKeel(), sqlConnection)
                                                                .forSchema(schemaName);
                                                        x.setLogger(getUnitLogger());
                                                        if (tables != null) {
@@ -256,17 +258,17 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelAsyncMixin {
      */
     private Future<Void> stashOldClassFiles(String dir) {
         getUnitLogger().notice("stashOldClassFiles");
-        return getVertx().fileSystem().readDir(dir)
-                         .compose(files -> {
-                             return asyncCallIteratively(files, file -> {
-                                 if (file.endsWith("/package-info.java")) {
-                                     return Future.succeededFuture();
-                                 } else {
-                                     //return Keel.getVertx().fileSystem().delete(file);
-                                     return getVertx().fileSystem().move(file, file + ".stash");
-                                 }
-                             });
-                         });
+        return getKeel().fileSystem().readDir(dir)
+                        .compose(files -> {
+                            return getKeel().asyncCallIteratively(files, file -> {
+                                if (file.endsWith("/package-info.java")) {
+                                    return Future.succeededFuture();
+                                } else {
+                                    //return Keel.getVertx().fileSystem().delete(file);
+                                    return getKeel().fileSystem().move(file, file + ".stash");
+                                }
+                            });
+                        });
     }
 
     /**
@@ -281,16 +283,16 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelAsyncMixin {
      */
     private Future<Void> callbackOldClassFiles(String dir) {
         getUnitLogger().warning("callbackOldClassFiles");
-        return getVertx().fileSystem().readDir(dir)
-                         .compose(files -> {
-                             return asyncCallIteratively(files, file -> {
-                                 if (file.endsWith(".stash")) {
-                                     String x = file.substring(0, file.length() - ".stash".length());
-                                     return getVertx().fileSystem().move(file, x);
-                                 }
-                                 return Future.succeededFuture();
-                             });
-                         });
+        return getKeel().fileSystem().readDir(dir)
+                        .compose(files -> {
+                            return getKeel().asyncCallIteratively(files, file -> {
+                                if (file.endsWith(".stash")) {
+                                    String x = file.substring(0, file.length() - ".stash".length());
+                                    return getKeel().fileSystem().move(file, x);
+                                }
+                                return Future.succeededFuture();
+                            });
+                        });
     }
 
     /**
@@ -305,14 +307,14 @@ public interface MySQLSchemaTableClassFileGenerator extends KeelAsyncMixin {
      */
     private Future<Void> removeOldClassFiles(String dir) {
         getUnitLogger().notice("removeOldClassFiles");
-        return getVertx().fileSystem().readDir(dir)
-                         .compose(files -> {
-                             return asyncCallIteratively(files, file -> {
-                                 if (file.endsWith(".stash")) {
-                                     return getVertx().fileSystem().delete(file);
-                                 }
-                                 return Future.succeededFuture();
-                             });
-                         });
+        return getKeel().fileSystem().readDir(dir)
+                        .compose(files -> {
+                            return getKeel().asyncCallIteratively(files, file -> {
+                                if (file.endsWith(".stash")) {
+                                    return getKeel().fileSystem().delete(file);
+                                }
+                                return Future.succeededFuture();
+                            });
+                        });
     }
 }

@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.base.async.KeelAsyncMixin;
+import io.github.sinri.keel.base.async.Keel;
 import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
@@ -8,7 +8,6 @@ import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlConnection;
@@ -24,12 +23,12 @@ import java.util.*;
  * @since 5.0.0
  */
 @NullMarked
-public class TableRowClassSourceCodeGenerator implements KeelAsyncMixin {
+public class TableRowClassSourceCodeGenerator {
     private final SqlConnection sqlConnection;
     private final Set<String> tableSet;
     private final Set<String> excludedTableSet;
-    //private final Keel keel;
-    private final Vertx vertx;
+    private final Keel keel;
+    //    private final Vertx vertx;
     private @Nullable String schema;
     private @Nullable Handler<TableRowClassBuildStandard> standardHandler;
     private Logger logger;
@@ -39,13 +38,13 @@ public class TableRowClassSourceCodeGenerator implements KeelAsyncMixin {
      *
      * @param namedMySQLConnection 命名MySQL连接
      */
-    public TableRowClassSourceCodeGenerator(Vertx vertx, NamedMySQLConnection namedMySQLConnection) {
+    public TableRowClassSourceCodeGenerator(Keel keel, NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
         this.schema = null;
         this.tableSet = new HashSet<>();
         this.excludedTableSet = new HashSet<>();
         this.logger = StdoutLoggerFactory.getInstance().createLogger(getClass().getSimpleName());
-        this.vertx = vertx;
+        this.keel = keel;
     }
 
     /**
@@ -68,9 +67,8 @@ public class TableRowClassSourceCodeGenerator implements KeelAsyncMixin {
         return this;
     }
 
-    @Override
-    public Vertx getVertx() {
-        return vertx;
+    public Keel getKeel() {
+        return keel;
     }
 
     public TableRowClassSourceCodeGenerator forSchema(@Nullable String schema) {
@@ -151,35 +149,34 @@ public class TableRowClassSourceCodeGenerator implements KeelAsyncMixin {
         getLogger().info("To generate class code for tables: " + String.join(", ", tables));
 
         Map<String, String> writeMap = new HashMap<>();
-        return asyncCallIteratively(
-                tables,
-                table -> {
-                    String className = StringUtils.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
-                    String classFile = packagePath + "/" + className + ".java";
+        return getKeel().asyncCallIteratively(
+                                tables,
+                                table -> {
+                                    String className = StringUtils.fromUnderScoreCaseToCamelCase(table, false) + "TableRow";
+                                    String classFile = packagePath + "/" + className + ".java";
 
-                    getLogger().info(String.format("To generate class %s to file %s", className, classFile));
+                                    getLogger().info(String.format("To generate class %s to file %s", className, classFile));
 
-                    TableRowClassBuildStandard standard = new TableRowClassBuildStandard();
-                    if (standardHandler != null) {
-                        standardHandler.handle(standard);
-                    }
-                    var options = new TableRowClassBuildOptions(standard)
-                            .setSchema(schema)
-                            .setTable(table)
-                            .setPackageName(packageName);
+                                    TableRowClassBuildStandard standard = new TableRowClassBuildStandard();
+                                    if (standardHandler != null) {
+                                        standardHandler.handle(standard);
+                                    }
+                                    var options = new TableRowClassBuildOptions(standard)
+                                            .setSchema(schema)
+                                            .setTable(table)
+                                            .setPackageName(packageName);
 
-                    return this.generateClassCodeForOneTable(options)
-                               .compose(code -> {
-                                   writeMap.put(classFile, code);
-                                   return Future.succeededFuture();
-                               });
-                })
-                .compose(v -> asyncCallIteratively(writeMap.entrySet(), entry -> {
-                    var classFile = entry.getKey();
-                    var code = entry.getValue();
-                    return getVertx().fileSystem()
-                                     .writeFile(classFile, Buffer.buffer(code));
-                }));
+                                    return this.generateClassCodeForOneTable(options)
+                                               .compose(code -> {
+                                                   writeMap.put(classFile, code);
+                                                   return Future.succeededFuture();
+                                               });
+                                })
+                        .compose(v -> getKeel().asyncCallIteratively(writeMap.entrySet(), entry -> {
+                            var classFile = entry.getKey();
+                            var code = entry.getValue();
+                            return getKeel().fileSystem().writeFile(classFile, Buffer.buffer(code));
+                        }));
     }
 
     private Future<String> generateClassCodeForOneTable(TableRowClassBuildOptions options) {
