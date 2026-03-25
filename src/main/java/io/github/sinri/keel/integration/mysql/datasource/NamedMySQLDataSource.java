@@ -37,10 +37,6 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     private final KeelMySQLConfiguration configuration;
 
     /**
-     * 记录初始化到池中的连接数
-     */
-    private final AtomicInteger initializedConnectionCounter = new AtomicInteger(0);
-    /**
      * 记录当前正在使用的连接数
      */
     private final AtomicInteger borrowedConnectionCounter = new AtomicInteger(0);
@@ -142,10 +138,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                   }
               })
               .onComplete(ar -> {
-                  sqlConnection.close()
-                               .onSuccess(releasedConnectionToPool -> {
-                                   initializedConnectionCounter.incrementAndGet();
-                               });
+                  sqlConnection.close();
               });
     }
 
@@ -160,27 +153,48 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
-     * 获取池中初始化且当前未使用的连接数
+     * 获取当前池大小的近似值，委托 Vert.x {@link Pool#size()}。
+     * <p>
+     * 该值反映池中当前存活的连接数（含空闲与借出），由 Vert.x 内部维护，属于近似值。
+     * </p>
      *
-     * @return 空闲连接数
+     * @return 池中当前连接数（近似值）
+     * @since 5.0.1
+     */
+    public int getCurrentPoolSize() {
+        return pool.size();
+    }
+
+    /**
+     * 获取池中当前未使用的连接数的近似值。
+     * <p>
+     * 计算方式为 {@code pool.size() - borrowedCount}，并以 0 为下限保护，
+     * 避免并发场景下出现瞬态负值。
+     * </p>
+     *
+     * @return 空闲连接数（近似值，≥ 0）
+     * @since 5.0.0
      */
     public int getCurrentIdleConnectionCount() {
-        return getCurrentInitializedConnectionCount() - getCurrentActiveConnectionCount();
+        return Math.max(0, pool.size() - borrowedConnectionCounter.get());
     }
 
     /**
-     * 获取池中初始化的连接总数
+     * 获取池中初始化的连接总数。
      *
-     * @return 初始化连接数
+     * @return 当前池大小（近似值）
+     * @deprecated 该方法原基于只增不减的累计计数器，语义不正确。请改用 {@link #getCurrentPoolSize()}。
      */
+    @Deprecated
     public int getCurrentInitializedConnectionCount() {
-        return initializedConnectionCounter.get();
+        return pool.size();
     }
 
     /**
-     * 获取当前正在使用的连接数（即从池中借出的连接）
+     * 获取当前正在使用的连接数，即从池中借出且尚未归还的连接。
      *
      * @return 活跃连接数
+     * @since 5.0.0
      */
     public int getCurrentActiveConnectionCount() {
         return borrowedConnectionCounter.get();
@@ -196,10 +210,15 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
-     * 使用连接执行操作
+     * 从池中借出一个连接，执行给定的异步操作，操作完成后自动归还连接。
+     * <p>
+     * 连接的借出与归还由本方法自动管理，无需调用方手动关闭。
+     * </p>
      *
-     * @param function 连接操作函数
-     * @return 操作结果Future
+     * @param function 在连接上执行的异步操作
+     * @param <T>      操作结果类型
+     * @return 包含操作结果的 {@link ValueBox} Future
+     * @since 5.0.0
      */
     @TechnicalPreview(since = "5.0.0")
     public <T> Future<ValueBox<T>> executeInConnection(Function<C, Future<T>> function) {
@@ -231,10 +250,15 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
-     * 使用连接执行操作
+     * 从池中借出一个连接，执行给定的异步操作，操作完成后自动归还连接。
+     * <p>
+     * 连接的借出与归还由本方法自动管理，无需调用方手动关闭。
+     * </p>
      *
-     * @param function 连接操作函数
-     * @return 操作结果Future
+     * @param function 在连接上执行的异步操作
+     * @param <T>      操作结果类型
+     * @return 操作结果 Future，结果可能为 null
+     * @since 5.0.0
      */
     public <T> Future<@Nullable T> withConnection(Function<C, Future<@Nullable T>> function) {
         return Future.succeededFuture().compose(
@@ -258,10 +282,16 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
-     * 在事务中使用连接执行操作
+     * 在事务中执行给定的异步操作。
+     * <p>
+     * 自动管理 {@code BEGIN} / {@code COMMIT} / {@code ROLLBACK} 生命周期：
+     * 操作成功时提交事务，抛出异常时回滚事务。连接在事务结束后自动归还。
+     * </p>
      *
-     * @param function 事务操作函数
-     * @return 事务结果Future
+     * @param function 在事务连接上执行的异步操作
+     * @param <T>      操作结果类型
+     * @return 包含操作结果的 {@link ValueBox} Future
+     * @since 5.0.0
      */
     @TechnicalPreview(since = "5.0.0")
     public <T> Future<ValueBox<T>> executeInTransaction(Function<C, Future<T>> function) {
@@ -301,10 +331,16 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
-     * 在事务中使用连接执行操作
+     * 在事务中执行给定的异步操作。
+     * <p>
+     * 自动管理 {@code BEGIN} / {@code COMMIT} / {@code ROLLBACK} 生命周期：
+     * 操作成功时提交事务，抛出异常时回滚事务。连接在事务结束后自动归还。
+     * </p>
      *
-     * @param function 事务操作函数
-     * @return 事务结果Future
+     * @param function 在事务连接上执行的异步操作
+     * @param <T>      操作结果类型
+     * @return 操作结果 Future，结果可能为 null
+     * @since 5.0.0
      */
     public <T> Future<@Nullable T> withTransaction(Function<C, Future<@Nullable T>> function) {
         return withConnection(c -> {
@@ -360,9 +396,13 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
-     * 获取MySQL连接
+     * 从池中获取一个 {@link SqlConnection} 并包装为 {@code C}。
+     * <p>
+     * 该方法仅负责获取连接，不管理借出计数；借出计数由调用方（如
+     * {@link #withConnection} / {@link #executeInConnection}）负责维护。
+     * </p>
      *
-     * @return 连接Future
+     * @return 包装后的连接 Future
      */
     private Future<C> fetchMySQLConnection() {
         return Future.succeededFuture()
@@ -382,26 +422,74 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                                      new KeelMySQLConnectionException(
                                              "MySQLDataSource Failed to get SqlConnection From Pool " +
                                                      "`" + this.getConfiguration().getDataSourceName() + "` " +
-                                                     "(usage: " + borrowedConnectionCounter.get() + " of "
-                                                     + initializedConnectionCounter.get() + "): " +
+                                                     "(active: " + borrowedConnectionCounter.get()
+                                                     + ", pool size: " + pool.size() + "): " +
                                                      throwable,
                                              throwable))
                      );
     }
 
+    /**
+     * 获取底层 Vert.x 连接池实例。
+     *
+     * @return 连接池
+     */
     Pool getPool() {
         return pool;
     }
 
+    /**
+     * 获取 SQL 连接包装器函数。
+     *
+     * @return 将 {@link SqlConnection} 转换为 {@code C} 的函数
+     */
     Function<SqlConnection, C> getSqlConnectionWrapper() {
         return sqlConnectionWrapper;
     }
 
+    /**
+     * 在虚拟线程中以阻塞方式从池中获取一个连接。
+     * <p>
+     * 该方法通过 {@code Future.await()} 阻塞当前虚拟线程直到连接就绪，
+     * 因此<strong>仅可在虚拟线程中调用</strong>，在事件循环线程调用会导致阻塞。
+     * </p>
+     * <p>
+     * 调用方必须在使用完毕后通过 {@link #returnConnectionFromVirtualThread(NamedMySQLConnection)}
+     * 归还连接，以确保连接释放和活跃计数准确。直接调用
+     * {@link NamedMySQLConnection#asyncClose()} 或 {@link NamedMySQLConnection#close()}
+     * 可以释放连接，但不会递减活跃计数。
+     * </p>
+     *
+     * @return 命名MySQL连接
+     * @throws UnsupportedOperationException 如果当前不在虚拟线程中
+     * @see #returnConnectionFromVirtualThread(NamedMySQLConnection)
+     * @since 5.0.0
+     */
     public C fetchConnectionInVirtualThread() {
         if (!ReflectionUtils.isVirtualThreadsAvailable()) {
             throw new UnsupportedOperationException("Not in Virtual Thread!");
         }
         var sqlConnection = getPool().getConnection().await();
-        return getSqlConnectionWrapper().apply(sqlConnection);
+        borrowedConnectionCounter.incrementAndGet();
+        C c = getSqlConnectionWrapper().apply(sqlConnection);
+        if (this.lateFullVersion.isInitialized()) {
+            c.setMysqlVersion(lateFullVersion.get());
+        }
+        return c;
+    }
+
+    /**
+     * 归还通过 {@link #fetchConnectionInVirtualThread()} 获取的连接。
+     * <p>
+     * 关闭底层 {@link SqlConnection} 以释放回池，并递减活跃连接计数。
+     * </p>
+     *
+     * @param connection 需要归还的连接
+     * @see #fetchConnectionInVirtualThread()
+     * @since 5.0.1
+     */
+    public void returnConnectionFromVirtualThread(C connection) {
+        connection.getSqlConnection().close()
+                  .andThen(ar -> borrowedConnectionCounter.decrementAndGet());
     }
 }
