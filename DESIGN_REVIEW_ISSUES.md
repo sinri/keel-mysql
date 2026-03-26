@@ -35,9 +35,8 @@
    **确认为设计预期，已补充文档。** 所有内置查询构建器通过 `Quoter` 将值内联到 SQL 字符串中，从不生成 `?` 占位符，库中无 `Tuple` 使用。`toPrepareStatement` 标志控制的是 MySQL COM_STMT_PREPARE 协议（服务端语句缓存与执行计划复用），而非 JDBC 风格的参数绑定。对不含 `?` 的完整 SQL 调用 `preparedQuery(sql).execute()` 是合法的。`RawStatement` 若传入含 `?` 的 SQL 会因参数数量不匹配而直接报错（fail-fast），不会静默产生错误结果。已在 `RawStatement`、`RunnableStatementFactory.rawForPreparedQuery/rawForDirectQuery`、`AnyStatement.setToPrepareStatement/isToPrepareStatement` 的 JavaDoc 中明确说明语义与限制。
    涉及：`RawStatement.java`、`RunnableStatementFactory.java`、`AnyStatement.java`。
 
-7. **模板 SQL：`buildSql` 字符串替换与编码**  
-   - `TemplatedStatement.loadTemplateTo*` 使用 `new String(bytes)`，依赖平台默认字符集，跨环境可能与 UTF-8 文件不一致。  
-   - `replaceAll("\\{" + argumentName + "}", ...)` 若 `argumentName` 含正则元字符，模式错误；占位符与命名约定需在文档中约束或改为非正则替换。  
+7. ~~**模板 SQL：`buildSql` 字符串替换与编码**~~
+   **已修复。** (a) `loadTemplateTo*` 中 `new String(bytes)` 改为 `new String(bytes, StandardCharsets.UTF_8)`，显式指定 UTF-8 编码。(b) `buildSql()` 中 `String.replaceAll`（正则替换）改为 `String.replace`（字面量替换），消除 `argumentName` 含正则元字符时匹配错误或 `PatternSyntaxException` 的风险，同时移除了不再需要的 `Matcher.quoteReplacement` 和 `java.util.regex.Matcher` 导入。
    涉及：`TemplatedStatement.java`。
 
 8. **查询构建器将标识符与字面量直接拼接**  

@@ -6,8 +6,8 @@ import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import org.jspecify.annotations.NullMarked;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
 
 
 /**
@@ -34,7 +34,7 @@ public sealed interface TemplatedStatement<S> extends AnyStatement<S>
     static TemplatedReadStatement loadTemplateToRead(String templatePath) {
         try {
             byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
-            String sqlTemplate = new String(bytes);
+            String sqlTemplate = new String(bytes, StandardCharsets.UTF_8);
             return new TemplatedReadStatement(sqlTemplate);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -50,7 +50,7 @@ public sealed interface TemplatedStatement<S> extends AnyStatement<S>
     static TemplatedModifyStatement loadTemplateToModify(String templatePath) {
         try {
             byte[] bytes = FileUtils.readFileAsByteArray(templatePath, true);
-            String sqlTemplate = new String(bytes);
+            String sqlTemplate = new String(bytes, StandardCharsets.UTF_8);
             return new TemplatedModifyStatement(sqlTemplate);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -81,7 +81,7 @@ public sealed interface TemplatedStatement<S> extends AnyStatement<S>
 
         getArguments().forEach((argumentName, argumentValue) -> {
             String s = sqlRef.get()
-                             .replaceAll("\\{" + argumentName + "}", Matcher.quoteReplacement(argumentValue.toString()));
+                             .replace("{" + argumentName + "}", argumentValue.toString());
             sqlRef.set(s);
         });
 
