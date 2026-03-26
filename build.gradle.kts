@@ -30,16 +30,17 @@ val keelCoreVersion: String by project
 val keelTestVersion: String by project
 
 repositories {
-    // Internal Nexus repository for dependencies
-    maven {
-        name = "InternalNexus"
-        url = uri(findProperty("internalNexusPublicUrl") as String)
-        credentials {
-            username = findProperty("internalNexusUsername") as String
-            password = findProperty("internalNexusPassword") as String
+    // Internal Nexus repository for SNAPSHOT and internal dependencies (optional)
+    val nexusUrl = findProperty("internalNexusPublicUrl") as String?
+    if (nexusUrl != null) {
+        maven {
+            name = "InternalNexus"
+            url = uri(nexusUrl)
+            credentials {
+                username = findProperty("internalNexusUsername") as String?
+                password = findProperty("internalNexusPassword") as String?
+            }
         }
-        // Allow insecure protocol if needed (not recommended for production)
-        // isAllowInsecureProtocol = false
     }
 
     mavenCentral()
@@ -143,25 +144,27 @@ publishing {
 
     repositories {
         maven {
-            // name = "mixed"
-            if (version.toString().endsWith("SNAPSHOT")) {
-                url = uri(findProperty("internalNexusSnapshotsUrl") as String)
+            val versionStr = version.toString()
+            val nexusUsername = findProperty("internalNexusUsername") as String?
+            val nexusPassword = findProperty("internalNexusPassword") as String?
+
+            if (versionStr.endsWith("SNAPSHOT")) {
+                val snapshotsUrl = findProperty("internalNexusSnapshotsUrl") as String?
+                    ?: error("Publishing SNAPSHOT requires 'internalNexusSnapshotsUrl' in gradle.properties")
+                url = uri(snapshotsUrl)
                 credentials {
-                    username = findProperty("internalNexusUsername") as String
-                    password = findProperty("internalNexusPassword") as String
+                    username = nexusUsername
+                    password = nexusPassword
                 }
-            } else if (version.toString().contains(Regex("-[A-Za-z]+"))) {
-                url = uri(findProperty("internalNexusReleasesUrl") as String)
+            } else if (versionStr.contains(Regex("-[A-Za-z]+"))) {
+                val releasesUrl = findProperty("internalNexusReleasesUrl") as String?
+                    ?: error("Publishing pre-release requires 'internalNexusReleasesUrl' in gradle.properties")
+                url = uri(releasesUrl)
                 credentials {
-                    username = findProperty("internalNexusUsername") as String
-                    password = findProperty("internalNexusPassword") as String
+                    username = nexusUsername
+                    password = nexusPassword
                 }
             } else {
-//                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-//                credentials {
-//                    username = findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME")
-//                    password = findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD")
-//                }
                 url = uri(layout.buildDirectory.dir("staging-deploy"))
             }
         }

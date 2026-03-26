@@ -81,7 +81,7 @@
     涉及：`StatementAuditorHolder.java`。
 
 17. ~~**构建强依赖内部 Nexus**~~
-    **确认为设计预期，可考虑容错优化。** Internal Nexus 置首是为了优先解析 SNAPSHOT 版本依赖（仅存在于内部仓库）。当前 `findProperty(...) as String` 在缺少凭据属性时会直接抛 `ClassCastException`（`null as String`），导致无内部仓库凭据的环境连 `mavenCentral()` 都无法到达。可考虑将内部仓库配置包裹在属性存在性检查中（如 `findProperty(...) != null`），属性缺失时跳过内部仓库，仅使用 Maven Central，使公开克隆仓库者在非 SNAPSHOT 版本下仍能正常构建。
+    **已修复。** 依赖解析的 `repositories` 块改为检查 `internalNexusPublicUrl` 属性是否存在，缺失时跳过内部仓库，仅使用 Maven Central，外部构建者在非 SNAPSHOT 版本下可正常构建。发布的 `repositories` 块中，SNAPSHOT 和预发布版本在缺少对应 URL 属性时通过 `error()` 给出明确错误提示（发布必须配置内部仓库），正式版本发布不受影响。
     涉及：`build.gradle.kts`。
 
 18. **测试覆盖面**  
