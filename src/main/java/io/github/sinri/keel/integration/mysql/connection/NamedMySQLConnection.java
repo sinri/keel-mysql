@@ -42,11 +42,19 @@ public interface NamedMySQLConnection extends RunnableStatementFactory,MySQLServ
     }
 
     default Future<Void> commitTransaction() {
-        return getSqlConnection().transaction().commit();
+        Transaction tx = getSqlConnection().transaction();
+        if (tx == null) {
+            return Future.failedFuture(new IllegalStateException("No active transaction to commit"));
+        }
+        return tx.commit();
     }
 
     default Future<Void> rollbackTransaction() {
-        return getSqlConnection().transaction().rollback();
+        Transaction tx = getSqlConnection().transaction();
+        if (tx == null) {
+            return Future.failedFuture(new IllegalStateException("No active transaction to rollback"));
+        }
+        return tx.rollback();
     }
 
     default void close() {

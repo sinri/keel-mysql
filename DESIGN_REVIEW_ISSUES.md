@@ -23,8 +23,8 @@
    **已修复。** 连接成功时取消定时器；`withConnection` 的失败通过 `.onFailure(e -> promise.tryFail(e))` 立即传播，不再等满超时；超时改用 `TimeoutException` 替代裸字符串，便于上层类型区分。
    涉及：`KeelMySQLDataSourceProvider.waitForLoading`。
 
-5. **`NamedMySQLConnection` 事务相关默认方法在无线程上易 NPE**  
-   `commitTransaction()` / `rollbackTransaction()` 直接 `getSqlConnection().transaction()`，若当前未 `begin()`，`transaction()` 可能为 `null`（取决于 Vert.x 实现），存在 NPE 风险。`isForTransaction()` 同样依赖 `transaction()` 非空语义。  
+5. ~~**`NamedMySQLConnection` 事务相关默认方法在无事务时易 NPE**~~
+   **已修复。** Vert.x 5 中 `SqlConnection.transaction()` 在无活跃事务时返回 `null`（已通过源码确认）。`commitTransaction()` 和 `rollbackTransaction()` 原先直接在 `transaction()` 返回值上调用方法，未做 null 检查。现已添加防御性检查：`transaction()` 为 null 时返回 `Future.failedFuture(new IllegalStateException(...))`。`isForTransaction()` 和 `getTransaction()` 本身已正确处理 null。注：高层 API `NamedMySQLDataSource.executeInTransaction()` / `withTransaction()` 未使用这些接口方法，它们直接持有 `begin()` 返回的 `Transaction` 引用操作，不受此问题影响。
    涉及：`NamedMySQLConnection.java`。
 
 ---
