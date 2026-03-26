@@ -51,8 +51,8 @@
     **确认为非问题，已完善相关 API。** 版本信息仅供上层应用通过 `getFullVersion()` 和 `MySQLServerVersionMixin.isMySQLVersion*()` 查询，库内部不依赖版本做任何逻辑分支。获取失败时 `lateFullVersion` 保持未初始化，连接对象的 `mysqlVersion` 为 `null`，不影响连接、查询、事务等核心功能。已完善 `getFullVersion()` 的 JavaDoc 说明版本信息可能为 `null` 的场景；`MySQLServerVersionMixin.isMySQLVersion*()` 方法改为在版本信息不可用时抛出 `NullPointerException`，使调用方能明确感知版本未就绪的状态，而非静默返回 `false`。
     涉及：`NamedMySQLDataSource.getFullVersion`、`MySQLServerVersionMixin.java`。
 
-11. **`instantQuery` / 流式查询的资源与失败路径**  
-    `instantQuery` 用 `andThen` 关闭 `sqlClient`，需确认 Vert.x 版本下是否在查询失败时仍关闭（通常 `onComplete` 类行为会执行）。`instantQueryForStream` 链路长，依赖 `eventually` 多处兜底，建议集成测试覆盖失败与中途取消场景。  
+11. ~~**`instantQuery` / 流式查询的资源与失败路径**~~
+    **确认为非问题。** Vert.x 5 中 `andThen` 在 Future 完成时执行（无论成功或失败），因此 `instantQuery` 中 `sqlClient.close()` 在所有失败路径下均会被调用。`instantQueryForStream` 使用三层 `eventually` 嵌套（cursor → connection → pool），`eventually` 语义为"总是执行，等待完成，保留原始结果"，所有失败路径（`getConnection`、`prepare`、`cursor.read`、`readWindowFunction` 异常）下资源均能正确释放。`instantQuery` 中 `andThen` 对 `close()` 返回值为 fire-and-forget（调用方拿到结果时 close 可能尚未完成），语义上不如 `eventually` 精确，但不会导致资源泄漏。
     涉及：`KeelMySQLConfiguration.java`。
 
 12. **主模块导出 `dev` 包**  
