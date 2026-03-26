@@ -14,6 +14,8 @@ import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.util.concurrent.TimeoutException;
+
 import java.util.List;
 import java.util.function.Function;
 
@@ -80,19 +82,19 @@ public class KeelMySQLDataSourceProvider {
 
 
     protected Future<Void> waitForLoading(Vertx vertx, NamedMySQLDataSource<?> dataSource) {
-        KeelMySQLConfiguration mySQLConfiguration = dataSource.getConfiguration();
-        PoolOptions poolOptions = mySQLConfiguration.getPoolOptions();
-        Promise<Void> initializedPromise = Promise.promise();
-        vertx.setTimer(
+        PoolOptions poolOptions = dataSource.getConfiguration().getPoolOptions();
+        Promise<Void> promise = Promise.promise();
+        long timerId = vertx.setTimer(
                 poolOptions.getConnectionTimeoutUnit().toMillis(poolOptions.getConnectionTimeout()),
-                x -> {
-                    initializedPromise.tryFail("MySQL Pool Connection Timeout on testing, the configuration might need adjusting.");
-                });
+                x -> promise.tryFail(new TimeoutException(
+                        "MySQL pool connection timeout on initial connectivity test, the configuration might need adjusting."))
+        );
         dataSource.withConnection(c -> {
-            initializedPromise.tryComplete();
+            vertx.cancelTimer(timerId);
+            promise.tryComplete();
             return Future.succeededFuture();
-        });
-        return initializedPromise.future();
+        }).onFailure(e -> promise.tryFail(e));
+        return promise.future();
     }
 
 

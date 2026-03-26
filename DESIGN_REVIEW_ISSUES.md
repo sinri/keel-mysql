@@ -11,18 +11,16 @@
    **已修复。** 移除了只增不减的 `initializedConnectionCounter`，改为委托 Vert.x 5 `Pool.size()` 获取池大小近似值；`getCurrentIdleConnectionCount()` 改为 `Math.max(0, pool.size() - borrowed)`；原 `getCurrentInitializedConnectionCount()` 标记 `@Deprecated` 并转发到 `pool.size()`。
    涉及：`NamedMySQLDataSource.java`。
 
-2. **`lateFullVersion` 存在并发竞态**  
-   `initializeConnection` 中 `if (!lateFullVersion.isInitialized())` 与后续 `checkMySQLVersion` + `set` 非原子；多条连接同时进入时可能重复查版本或写入顺序不确定。功能上可能仍「最终有一个版本」，但浪费查询且语义不清晰。  
+2. ~~**`lateFullVersion` 存在并发竞态**~~
+   **确认为非问题。** 理论上 `initializeConnection` 中 `isInitialized()` 与 `set()` 之间隔了异步的 `SELECT VERSION()` 查询，存在竞态窗口；但实际影响仅为多执行一次版本查询和一个被 `compose` 链静默消化的 `IllegalStateException`，不会导致数据错误、连接泄漏或功能异常（`onComplete` 无论成功失败均会关闭连接）。同一数据源的所有连接查到的版本号相同，因此无论哪个先 `set` 结果都正确。`LateObject.ensure()` 不可用于此场景：其接受同步 `Supplier`，无法适配异步的 `Future`；且其自身的双重检查锁实现（外层判空在 `synchronized` 之外、`value` 无 `volatile`）也存在缺陷。
    涉及：`NamedMySQLDataSource.initializeConnection`。
 
 3. ~~**`fetchConnectionInVirtualThread` 易泄漏连接且易误用**~~
    **已修复。** 补充了完整的 JavaDoc 说明阻塞风险和关闭责任；借出时纳入 `borrowedConnectionCounter` 计数并设置 MySQL 版本信息；新增 `returnConnectionFromVirtualThread()` 配套归还方法，负责关闭连接并递减计数。
    涉及：`NamedMySQLDataSource.fetchConnectionInVirtualThread`、`NamedMySQLDataSource.returnConnectionFromVirtualThread`。
 
-4. **`KeelMySQLDataSourceProvider.waitForLoading` 行为粗糙**  
-   - 使用 `vertx.setTimer` 超时失败，但成功路径未取消定时器（虽 `tryFail` 对已完成的 Promise 通常无害，仍会多余回调）。  
-   - `dataSource.withConnection(...)` 返回的 `Future` 未被链式处理：若取连接失败，要等满超时时间才失败，无法立即传递连接错误。  
-   - `tryFail` 传入字符串而非 `Throwable` / 专用异常类型，类型不一致不利于上层统一处理。  
+4. ~~**`KeelMySQLDataSourceProvider.waitForLoading` 行为粗糙**~~
+   **已修复。** 连接成功时取消定时器；`withConnection` 的失败通过 `.onFailure(e -> promise.tryFail(e))` 立即传播，不再等满超时；超时改用 `TimeoutException` 替代裸字符串，便于上层类型区分。
    涉及：`KeelMySQLDataSourceProvider.waitForLoading`。
 
 5. **`NamedMySQLConnection` 事务相关默认方法在无线程上易 NPE**  
@@ -102,7 +100,7 @@
 ## 建议的后续动作（可选）
 
 1. ~~将池统计改为文档化「仅供诊断的近似值」或改为暴露 Vert.x Pool 指标（若 API 提供）。~~ **已完成**：改用 `Pool.size()`，注释中标注为近似值。  
-2. 用 `synchronized` / `AtomicReference` / 一次性 `Future` 固定 `lateFullVersion` 的写入。  
+2. ~~用 `synchronized` / `AtomicReference` / 一次性 `Future` 固定 `lateFullVersion` 的写入。~~ **无需修复**：竞态实际无害，且 `LateObject.ensure()` 不适用于异步场景。  
 3. ~~为 `fetchConnectionInVirtualThread` 提供 `try-with-resources` 式封装或明确废弃。~~ **已完成**：新增 `returnConnectionFromVirtualThread()` 配套归还方法，JavaDoc 明确关闭责任。  
-4. 重构 `waitForLoading`：`compose` 链式处理 `withConnection` 的 Future，超时用 `Vertx.timer()` + `cancel` 或 `Future.timeout`。  
+4. ~~重构 `waitForLoading`：`compose` 链式处理 `withConnection` 的 Future，超时用 `Vertx.timer()` + `cancel` 或 `Future.timeout`。~~ **已完成**：连接失败立即传播，成功时取消定时器，超时改用 `TimeoutException`。  
 5. 为含占位符 SQL 增加 `execute(Tuple)` 或专用 API。
