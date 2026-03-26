@@ -31,9 +31,9 @@
 
 ## 中
 
-6. **预处理语句路径未绑定参数**  
-   `RunnableStatement.execute()` 在 `toPrepareStatement == true` 时调用 `preparedQuery(sql).execute()`，无 `Tuple`。对含 `?` 占位符的 SQL 可能错误或依赖驱动隐式行为；与「预编译防注入」的常见用法不一致。  
-   涉及：`RunnableStatement.java`。
+6. ~~**预处理语句路径未绑定参数**~~
+   **确认为设计预期，已补充文档。** 所有内置查询构建器通过 `Quoter` 将值内联到 SQL 字符串中，从不生成 `?` 占位符，库中无 `Tuple` 使用。`toPrepareStatement` 标志控制的是 MySQL COM_STMT_PREPARE 协议（服务端语句缓存与执行计划复用），而非 JDBC 风格的参数绑定。对不含 `?` 的完整 SQL 调用 `preparedQuery(sql).execute()` 是合法的。`RawStatement` 若传入含 `?` 的 SQL 会因参数数量不匹配而直接报错（fail-fast），不会静默产生错误结果。已在 `RawStatement`、`RunnableStatementFactory.rawForPreparedQuery/rawForDirectQuery`、`AnyStatement.setToPrepareStatement/isToPrepareStatement` 的 JavaDoc 中明确说明语义与限制。
+   涉及：`RawStatement.java`、`RunnableStatementFactory.java`、`AnyStatement.java`。
 
 7. **模板 SQL：`buildSql` 字符串替换与编码**  
    - `TemplatedStatement.loadTemplateTo*` 使用 `new String(bytes)`，依赖平台默认字符集，跨环境可能与 UTF-8 文件不一致。  
@@ -103,4 +103,4 @@
 2. ~~用 `synchronized` / `AtomicReference` / 一次性 `Future` 固定 `lateFullVersion` 的写入。~~ **无需修复**：竞态实际无害，且 `LateObject.ensure()` 不适用于异步场景。  
 3. ~~为 `fetchConnectionInVirtualThread` 提供 `try-with-resources` 式封装或明确废弃。~~ **已完成**：新增 `returnConnectionFromVirtualThread()` 配套归还方法，JavaDoc 明确关闭责任。  
 4. ~~重构 `waitForLoading`：`compose` 链式处理 `withConnection` 的 Future，超时用 `Vertx.timer()` + `cancel` 或 `Future.timeout`。~~ **已完成**：连接失败立即传播，成功时取消定时器，超时改用 `TimeoutException`。  
-5. 为含占位符 SQL 增加 `execute(Tuple)` 或专用 API。
+5. ~~为含占位符 SQL 增加 `execute(Tuple)` 或专用 API。~~ **暂不实施**：当前库设计为值内联模式，`toPrepareStatement` 用于协议层优化而非参数绑定；已在相关 API 的 JavaDoc 中明确说明语义与限制。如未来需要真正的参数化查询能力，可在 `RawStatement` 中扩展 `Tuple` 支持。

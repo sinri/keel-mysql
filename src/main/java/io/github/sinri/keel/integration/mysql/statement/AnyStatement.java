@@ -49,14 +49,27 @@ public sealed interface AnyStatement<S> extends SelfInterface<S>
     //        return attachToConnectionForCertainRunnableStatement(sqlConnection, RunnableStatement.class);
     //    }
 
+    /**
+     * 设置是否使用 MySQL 预编译协议（COM_STMT_PREPARE）执行本语句。
+     * <p>
+     * 预编译协议可获得服务端语句缓存与执行计划复用的性能优化。
+     * 注意：当前不支持 {@code ?} 占位符参数绑定（{@code Tuple}），
+     * {@link #buildSql()} 生成的 SQL 应为值已内联的完整语句。
+     *
+     * @param toPrepareStatement 是否使用预编译协议
+     * @return 自身引用，便于链式调用
+     */
     S setToPrepareStatement(boolean toPrepareStatement);
 
     String buildSql();
 
     /**
-     * 判断是否使用预处理语句
+     * 判断是否使用 MySQL 预编译协议（COM_STMT_PREPARE）执行本语句。
+     * <p>
+     * 默认为 {@code true}。此标志控制的是 MySQL 通信协议层面的预编译优化，
+     * 而非 JDBC 风格的 {@code ?} 占位符参数绑定。
      *
-     * @return 是否使用预处理语句
+     * @return 是否使用预编译协议
      */
     boolean isToPrepareStatement();
 }

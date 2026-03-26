@@ -21,9 +21,13 @@ import org.jspecify.annotations.NullMarked;
 public interface RunnableStatementFactory extends SqlConnectionHolder {
 
     /**
-     * 创建原始 SQL 语句
+     * 创建原始 SQL 语句，通过 MySQL 预编译协议（COM_STMT_PREPARE）执行。
+     * <p>
+     * 预编译协议可获得服务端语句缓存与执行计划复用的性能优化。
+     * 注意：当前不支持 {@code ?} 占位符参数绑定，SQL 中的所有值应已内联，
+     * 不应包含 {@code ?} 占位符，否则执行时会因参数数量不匹配而报错。
      *
-     * @param sql 原始 SQL 语句
+     * @param sql 完整的原始 SQL 语句（不含 {@code ?} 占位符）
      * @return 可执行的 SQL 语句对象
      */
     default RunnableStatement rawForPreparedQuery(String sql) {
@@ -32,9 +36,9 @@ public interface RunnableStatementFactory extends SqlConnectionHolder {
     }
 
     /**
-     * 创建原始 SQL 语句，支持指定是否使用预处理语句
+     * 创建原始 SQL 语句，通过普通查询协议（COM_QUERY）直接执行。
      *
-     * @param sql 原始 SQL 语句
+     * @param sql 完整的原始 SQL 语句
      * @return 可执行的 SQL 语句对象
      */
     default RunnableStatement rawForDirectQuery(String sql) {
