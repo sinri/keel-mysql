@@ -39,9 +39,9 @@
    **已修复。** (a) `loadTemplateTo*` 中 `new String(bytes)` 改为 `new String(bytes, StandardCharsets.UTF_8)`，显式指定 UTF-8 编码。(b) `buildSql()` 中 `String.replaceAll`（正则替换）改为 `String.replace`（字面量替换），消除 `argumentName` 含正则元字符时匹配错误或 `PatternSyntaxException` 的风险，同时移除了不再需要的 `Matcher.quoteReplacement` 和 `java.util.regex.Matcher` 导入。
    涉及：`TemplatedStatement.java`。
 
-8. **查询构建器将标识符与字面量直接拼接**  
-   `SelectStatement`、条件组件等将表名、列名、子查询等拼进 SQL，属典型 DSL 设计；若调用方把不可信输入当作标识符传入，存在 SQL 注入面。库侧未做标识符校验/转义，应在文档中明确「仅可信输入」。  
-   涉及：`statement` / `condition` 包。
+8. ~~**查询构建器将标识符与字面量直接拼接**~~
+   **确认为 DSL 设计预期，已补充 JavaDoc 安全说明。** 标识符直接拼接是 SQL DSL 构建器的标准做法（与 jOOQ、QueryDSL 等一致），字面量值的注入防护由 `Quoter` 负责。已在 `AbstractStatement`（覆盖所有语句子类）、`MySQLCondition`（覆盖所有条件实现类）、`RawCondition`（风险最高的原始表达式类）的 JavaDoc 中添加安全说明，明确标识符/表达式参数仅接受可信输入。
+   涉及：`AbstractStatement.java`、`MySQLCondition.java`、`RawCondition.java`。
 
 9. **`KeelMySQLConfiguration.generatePropertiesForConfig` 包含明文密码**  
    生成的配置串带 `password`，落盘或打日志时有泄露风险；需警示或提供脱敏导出。  

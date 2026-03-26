@@ -4,7 +4,10 @@ package io.github.sinri.keel.integration.mysql.condition;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * 原始条件类，用于直接存储和生成SQL条件表达式
+ * 原始条件类，用于直接存储和生成SQL条件表达式。
+ * <p>
+ * <strong>安全说明：</strong>传入的表达式会被原样拼入 SQL，不做任何转义。
+ * 调用方必须确保表达式内容完全可信，切勿传入不可信的用户输入。
  *
  * @since 5.0.0
  */
