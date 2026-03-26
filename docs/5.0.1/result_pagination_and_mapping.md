@@ -54,7 +54,7 @@
 - 静态工具：**`mapRowToEntity(row, clazz)`**（**`row.toJson().mapTo`**）、**`mapRowToResultRow(row, clazz)`**（*
   *`ResultRow.of`**）。
 
-与 **`StreamableStatement`** 配合见 [语句执行与流式读取.md](./语句执行与流式读取.md)。
+与 **`StreamableStatement`** 配合见 [execution_and_stream.md](./execution_and_stream.md)。
 
 ## 与 `instantQuery` 结果
 

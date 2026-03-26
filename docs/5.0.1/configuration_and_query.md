@@ -46,6 +46,7 @@
 - 标注为 **Technical Preview**：若频繁调用，需注意 Vert.x 与文档中关于**池共享、唯一池名**的说明，避免资源或行为不符合预期。
 
 ###
+
 `instantQueryForStream(Keel keel, String sql, int readWindowSize, Function<RowSet<Row>, Future<Void>> readWindowFunction)`
 
 - 使用 **`MySQLBuilder.pool()`**，在连接上 **`prepare` + `cursor`**，按 **`readWindowSize`** 批量调用 *
@@ -56,8 +57,8 @@
 
 ## 与 `NamedMySQLDataSource` 的选择
 
-| 需求                    | 建议                                                                                             |
-|-----------------------|------------------------------------------------------------------------------------------------|
-| 应用内长期复用、事务、连接计数       | **`NamedMySQLDataSource`**（见 [数据源与连接池.md](./数据源与连接池.md)）                                       |
-| 单次脚本、极短生命周期查询         | 可考虑 **`instantQuery`**（注意 preview 语义）                                                          |
-| 大结果集流式处理且自管 pool 生命周期 | **`instantQueryForStream`** 或自建池 + **`StreamableStatement`**（见 [语句执行与流式读取.md](./语句执行与流式读取.md)） |
+| 需求                    | 建议                                                                                                                   |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------|
+| 应用内长期复用、事务、连接计数       | **`NamedMySQLDataSource`**（见 [datasource_and_pool.md](./datasource_and_pool.md)）                                     |
+| 单次脚本、极短生命周期查询         | 可考虑 **`instantQuery`**（注意 preview 语义）                                                                                |
+| 大结果集流式处理且自管 pool 生命周期 | **`instantQueryForStream`** 或自建池 + **`StreamableStatement`**（见 [execution_and_stream.md](./execution_and_stream.md)） |

@@ -9,7 +9,7 @@
 组合能力：
 
 - **`RunnableStatementFactory`**：在此连接上构建 `select` / `update` /
-  `rawForPreparedQuery` 等（见 [语句执行与流式读取.md](./语句执行与流式读取.md)）。
+  `rawForPreparedQuery` 等（见 [execution_and_stream.md](./execution_and_stream.md)）。
 - **`MySQLServerVersionMixin`**：访问服务端版本相关能力（若数据源已注入版本字符串）。
 - **`Closeable`**：默认委托 **`asyncClose()` → getSqlConnection().close()`**。
 

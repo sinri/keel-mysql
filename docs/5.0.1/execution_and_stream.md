@@ -7,14 +7,14 @@
 ## 类层次（概念）
 
 - **`AnyStatementWithSqlConnection`**：持有语句与连接、审计 UUID、绑定 **`StatementAuditorHolder`
-  **（见 [异常与SQL审计.md](./异常与SQL审计.md)）。
+  **（见 [exception_and_audit.md](./exception_and_audit.md)）。
 - **`RunnableStatement`**：**`execute()` → `StatementExecuteResult`**；根据语句的 **`isToPrepareStatement()`** 选择 *
   *`query(sql)`** 或 **`preparedQuery(sql)`**（无参数绑定）。
 - **`RunnableStatementForRead`**：在 `execute()` 之上提供 *
   *`executeForOneRow` / `executeForRowList` / `executeForResultMatrix` / `executeForCategorizedMap` /
   `executeForUniqueKeyBoundMap`** 等。
 - **`RunnableStatementForReadAndPagination`**：**`executeForPagination(pageNo, pageSize)`
-  **（见 [结果集分页与映射.md](./结果集分页与映射.md)）。
+  **（见 [result_pagination_and_mapping.md](./result_pagination_and_mapping.md)）。
 - **`RunnableStatementForModify`**：**`executeForAffectedRows()`**。
 - **`RunnableStatementForWrite`**（extends Modify）：**`executeForLastInsertedID()`**（依赖 MySQL 协议属性 *
   *`LAST_INSERTED_ID`**）。
@@ -40,7 +40,7 @@
 - 内部 **`asyncCallRepeatedly`**：无更多行时 **`stop()`**；否则 **`cursor.read(batch)`** 后对行集 **`asyncCallIteratively`
   ** 调用 **`ResultStreamReader#read(Row)`**。
 - **`ResultStreamReader`** 还提供静态 **`mapRowToEntity` / `mapRowToResultRow`
-  **（见 [结果集分页与映射.md](./结果集分页与映射.md)）。
+  **（见 [result_pagination_and_mapping.md](./result_pagination_and_mapping.md)）。
 
 ## 与 `instantQueryForStream` 的对比
 
@@ -58,4 +58,4 @@
 - **`RawStatement(..., true)`** 与 **`rawForPreparedQuery`**：预编译路径，但 **SQL 中不得含 `?`**（当前实现无绑定参数）。
 - **`rawForDirectQuery`**：普通查询协议。
 
-详见 [原始SQL与模板SQL.md](./原始SQL与模板SQL.md)。
+详见 [raw_and_templated_sql.md](./raw_and_templated_sql.md)。

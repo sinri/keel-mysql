@@ -36,7 +36,7 @@
 | `executeInConnection` / `executeInTransaction` | 返回 **`ValueBox<T>`**，标记为 **Technical Preview**                                     |
 
 类型参数 **`C`** 须实现 **`NamedMySQLConnection`**，通常 **`DynamicNamedMySQLConnection`
-** 或自定义子类（见 [命名连接与动作模式.md](./命名连接与动作模式.md)）。
+** 或自定义子类（见 [connection_and_action.md](./connection_and_action.md)）。
 
 ### 事务语义（摘要）
 
@@ -77,9 +77,9 @@
 
 ## 场景对照
 
-| 场景       | 做法                                                                                      |
-|----------|-----------------------------------------------------------------------------------------|
-| 应用启动加载主库 | `provider.loadDefault(vertx)` 或 `loadDynamic(vertx, "billing")`                         |
-| 多租户多配置   | 多个 `mysql.<name>` + 多次 `load`                                                           |
-| 全局事务边界   | `dataSource.withTransaction(conn -> ...)`                                               |
-| 只读批量     | `withConnection` 内使用 `select` / `StreamableStatement`（见 [语句执行与流式读取.md](./语句执行与流式读取.md)） |
+| 场景       | 做法                                                                                                            |
+|----------|---------------------------------------------------------------------------------------------------------------|
+| 应用启动加载主库 | `provider.loadDefault(vertx)` 或 `loadDynamic(vertx, "billing")`                                               |
+| 多租户多配置   | 多个 `mysql.<name>` + 多次 `load`                                                                                 |
+| 全局事务边界   | `dataSource.withTransaction(conn -> ...)`                                                                     |
+| 只读批量     | `withConnection` 内使用 `select` / `StreamableStatement`（见 [execution_and_stream.md](./execution_and_stream.md)） |

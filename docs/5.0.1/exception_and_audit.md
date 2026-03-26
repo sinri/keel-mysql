@@ -33,4 +33,4 @@
 ## 与 DSL 安全说明的关系
 
 条件、原始 SQL、模板替换均可能将**敏感或恶意内容
-**写入 SQL；异常堆栈与审计日志可能暴露 SQL。生产环境应限制日志级别与字段脱敏（见 [DSL条件与DDL.md](./DSL条件与DDL.md)、[原始SQL与模板SQL.md](./原始SQL与模板SQL.md)）。
+**写入 SQL；异常堆栈与审计日志可能暴露 SQL。生产环境应限制日志级别与字段脱敏（见 [dsl_and_ddl.md](./dsl_and_ddl.md)、[raw_and_templated_sql.md](./raw_and_templated_sql.md)）。

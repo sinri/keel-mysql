@@ -40,7 +40,7 @@
 支持分页的 SELECT 通过 **`PaginatableStatementMixin`** 提供 **`limit(limit)`**、**`limit(limit, offset)`**。
 
 **`executeForPagination`** 在 **`RunnableStatementForReadAndPagination`** 上：会复制语句生成 **COUNT(\*)** 与带 *
-*LIMIT/OFFSET** 的数据查询（见 [结果集分页与映射.md](./结果集分页与映射.md)）。
+*LIMIT/OFFSET** 的数据查询（见 [result_pagination_and_mapping.md](./result_pagination_and_mapping.md)）。
 
 ## DDL 使用建议
 
@@ -52,5 +52,5 @@
 ## 与模板 SQL、原始 SQL 的分工
 
 - **结构化、可组合**：本 DSL + **`ConditionsComponent`**。
-- **长文本、运维脚本**：**`TemplatedStatement`**（见 [原始SQL与模板SQL.md](./原始SQL与模板SQL.md)）。
+- **长文本、运维脚本**：**`TemplatedStatement`**（见 [raw_and_templated_sql.md](./raw_and_templated_sql.md)）。
 - **完全手写、或需指定协议**：**`RawStatement` / `rawFor*`**。
