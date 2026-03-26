@@ -47,9 +47,9 @@
    **已修复。** 原方法标记为 `@Deprecated(since = "5.0.1", forRemoval = true)`，JavaDoc 中说明了明文密码泄露风险。新增 `generateSamplePropertiesForConfig(String dataSourceName)` 静态方法，生成包含占位符值的样本配置字符串，不含任何真实连接信息，可安全用于文档、日志或版本控制。
    涉及：`KeelMySQLConfiguration.java`。
 
-10. **`checkMySQLVersion` 静默吞异常**  
-    解析 `VERSION()` 失败时返回 `null` 且注释掉日志，排障困难。  
-    涉及：`NamedMySQLDataSource.checkMySQLVersion`。
+10. ~~**`checkMySQLVersion` 静默吞异常**~~
+    **确认为非问题，已完善相关 API。** 版本信息仅供上层应用通过 `getFullVersion()` 和 `MySQLServerVersionMixin.isMySQLVersion*()` 查询，库内部不依赖版本做任何逻辑分支。获取失败时 `lateFullVersion` 保持未初始化，连接对象的 `mysqlVersion` 为 `null`，不影响连接、查询、事务等核心功能。已完善 `getFullVersion()` 的 JavaDoc 说明版本信息可能为 `null` 的场景；`MySQLServerVersionMixin.isMySQLVersion*()` 方法改为在版本信息不可用时抛出 `NullPointerException`，使调用方能明确感知版本未就绪的状态，而非静默返回 `false`。
+    涉及：`NamedMySQLDataSource.getFullVersion`、`MySQLServerVersionMixin.java`。
 
 11. **`instantQuery` / 流式查询的资源与失败路径**  
     `instantQuery` 用 `andThen` 关闭 `sqlClient`，需确认 Vert.x 版本下是否在查询失败时仍关闭（通常 `onComplete` 类行为会执行）。`instantQueryForStream` 链路长，依赖 `eventually` 多处兜底，建议集成测试覆盖失败与中途取消场景。  

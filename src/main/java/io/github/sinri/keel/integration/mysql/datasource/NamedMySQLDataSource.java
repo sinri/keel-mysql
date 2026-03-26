@@ -201,9 +201,13 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
-     * 获取MySQL完整版本信息
+     * 获取MySQL完整版本信息（如 {@code "8.0.35"}）。
+     * <p>
+     * 版本信息在首次连接初始化时通过 {@code SELECT VERSION()} 异步获取。
+     * 若查询或解析失败，版本信息将保持为 {@code null}，但不影响连接池及查询等核心功能。
+     * </p>
      *
-     * @return MySQL版本信息，可能为null
+     * @return MySQL版本字符串，若尚未获取到则返回 {@code null}
      */
     public @Nullable String getFullVersion() {
         return lateFullVersion.get();
