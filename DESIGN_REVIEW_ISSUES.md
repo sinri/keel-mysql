@@ -55,9 +55,10 @@
     **确认为非问题。** Vert.x 5 中 `andThen` 在 Future 完成时执行（无论成功或失败），因此 `instantQuery` 中 `sqlClient.close()` 在所有失败路径下均会被调用。`instantQueryForStream` 使用三层 `eventually` 嵌套（cursor → connection → pool），`eventually` 语义为"总是执行，等待完成，保留原始结果"，所有失败路径（`getConnection`、`prepare`、`cursor.read`、`readWindowFunction` 异常）下资源均能正确释放。`instantQuery` 中 `andThen` 对 `close()` 返回值为 fire-and-forget（调用方拿到结果时 close 可能尚未完成），语义上不如 `eventually` 精确，但不会导致资源泄漏。
     涉及：`KeelMySQLConfiguration.java`。
 
-12. **主模块导出 `dev` 包**  
-    `module-info` 将代码生成等开发工具类与运行时 API 同模块导出，增加暴露面与依赖混淆；长期更适合拆分为 `*-dev` 或 `test` 可见。  
+12. **主模块导出 `dev` 包**
+    `module-info` 将代码生成等开发工具类与运行时 API 同模块导出，增加暴露面与依赖混淆；长期更适合拆分为 `*-dev` 或 `test` 可见。
     涉及：`module-info.java`。
+    **TODO（下一大版本）：** 将 `dev` 包拆分为独立模块（如 `keel-mysql-dev`），运行时模块不再导出开发工具类。属于包结构调整，涉及破坏性变更，留待大版本升级时处理。
 
 ---
 
