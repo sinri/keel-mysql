@@ -32,14 +32,16 @@ public class KeelMySQLConfiguration extends ConfigElement {
     }
 
     /**
-     * 生成MySQL配置的属性字符串
+     * 生成MySQL配置的属性字符串。
      *
      * @param dataSourceName      数据源名称
      * @param mySQLConnectOptions MySQL连接选项
      * @param poolOptions         连接池选项
      * @return 配置属性字符串
+     * @deprecated 此方法会将密码以明文形式写入生成的配置字符串，存在泄露风险。
+     * 请使用 {@link #generateSamplePropertiesForConfig(String)} 生成脱敏的样本配置。
      */
-
+    @Deprecated(since = "5.0.1", forRemoval = true)
     public static String generatePropertiesForConfig(String dataSourceName, MySQLConnectOptions mySQLConnectOptions, PoolOptions poolOptions) {
         var builder = new ConfigPropertiesBuilder();
         List<String> prefix = List.of("mysql", dataSourceName);
@@ -53,6 +55,31 @@ public class KeelMySQLConfiguration extends ConfigElement {
         builder.add(prefix, "poolMaxSize", String.valueOf(poolOptions.getMaxSize()));
         builder.add(prefix, "poolShared", (poolOptions.isShared() ? "YES" : "NO"));
         builder.add(prefix, "poolConnectionTimeout", String.valueOf(poolOptions.getConnectionTimeout()));
+
+        return builder.writeToString();
+    }
+
+    /**
+     * 生成 MySQL 配置的样本属性字符串，所有值为占位符，可作为配置模板使用。
+     * <p>
+     * 生成的内容不包含任何真实的连接信息或密码，可安全地写入文档、日志或版本控制。
+     *
+     * @param dataSourceName 数据源名称
+     * @return 包含占位符值的样本配置属性字符串
+     */
+    public static String generateSamplePropertiesForConfig(String dataSourceName) {
+        var builder = new ConfigPropertiesBuilder();
+        List<String> prefix = List.of("mysql", dataSourceName);
+
+        builder.add(prefix, "host", "127.0.0.1");
+        builder.add(prefix, "port", "3306");
+        builder.add(prefix, "username", "<YOUR_USERNAME>");
+        builder.add(prefix, "password", "<YOUR_PASSWORD>");
+        builder.add(prefix, "schema", "<YOUR_DATABASE>");
+        builder.add(prefix, "charset", "utf8mb4");
+        builder.add(prefix, "poolMaxSize", "10");
+        builder.add(prefix, "poolShared", "YES");
+        builder.add(prefix, "poolConnectionTimeout", "30");
 
         return builder.writeToString();
     }

@@ -43,8 +43,8 @@
    **确认为 DSL 设计预期，已补充 JavaDoc 安全说明。** 标识符直接拼接是 SQL DSL 构建器的标准做法（与 jOOQ、QueryDSL 等一致），字面量值的注入防护由 `Quoter` 负责。已在 `AbstractStatement`（覆盖所有语句子类）、`MySQLCondition`（覆盖所有条件实现类）、`RawCondition`（风险最高的原始表达式类）的 JavaDoc 中添加安全说明，明确标识符/表达式参数仅接受可信输入。
    涉及：`AbstractStatement.java`、`MySQLCondition.java`、`RawCondition.java`。
 
-9. **`KeelMySQLConfiguration.generatePropertiesForConfig` 包含明文密码**  
-   生成的配置串带 `password`，落盘或打日志时有泄露风险；需警示或提供脱敏导出。  
+9. ~~**`KeelMySQLConfiguration.generatePropertiesForConfig` 包含明文密码**~~
+   **已修复。** 原方法标记为 `@Deprecated(since = "5.0.1", forRemoval = true)`，JavaDoc 中说明了明文密码泄露风险。新增 `generateSamplePropertiesForConfig(String dataSourceName)` 静态方法，生成包含占位符值的样本配置字符串，不含任何真实连接信息，可安全用于文档、日志或版本控制。
    涉及：`KeelMySQLConfiguration.java`。
 
 10. **`checkMySQLVersion` 静默吞异常**  
