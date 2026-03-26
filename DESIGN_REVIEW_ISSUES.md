@@ -64,8 +64,8 @@
 
 ## 低
 
-13. **`AbstractStatement.SQL_COMPONENT_SEPARATOR` 为可变 `static` 非 `final`**  
-    被任一语句类修改会影响全局 SQL 拼接格式，线程安全与可预测性差。更稳妥为 `private static final` 或实例字段。  
+13. ~~**`AbstractStatement.SQL_COMPONENT_SEPARATOR` 为可变 `static` 非 `final`**~~
+    **确认为非问题（设计预期）。** 该字段故意设计为可变，允许使用方按需调整 SQL 拼接分隔符。
     涉及：`AbstractStatement.java`。
 
 14. **`RawStatement` 构造参数拼写错误**  
@@ -80,8 +80,8 @@
     「重新加载SQL审计问题记录器」应为「日志记录器」一类表述。  
     涉及：`StatementAuditorHolder.java`。
 
-17. **构建强依赖内部 Nexus**  
-    `build.gradle.kts` 中 `repositories` 将 Internal Nexus 置首且需凭据，公开克隆仓库者在无凭据时可能无法解析依赖（取决于 `gradle.properties` 是否齐全）。需在 README 说明匿名只读或使用 Maven Central 的可行配置。  
+17. ~~**构建强依赖内部 Nexus**~~
+    **确认为设计预期，可考虑容错优化。** Internal Nexus 置首是为了优先解析 SNAPSHOT 版本依赖（仅存在于内部仓库）。当前 `findProperty(...) as String` 在缺少凭据属性时会直接抛 `ClassCastException`（`null as String`），导致无内部仓库凭据的环境连 `mavenCentral()` 都无法到达。可考虑将内部仓库配置包裹在属性存在性检查中（如 `findProperty(...) != null`），属性缺失时跳过内部仓库，仅使用 Maven Central，使公开克隆仓库者在非 SNAPSHOT 版本下仍能正常构建。
     涉及：`build.gradle.kts`。
 
 18. **测试覆盖面**  
