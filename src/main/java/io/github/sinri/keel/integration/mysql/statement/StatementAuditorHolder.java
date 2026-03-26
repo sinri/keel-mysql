@@ -36,11 +36,11 @@ public class StatementAuditorHolder {
     }
 
     /**
-     * 重新加载SQL审计问题记录器
+     * 重新加载SQL审计日志记录器
      *
-     * @param loggerFactory SQL审计发送到的记录中心
+     * @param loggerFactory SQL审计发送到的日志工厂
      */
-    public void reloadSqlAuditIssueRecording(LoggerFactory loggerFactory) {
+    public void reloadSqlAuditLogger(LoggerFactory loggerFactory) {
         var sqlAuditLogger = buildSqlAuditLogger(loggerFactory);
         sqlAuditLoggerRef.set(sqlAuditLogger);
     }

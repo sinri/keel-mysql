@@ -68,24 +68,25 @@
     **确认为非问题（设计预期）。** 该字段故意设计为可变，允许使用方按需调整 SQL 拼接分隔符。
     涉及：`AbstractStatement.java`。
 
-14. **`RawStatement` 构造参数拼写错误**  
-    `prepareStatment` → 应为 `prepareStatement`（破坏性 API 变更，可标记 deprecated 再改）。  
+14. ~~**`RawStatement` 构造参数拼写错误**~~
+    **已修复（先前批次）。** 构造参数已从 `prepareStatment` 更正为 `prepareStatement`。
     涉及：`RawStatement.java`。
 
-15. **`RunnableStatementForRead.executeForRowList` 的 JavaDoc 不准确**  
-    文档称「查询不到时返回 null」，实现返回 `getRowList()`，空结果多为空列表而非 `null`。  
+15. ~~**`RunnableStatementForRead.executeForRowList` 的 JavaDoc 不准确**~~
+    **已修复。** JavaDoc 已更正：查询无结果时返回空列表而非 `null`。
     涉及：`RunnableStatementForRead.java`。
 
-16. **`StatementAuditorHolder` 注释笔误**  
-    「重新加载SQL审计问题记录器」应为「日志记录器」一类表述。  
+16. ~~**`StatementAuditorHolder` 注释笔误**~~
+    **已修复。** 方法名与 JavaDoc 已更正为「重新加载SQL审计日志记录器」。
     涉及：`StatementAuditorHolder.java`。
 
 17. ~~**构建强依赖内部 Nexus**~~
     **已修复。** 依赖解析的 `repositories` 块改为检查 `internalNexusPublicUrl` 属性是否存在，缺失时跳过内部仓库，仅使用 Maven Central，外部构建者在非 SNAPSHOT 版本下可正常构建。发布的 `repositories` 块中，SNAPSHOT 和预发布版本在缺少对应 URL 属性时通过 `error()` 给出明确错误提示（发布必须配置内部仓库），正式版本发布不受影响。
     涉及：`build.gradle.kts`。
 
-18. **测试覆盖面**  
-    当前测试能通过，但以样例 / 开发类为主；缺少对连接池失败、`waitForLoading` 超时、`executeInConnection` 失败路径、事务 rollback 分支等的单元 / 集成测试。  
+18. **测试覆盖面**
+    当前测试能通过，但以样例 / 开发类为主；缺少对连接池失败、`waitForLoading` 超时、`executeInConnection` 失败路径、事务 rollback 分支等的单元 / 集成测试。
+    **TODO（持续改进）：** 逐步补充关键路径的集成测试，优先覆盖连接池失败、超时、事务回滚等异常分支。
     涉及：`src/test`。
 
 ---

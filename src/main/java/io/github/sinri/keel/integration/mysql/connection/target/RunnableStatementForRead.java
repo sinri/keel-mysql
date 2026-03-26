@@ -59,7 +59,7 @@ public class RunnableStatementForRead extends RunnableStatement {
     /**
      * @param classT class of type of result object
      * @param <T>    type of result object
-     * @return 查询到数据，异步返回所有行数据封装的指定类实例；查询不到时异步返回null。
+     * @return 查询到数据，异步返回所有行数据封装的指定类实例列表；查询不到时返回空列表。
      */
     public <T extends ResultRow> Future<List<T>> executeForRowList(Class<T> classT) {
         return execute()
