@@ -1,9 +1,9 @@
 package io.github.sinri.keel.integration.mysql.action.mix;
 
 import io.github.sinri.keel.base.annotations.SelfInterface;
+import io.github.sinri.keel.integration.mysql.action.single.NamedActionInterface;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.connection.RunnableStatementFactory;
-import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -20,16 +20,5 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public interface NamedActionMixinInterface<C extends NamedMySQLConnection, W>
-        extends SelfInterface<W>, RunnableStatementFactory {
-    /**
-     * 获取关联的命名MySQL连接
-     *
-     * @return 与此动作关联的命名MySQL连接实例，永不为null
-     */
-    C getNamedSqlConnection();
-
-    @Override
-    default SqlConnection getSqlConnection(){
-        return getNamedSqlConnection().getSqlConnection();
-    }
+        extends NamedActionInterface<C>, SelfInterface<W>, RunnableStatementFactory {
 }

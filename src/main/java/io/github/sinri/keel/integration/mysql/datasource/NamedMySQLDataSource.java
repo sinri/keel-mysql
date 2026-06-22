@@ -1,8 +1,10 @@
 package io.github.sinri.keel.integration.mysql.datasource;
 
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.core.utils.ReflectionUtils;
 import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
+import io.github.sinri.keel.integration.mysql.action.single.NamedActionInterface;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
@@ -430,7 +432,45 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                   .andThen(ar -> borrowedConnectionCounter.decrementAndGet());
     }
 
-    //    @TechnicalPreview(since = "5.0.3")
-    //    public <A,T> Future<ValueBox<T>> withAction()
+
+    /**
+     * 在连接或事务中构建并执行一个命名动作
+     * <p>
+     * 当 {@code inTransaction} 为 {@code true} 时，整个动作在事务中执行（自动 BEGIN/COMMIT，异常时 ROLLBACK）；
+     * 为 {@code false} 时仅借用连接执行，不开启事务。
+     * <p>
+     * 典型用法：
+     * <pre>{@code
+     * dataSource.withAction(true,
+     *         conn -> new MyAction(conn),
+     *         action -> action.doSomething(param))
+     * }</pre>
+     *
+     * @param inTransaction  是否在事务中执行
+     * @param actionBuilder  从命名连接构建动作实例的工厂函数
+     * @param actionFunction 对构建好的动作执行具体操作并返回异步结果的函数
+     * @param <A>            动作类型，须实现 {@link NamedActionInterface}
+     * @param <T>            操作结果的类型
+     * @return 包含操作结果的 {@link ValueBox} 的异步 Future
+     * @since 5.0.3
+     */
+    @TechnicalPreview(since = "5.0.3")
+    public <A extends NamedActionInterface<C>, T> Future<ValueBox<T>> withAction(
+            boolean inTransaction,
+            Function<C, A> actionBuilder,
+            Function<A, Future<T>> actionFunction
+    ) {
+        if (inTransaction) {
+            return this.executeInTransaction(c -> {
+                A a = actionBuilder.apply(c);
+                return actionFunction.apply(a);
+            });
+        } else {
+            return this.executeInConnection(c -> {
+                A a = actionBuilder.apply(c);
+                return actionFunction.apply(a);
+            });
+        }
+    }
 
 }

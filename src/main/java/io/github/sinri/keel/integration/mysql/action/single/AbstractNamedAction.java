@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.action.single;
 
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
+import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 
 
@@ -30,7 +31,12 @@ public abstract class AbstractNamedAction<C extends NamedMySQLConnection> implem
      * @return 与此动作关联的命名MySQL连接实例，永不为null
      */
     @Override
-    public C getNamedSqlConnection() {
+    public final C getNamedSqlConnection() {
         return namedSqlConnection;
+    }
+
+    @Override
+    public final SqlConnection getSqlConnection() {
+        return getNamedSqlConnection().getSqlConnection();
     }
 }
