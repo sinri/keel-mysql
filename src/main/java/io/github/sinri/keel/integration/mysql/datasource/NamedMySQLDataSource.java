@@ -455,7 +455,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @since 5.0.3
      */
     @TechnicalPreview(since = "5.0.3")
-    public <A extends NamedActionInterface<C>, T> Future<ValueBox<T>> withAction(
+    protected <A extends NamedActionInterface<C>, T> Future<ValueBox<T>> withAction(
             boolean inTransaction,
             Function<C, A> actionBuilder,
             Function<A, Future<T>> actionFunction
@@ -473,4 +473,19 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
         }
     }
 
+    @TechnicalPreview(since = "5.0.3")
+    public <A extends NamedActionInterface<C>, T> Future<ValueBox<T>> actInConnection(
+            Function<C, A> actionBuilder,
+            Function<A, Future<T>> actionFunction
+    ) {
+        return withAction(false, actionBuilder, actionFunction);
+    }
+
+    @TechnicalPreview(since = "5.0.3")
+    public <A extends NamedActionInterface<C>, T> Future<ValueBox<T>> actInTransaction(
+            Function<C, A> actionBuilder,
+            Function<A, Future<T>> actionFunction
+    ) {
+        return withAction(true, actionBuilder, actionFunction);
+    }
 }
