@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.integration.mysql.result.row.AbstractTableRow;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.jspecify.annotations.NullMarked;
 
@@ -64,6 +65,7 @@ class TableRowClassBuilder {
         code.append("package ").append(options.getPackageName()).append(";").append("\n")
             .append("import ").append(AbstractTableRow.class.getName()).append(";\n")
             .append("import ").append(JsonObject.class.getName()).append(";\n")
+            .append("import ").append(JsonArray.class.getName()).append(";\n")
             .append("\n")
             .append("import org.jspecify.annotations.NullMarked;\n")
             .append("import org.jspecify.annotations.Nullable;\n")

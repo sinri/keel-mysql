@@ -20,11 +20,13 @@ class TableRowClassField {
     private static final Pattern patternForLooseEnum;
     private static final Pattern patternForStrictEnum;
     private static final Pattern patternForAnyEnvelope;
+    private static final Pattern patternForJsonType;
 
     static {
         patternForLooseEnum = Pattern.compile("Enum\\{([A-Za-z0-9_, ]+)}");
         patternForStrictEnum = Pattern.compile("Enum<([A-Za-z0-9_.]+)>");
         patternForAnyEnvelope = Pattern.compile("Envelope<([A-Za-z0-9_.]+)>");
+        patternForJsonType = Pattern.compile("Type<(JsonObject|JsonArray)>");
     }
 
     private final String field;
@@ -96,6 +98,22 @@ class TableRowClassField {
             // mediumtext, varchar, etc.
             returnType = "String";
             readMethod = "readString";
+        } else if (type.contains("json")) {
+            // JSON 字段：根据注释中的 Type<JsonObject> / Type<JsonArray> 确定返回类型，
+            // 未声明时保持默认的 Object / readValue。
+            if (comment != null) {
+                Matcher matcherForJsonType = patternForJsonType.matcher(comment);
+                if (matcherForJsonType.find()) {
+                    String jsonReturnType = matcherForJsonType.group(1);
+                    if ("JsonObject".equals(jsonReturnType)) {
+                        returnType = "JsonObject";
+                        readMethod = "readJsonObject";
+                    } else {
+                        returnType = "JsonArray";
+                        readMethod = "readJsonArray";
+                    }
+                }
+            }
         }
     }
 
