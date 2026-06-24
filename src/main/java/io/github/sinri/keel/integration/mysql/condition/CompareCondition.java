@@ -172,7 +172,7 @@ public class CompareCondition implements MySQLCondition {
      * @return 自身实例
      */
     public CompareCondition againstLiteralValue(@Nullable Object rightSide) {
-        this.rightSide = String.valueOf(new Quoter(String.valueOf(rightSide)));
+        this.rightSide = String.valueOf(new Quoter(rightSide == null ? null : String.valueOf(rightSide)));
         return this;
     }
 
