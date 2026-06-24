@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.condition;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
+import io.github.sinri.keel.integration.mysql.exception.KeelSQLGenerateError;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -310,6 +311,15 @@ public class CompareCondition implements MySQLCondition {
      */
     @Override
     public String toString() {
+        if (leftSide == null) {
+            throw new KeelSQLGenerateError("CompareCondition leftSide is not set");
+        }
+        if (operator == null) {
+            throw new KeelSQLGenerateError("CompareCondition operator is not set");
+        }
+        if (rightSide == null) {
+            throw new KeelSQLGenerateError("CompareCondition rightSide is not set");
+        }
         String x = leftSide + " " + operator + " " + rightSide;
         if (inverseOperator) {
             x = "NOT (" + x + ")";
