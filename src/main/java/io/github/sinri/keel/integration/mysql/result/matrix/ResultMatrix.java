@@ -161,6 +161,7 @@ public interface ResultMatrix<R extends ResultRow> extends Iterable<R> {
             keyEntity.forEach(e -> x.put(e.getKey(), e.getValue()));
             List<JsonObject> jsonObjects = bodyMap.get(k);
             x.put(shrinkBodyListKey, jsonObjects);
+            resultList.add(x);
         });
         return Future.succeededFuture(resultList);
     }
