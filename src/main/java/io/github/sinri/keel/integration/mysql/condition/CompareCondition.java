@@ -139,7 +139,7 @@ public class CompareCondition implements MySQLCondition {
      * @return 自身实例
      */
     public CompareCondition compareValue(@Nullable Object leftSide) {
-        this.leftSide = String.valueOf(new Quoter(String.valueOf(leftSide)));
+        this.leftSide = String.valueOf(new Quoter(leftSide == null ? null : String.valueOf(leftSide)));
         return this;
     }
 
