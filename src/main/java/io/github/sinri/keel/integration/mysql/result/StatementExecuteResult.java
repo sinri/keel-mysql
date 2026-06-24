@@ -9,7 +9,6 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.jspecify.annotations.NullMarked;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.function.Function;
 
@@ -63,15 +62,7 @@ public class StatementExecuteResult implements Iterable<Row> {
     }
 
     public <R extends ResultRow> ResultMatrix<R> toMatrix(Class<R> clazz) {
-        Function<JsonObject, R> mapper = jsonObject -> {
-            try {
-                return clazz.getConstructor(JsonObject.class).newInstance(jsonObject);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                     NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        };
-        return toMatrix(mapper);
+        return toMatrix(jsonObject -> ResultRow.of(jsonObject, clazz));
     }
 
     public <R extends ResultRow> ResultMatrix<R> toMatrix(Function<JsonObject, R> mapper) {

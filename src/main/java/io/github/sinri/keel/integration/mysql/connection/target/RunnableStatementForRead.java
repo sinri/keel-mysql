@@ -10,8 +10,6 @@ import io.vertx.core.json.JsonObject;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -23,19 +21,7 @@ public class RunnableStatementForRead extends RunnableStatement {
     }
 
     private <T extends ResultRow> Function<JsonObject, T> mapper(Class<T> classT) {
-        Constructor<T> constructor;
-        try {
-            constructor = classT.getConstructor(JsonObject.class);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-        return jsonObject -> {
-            try {
-                return constructor.newInstance(jsonObject);
-            } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        };
+        return jsonObject -> ResultRow.of(jsonObject, classT);
     }
 
     /**

@@ -8,9 +8,11 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -22,6 +24,30 @@ import java.util.function.Function;
 @NullMarked
 public interface ResultRow extends JsonifiableDataUnit {
     /**
+     * {@code (Class&lt;? extends ResultRow&gt; -&gt; Constructor)} 反射构造器缓存，
+     * 避免每次实例化都重复执行 {@link Class#getConstructor} 查找。
+     */
+    ConcurrentHashMap<Class<?>, Constructor<?>> CONSTRUCTOR_CACHE = new ConcurrentHashMap<>();
+
+    /**
+     * 从缓存中获取指定结果行类的 {@code (JsonObject)} 构造器；缓存未命中时执行反射查找并写入缓存。
+     *
+     * @param clazz 结果行类
+     * @param <R>   结果行类型
+     * @return 构造器
+     */
+    @SuppressWarnings("unchecked")
+    private static <R extends ResultRow> Constructor<R> findConstructor(Class<R> clazz) {
+        return (Constructor<R>) CONSTRUCTOR_CACHE.computeIfAbsent(clazz, c -> {
+            try {
+                return c.getConstructor(JsonObject.class);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    /**
      * 从JSON对象创建结果行对象
      *
      * @param tableRow 表格行JSON对象
@@ -29,10 +55,10 @@ public interface ResultRow extends JsonifiableDataUnit {
      * @return 结果行对象
      */
     static <R extends ResultRow> R of(JsonObject tableRow, Class<R> clazz) {
+        Constructor<R> constructor = findConstructor(clazz);
         try {
-            Constructor<R> constructor = clazz.getConstructor(JsonObject.class);
             return constructor.newInstance(tableRow);
-        } catch (Throwable e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
