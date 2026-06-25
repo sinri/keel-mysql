@@ -385,6 +385,6 @@ public class ConditionsComponent {
     @Override
     public String toString() {
         if (conditions.isEmpty()) return "";
-        return String.join(" and ", conditions.stream().map(MySQLCondition::toString).toList());
+        return String.join(" AND ", conditions.stream().map(MySQLCondition::toString).toList());
     }
 }

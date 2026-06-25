@@ -256,7 +256,7 @@ public class CompareCondition implements MySQLCondition {
      * @return 自身实例
      */
     public CompareCondition hasPrefix(String rightSide) {
-        this.operator = "like";
+        this.operator = OP_LIKE;
         String x = Quoter.escapeStringWithWildcards(rightSide);
         this.rightSide = "'" + x + "%'";
         return this;
@@ -269,7 +269,7 @@ public class CompareCondition implements MySQLCondition {
      * @return 自身实例
      */
     public CompareCondition hasSuffix(String rightSide) {
-        this.operator = "like";
+        this.operator = OP_LIKE;
         String x = Quoter.escapeStringWithWildcards(rightSide);
         this.rightSide = "'%" + x + "'";
         return this;
