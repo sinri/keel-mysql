@@ -47,6 +47,25 @@ class QuoterTest {
     }
 
     @Test
+    void quoteLikeBoundaryPatternsShouldAddLiteralWildcardAroundEscapedValue() {
+        Quoter quoter = new Quoter();
+
+        assertEquals("'%a\\\\%b%'", quoter.quoteLikeContains("a%b"));
+        assertEquals("'a\\\\_b%'", quoter.quoteLikePrefix("a_b"));
+        assertEquals("'%a\\\\%b'", quoter.quoteLikeSuffix("a%b"));
+    }
+
+    @Test
+    void quoteValueShouldDispatchByValueType() {
+        Quoter quoter = new Quoter();
+
+        assertEquals("NULL", quoter.quoteValue(null));
+        assertEquals("123", quoter.quoteValue(123));
+        assertEquals("TRUE", quoter.quoteValue(true));
+        assertEquals("'a\\'b'", quoter.quoteValue("a'b"));
+    }
+
+    @Test
     void quoteScalarsShouldRenderMysqlExpressions() {
         Quoter quoter = new Quoter();
 

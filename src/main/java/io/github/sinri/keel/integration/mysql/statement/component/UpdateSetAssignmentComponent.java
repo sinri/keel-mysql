@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
-import io.github.sinri.keel.integration.mysql.Quoter;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -42,13 +42,7 @@ public class UpdateSetAssignmentComponent {
      * @return 自身实例
      */
     public UpdateSetAssignmentComponent assignmentToValue(@Nullable Object expression) {
-        if (expression == null) {
-            this.expression = "NULL";
-        } else if (expression instanceof Number) {
-            this.expression = expression.toString();
-        } else {
-            this.expression = new Quoter(expression.toString()).toString();
-        }
+        this.expression = new Quoter().quoteValue(expression);
         return this;
     }
 

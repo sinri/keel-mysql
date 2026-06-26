@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.condition;
 
-import io.github.sinri.keel.integration.mysql.Quoter;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLGenerateError;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -40,12 +40,12 @@ public class AmongstCondition implements MySQLCondition {
     }
 
     public AmongstCondition elementAsValue(@Nullable String element) {
-        this.element = new Quoter(element).toString();
+        this.element = new Quoter().quoteValue(element);
         return this;
     }
 
     public AmongstCondition elementAsValue(@Nullable Number element) {
-        this.element = new Quoter(element).toString();
+        this.element = new Quoter().quoteValue(element);
         return this;
     }
 
@@ -67,7 +67,7 @@ public class AmongstCondition implements MySQLCondition {
         if (value == null) {
             this.targetSet.add("NULL");
         } else {
-            this.targetSet.add(new Quoter(String.valueOf(value)).toString());
+            this.targetSet.add(new Quoter().quoteLiteral(String.valueOf(value)));
         }
         return this;
     }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("deprecation")
 class QuoterTest {
     @Test
     void escapeStringShouldKeepBaselineBackslashEscaping() {

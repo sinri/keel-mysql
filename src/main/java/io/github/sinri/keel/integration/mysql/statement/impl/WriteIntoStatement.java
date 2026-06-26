@@ -1,8 +1,8 @@
 package io.github.sinri.keel.integration.mysql.statement.impl;
 
-import io.github.sinri.keel.integration.mysql.Quoter;
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.mixin.WriteIntoStatementMixin;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -80,12 +80,13 @@ public class WriteIntoStatement extends AbstractStatement<WriteIntoStatement> im
     }
 
     public <T extends @Nullable Object> WriteIntoStatement addDataRow(List<T> row) {
+        Quoter quoter = new Quoter();
         List<String> t = new ArrayList<>();
         for (Object item : row) {
             if (item == null) {
-                t.add("NULL");
+                t.add(quoter.quoteNull());
             } else {
-                t.add(new Quoter(String.valueOf(item)).toString());
+                t.add(quoter.quoteLiteral(String.valueOf(item)));
             }
         }
         this.batchValues.add(t);
@@ -317,13 +318,7 @@ public class WriteIntoStatement extends AbstractStatement<WriteIntoStatement> im
         }
 
         public RowToWrite put(String columnName, @Nullable Object value) {
-            if (value == null) {
-                return this.putExpression(columnName, "NULL");
-            } else if (value instanceof Number) {
-                return putExpression(columnName, String.valueOf(value));
-            } else {
-                return putExpression(columnName, new Quoter(value.toString()).toString());
-            }
+            return this.putExpression(columnName, new Quoter().quoteValue(value));
         }
     }
 }

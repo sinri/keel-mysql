@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
-import io.github.sinri.keel.integration.mysql.Quoter;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -27,7 +27,7 @@ public class CaseOperatorPair {
     }
 
     public CaseOperatorPair setThenAsString(@Nullable String thenAsString) {
-        this.thenExpression = new Quoter(thenAsString).toString();
+        this.thenExpression = new Quoter().quoteValue(thenAsString);
         return this;
     }
 
@@ -37,7 +37,7 @@ public class CaseOperatorPair {
     }
 
     public CaseOperatorPair setWhenAsString(@Nullable String whenAsString) {
-        this.whenExpression = new Quoter(whenAsString).toString();
+        this.whenExpression = new Quoter().quoteValue(whenAsString);
         return this;
     }
 

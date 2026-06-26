@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
-import io.github.sinri.keel.integration.mysql.Quoter;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -37,7 +37,7 @@ public class CaseOperator {
     }
 
     public CaseOperator setCaseValueAsString(String caseValueAsString) {
-        this.caseValueExpression = new Quoter(caseValueAsString).toString();
+        this.caseValueExpression = new Quoter().quoteLiteral(caseValueAsString);
         return this;
     }
 
@@ -47,7 +47,7 @@ public class CaseOperator {
     }
 
     public CaseOperator setElseResultAsString(String elseResultAsString) {
-        this.elseResultExpression = new Quoter(elseResultAsString).toString();
+        this.elseResultExpression = new Quoter().quoteLiteral(elseResultAsString);
         return this;
     }
 

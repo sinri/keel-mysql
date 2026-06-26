@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.templated;
 
 
-import io.github.sinri.keel.integration.mysql.Quoter;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
@@ -67,11 +67,7 @@ public class TemplateArgument {
      * @return 模板参数实例
      */
     public static TemplateArgument forString(String string) {
-        String s1 = Quoter.escapeString(string);
-        //        System.out.println("S1 | "+s1);
-        String s2 = Quoter.quoteEscapedString(s1);
-        //        System.out.println("S2 | "+s2);
-        return forExpression(s2);
+        return forExpression(new Quoter().quoteLiteral(string));
     }
 
     /**
@@ -81,8 +77,9 @@ public class TemplateArgument {
      * @return 模板参数实例
      */
     public static TemplateArgument forStrings(Collection<String> strings) {
+        Quoter quoter = new Quoter();
         List<String> list = new ArrayList<>();
-        strings.forEach(string -> list.add(Quoter.quoteEscapedString(Quoter.escapeString(string))));
+        strings.forEach(string -> list.add(quoter.quoteLiteral(string)));
         return forExpressions(list);
     }
 

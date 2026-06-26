@@ -18,10 +18,6 @@ public final class Quoter {
         this.escapeContext = Objects.requireNonNull(escapeContext, "escapeContext");
     }
 
-    protected MySQLEscapeContext getEscapeContext() {
-        return escapeContext;
-    }
-
     public Quoter() {
         this(MySQLEscapeContext.DEFAULT);
     }
@@ -31,10 +27,37 @@ public final class Quoter {
     }
 
     public String quoteLikePattern(String value) {
-        String escapedPattern = value.replace("\\", "\\\\")
-                                     .replace("%", "\\%")
-                                     .replace("_", "\\_");
-        return quoteEscapedString(escapeString(escapedPattern));
+        return quoteEscapedString(escapeString(escapeLikeWildcards(value)));
+    }
+
+    /**
+     * 构造 LIKE 的 contains 模式：{@code '%escaped%'}。
+     *
+     * @param value 匹配子串
+     * @return 带 {@code %} 通配符前后缀的 LIKE 模式字面量
+     */
+    public String quoteLikeContains(String value) {
+        return "'%" + escapeString(escapeLikeWildcards(value)) + "%'";
+    }
+
+    /**
+     * 构造 LIKE 的前缀模式：{@code 'escaped%'}。
+     *
+     * @param value 匹配前缀
+     * @return 带 {@code %} 通配符后缀的 LIKE 模式字面量
+     */
+    public String quoteLikePrefix(String value) {
+        return "'" + escapeString(escapeLikeWildcards(value)) + "%'";
+    }
+
+    /**
+     * 构造 LIKE 的后缀模式：{@code '%escaped'}。
+     *
+     * @param value 匹配后缀
+     * @return 带 {@code %} 通配符前缀的 LIKE 模式字面量
+     */
+    public String quoteLikeSuffix(String value) {
+        return "'%" + escapeString(escapeLikeWildcards(value)) + "'";
     }
 
     public String quoteNull() {
@@ -62,7 +85,17 @@ public final class Quoter {
         return "(" + q + ")";
     }
 
-    protected String quoteValue(@Nullable Object value) {
+    /**
+     * 将任意值转换为 MySQL 表达式片段。
+     * <p>
+     * {@code null} 输出 {@link #quoteNull()}；{@link Number} 输出 {@link #quoteNumeric(Number)}；
+     * {@link Boolean} 输出 {@link #quoteBoolean(boolean)}；其余按字符串字面量
+     * {@link #quoteLiteral(String)} 处理。
+     *
+     * @param value 任意值
+     * @return MySQL 表达式片段
+     */
+    public String quoteValue(@Nullable Object value) {
         if (value == null) {
             return quoteNull();
         }
@@ -75,7 +108,13 @@ public final class Quoter {
         return quoteLiteral(value.toString());
     }
 
-    protected String escapeString(String value) {
+    private static String escapeLikeWildcards(String value) {
+        return value.replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
+    }
+
+    private String escapeString(String value) {
         Objects.requireNonNull(value, "value");
         if (escapeContext.usesNoBackslashEscapes()) {
             return value.replace("'", "''");
@@ -92,7 +131,7 @@ public final class Quoter {
                     .replace("\"", "\\\"");
     }
 
-    protected String quoteEscapedString(String escaped) {
+    private String quoteEscapedString(String escaped) {
         return "'" + escaped + "'";
     }
 

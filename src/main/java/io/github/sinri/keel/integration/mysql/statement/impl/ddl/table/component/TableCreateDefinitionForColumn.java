@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.component;
 
-import io.github.sinri.keel.integration.mysql.Quoter;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -28,11 +28,12 @@ public final class TableCreateDefinitionForColumn extends TableCreateDefinition 
 
     @Override
     public String toString() {
+        Quoter quoter = new Quoter();
         return "`" + columnName + "` "
                 + dataType + " " + (nullable ? "NULL" : "NOT NULL") + " "
-                + (defaultExpression != null ? ("DEFAULT " + new Quoter(defaultExpression)) : "") + " "
+                + (defaultExpression != null ? ("DEFAULT " + quoter.quoteLiteral(defaultExpression)) : "") + " "
                 + (autoIncrement ? "AUTO_INCREMENT" : "") + " "
-                + (comment != null ? ("COMMENT " + new Quoter(comment)) : "") + " "
+                + (comment != null ? ("COMMENT " + quoter.quoteLiteral(comment)) : "") + " "
                 + (collationName != null ? ("COLLATE " + collationName) : "") + " "
                 + (others != null ? (others) : "") + " ";
     }

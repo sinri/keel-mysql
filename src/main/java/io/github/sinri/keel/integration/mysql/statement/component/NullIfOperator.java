@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
-import io.github.sinri.keel.integration.mysql.Quoter;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -26,7 +26,7 @@ public class NullIfOperator {
     }
 
     public NullIfOperator setBaseAsString(@Nullable String string) {
-        this.baseExpression = new Quoter(string).toString();
+        this.baseExpression = new Quoter().quoteValue(string);
         return this;
     }
 
@@ -41,7 +41,7 @@ public class NullIfOperator {
     }
 
     public NullIfOperator setNullRefString(@Nullable String string) {
-        this.nullRefExpression = new Quoter(string).toString();
+        this.nullRefExpression = new Quoter().quoteValue(string);
         return this;
     }
 

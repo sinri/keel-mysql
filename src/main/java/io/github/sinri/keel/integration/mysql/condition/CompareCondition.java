@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.condition;
 
-import io.github.sinri.keel.integration.mysql.Quoter;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLGenerateError;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -140,7 +140,7 @@ public class CompareCondition implements MySQLCondition {
      * @return 自身实例
      */
     public CompareCondition compareValue(@Nullable Object leftSide) {
-        this.leftSide = String.valueOf(new Quoter(leftSide == null ? null : String.valueOf(leftSide)));
+        this.leftSide = new Quoter().quoteValue(leftSide == null ? null : String.valueOf(leftSide));
         return this;
     }
 
@@ -173,7 +173,7 @@ public class CompareCondition implements MySQLCondition {
      * @return 自身实例
      */
     public CompareCondition againstLiteralValue(@Nullable Object rightSide) {
-        this.rightSide = String.valueOf(new Quoter(rightSide == null ? null : String.valueOf(rightSide)));
+        this.rightSide = new Quoter().quoteValue(rightSide == null ? null : String.valueOf(rightSide));
         return this;
     }
 
@@ -244,8 +244,7 @@ public class CompareCondition implements MySQLCondition {
      */
     public CompareCondition contains(String rightSide) {
         this.operator = OP_LIKE;
-        String x = Quoter.escapeStringWithWildcards(rightSide);
-        this.rightSide = "'%" + x + "%'";
+        this.rightSide = new Quoter().quoteLikeContains(rightSide);
         return this;
     }
 
@@ -257,8 +256,7 @@ public class CompareCondition implements MySQLCondition {
      */
     public CompareCondition hasPrefix(String rightSide) {
         this.operator = OP_LIKE;
-        String x = Quoter.escapeStringWithWildcards(rightSide);
-        this.rightSide = "'" + x + "%'";
+        this.rightSide = new Quoter().quoteLikePrefix(rightSide);
         return this;
     }
 
@@ -270,8 +268,7 @@ public class CompareCondition implements MySQLCondition {
      */
     public CompareCondition hasSuffix(String rightSide) {
         this.operator = OP_LIKE;
-        String x = Quoter.escapeStringWithWildcards(rightSide);
-        this.rightSide = "'%" + x + "'";
+        this.rightSide = new Quoter().quoteLikeSuffix(rightSide);
         return this;
     }
 

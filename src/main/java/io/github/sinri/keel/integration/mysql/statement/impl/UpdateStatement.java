@@ -87,7 +87,6 @@ public class UpdateStatement extends AbstractStatement<UpdateStatement> implemen
     }
 
     public UpdateStatement setWithValue(String column, String value) {
-        //assignments.add(column + "=" + (new Quoter(value)));
         assignments.add(new UpdateSetAssignmentComponent(column).assignmentToValue(value));
         return this;
     }
