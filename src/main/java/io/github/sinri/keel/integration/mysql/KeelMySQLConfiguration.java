@@ -9,13 +9,22 @@ import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.github.sinri.keel.integration.mysql.result.row.SimpleResultRow;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.net.ClientSSLOptions;
+import io.vertx.core.net.JksOptions;
+import io.vertx.core.net.KeyCertOptions;
+import io.vertx.core.net.PemKeyCertOptions;
+import io.vertx.core.net.PemTrustOptions;
+import io.vertx.core.net.PfxOptions;
+import io.vertx.core.net.TrustOptions;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;
+import io.vertx.mysqlclient.SslMode;
 import io.vertx.sqlclient.*;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -29,34 +38,6 @@ import java.util.function.Function;
 public class KeelMySQLConfiguration extends ConfigElement {
     public KeelMySQLConfiguration(ConfigElement base) {
         super(base);
-    }
-
-    /**
-     * 生成MySQL配置的属性字符串。
-     *
-     * @param dataSourceName      数据源名称
-     * @param mySQLConnectOptions MySQL连接选项
-     * @param poolOptions         连接池选项
-     * @return 配置属性字符串
-     * @deprecated 此方法会将密码以明文形式写入生成的配置字符串，存在泄露风险。
-     * 请使用 {@link #generateSamplePropertiesForConfig(String)} 生成脱敏的样本配置。
-     */
-    @Deprecated(since = "5.0.1", forRemoval = true)
-    public static String generatePropertiesForConfig(String dataSourceName, MySQLConnectOptions mySQLConnectOptions, PoolOptions poolOptions) {
-        var builder = new ConfigPropertiesBuilder();
-        List<String> prefix = List.of("mysql", dataSourceName);
-
-        builder.add(prefix, "host", mySQLConnectOptions.getHost());
-        builder.add(prefix, "port", String.valueOf(mySQLConnectOptions.getPort()));
-        builder.add(prefix, "username", mySQLConnectOptions.getUser());
-        builder.add(prefix, "password", mySQLConnectOptions.getPassword());
-        builder.add(prefix, "schema", mySQLConnectOptions.getDatabase());
-        builder.add(prefix, "charset", mySQLConnectOptions.getCharset());
-        builder.add(prefix, "poolMaxSize", String.valueOf(poolOptions.getMaxSize()));
-        builder.add(prefix, "poolShared", (poolOptions.isShared() ? "YES" : "NO"));
-        builder.add(prefix, "poolConnectionTimeout", String.valueOf(poolOptions.getConnectionTimeout()));
-
-        return builder.writeToString();
     }
 
     /**
@@ -77,6 +58,11 @@ public class KeelMySQLConfiguration extends ConfigElement {
         builder.add(prefix, "password", "<YOUR_PASSWORD>");
         builder.add(prefix, "schema", "<YOUR_DATABASE>");
         builder.add(prefix, "charset", "utf8mb4");
+        builder.add(prefix, "ssl", "NO");
+        builder.add(prefix, "sslMode", "DISABLED");
+        builder.add(prefix, "sslCa", "<PATH_TO_CA_CERT_PEM>");
+        builder.add(prefix, "sslCert", "<PATH_TO_CLIENT_CERT_PEM>");
+        builder.add(prefix, "sslKey", "<PATH_TO_CLIENT_KEY_PEM>");
         builder.add(prefix, "poolMaxSize", "10");
         builder.add(prefix, "poolShared", "YES");
         builder.add(prefix, "poolConnectionTimeout", "30");
@@ -103,6 +89,14 @@ public class KeelMySQLConfiguration extends ConfigElement {
         String schema = getSchema();
         if (schema != null) {
             mySQLConnectOptions.setDatabase(schema);
+        }
+        SslMode sslMode = getSslMode();
+        if (sslMode != null) {
+            mySQLConnectOptions.setSslMode(sslMode);
+        }
+        ClientSSLOptions sslOptions = getSslOptions();
+        if (sslOptions != null) {
+            mySQLConnectOptions.setSslOptions(sslOptions);
         }
 
         return mySQLConnectOptions;
@@ -215,6 +209,138 @@ public class KeelMySQLConfiguration extends ConfigElement {
     }
 
     /**
+     * 获取 MySQL SSL 模式。
+     * <p>
+     * `sslMode` 可取 `DISABLED`、`PREFERRED`、`REQUIRED`、`VERIFY_CA`、`VERIFY_IDENTITY`；
+     * 未配置 `sslMode` 时，`ssl=true` 会映射为 `REQUIRED`，`ssl=false` 会映射为 `DISABLED`。
+     *
+     * @return SSL 模式
+     */
+    @Nullable
+    public SslMode getSslMode() {
+        try {
+            return parseSslMode(readString(List.of("sslMode")));
+        } catch (NotConfiguredException e) {
+            try {
+                return readBoolean(List.of("ssl")) ? SslMode.REQUIRED : SslMode.DISABLED;
+            } catch (NotConfiguredException ignored) {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * 获取 MySQL 客户端 SSL 选项。
+     * <p>
+     * 当前支持 `sslTrustAll`、`sslHostnameVerificationAlgorithm`、`sslCa`/`sslTrustCertPath`/`sslPemTrustCertPath`、
+     * `sslCert`/`sslKey` 客户端 PEM 证书、
+     * `sslJksTrustStorePath`/`sslJksTrustStorePassword` 以及
+     * `sslPfxTrustStorePath`/`sslPfxTrustStorePassword`。
+     *
+     * @return SSL 选项
+     */
+    @Nullable
+    public ClientSSLOptions getSslOptions() {
+        ClientSSLOptions sslOptions = new ClientSSLOptions();
+        boolean configured = false;
+
+        Boolean sslTrustAll = getSslTrustAll();
+        if (sslTrustAll != null) {
+            sslOptions.setTrustAll(sslTrustAll);
+            configured = true;
+        }
+
+        String hostnameVerificationAlgorithm = getSslHostnameVerificationAlgorithm();
+        if (hostnameVerificationAlgorithm != null) {
+            sslOptions.setHostnameVerificationAlgorithm(hostnameVerificationAlgorithm);
+            configured = true;
+        }
+
+        KeyCertOptions keyCertOptions = getSslKeyCertOptions();
+        if (keyCertOptions != null) {
+            sslOptions.setKeyCertOptions(keyCertOptions);
+            configured = true;
+        }
+
+        TrustOptions trustOptions = getSslTrustOptions();
+        if (trustOptions != null) {
+            sslOptions.setTrustOptions(trustOptions);
+            configured = true;
+        }
+
+        return configured ? sslOptions : null;
+    }
+
+    @Nullable
+    public Boolean getSslTrustAll() {
+        try {
+            return readBoolean(List.of("sslTrustAll"));
+        } catch (NotConfiguredException e) {
+            return null;
+        }
+    }
+
+    @Nullable
+    public String getSslHostnameVerificationAlgorithm() {
+        try {
+            return readString(List.of("sslHostnameVerificationAlgorithm"));
+        } catch (NotConfiguredException e) {
+            return null;
+        }
+    }
+
+    @Nullable
+    public KeyCertOptions getSslKeyCertOptions() {
+        String keyPath = getFirstConfiguredString("sslKey", "sslClientKey", "sslPemKeyCertKeyPath");
+        if (keyPath == null) {
+            return null;
+        }
+
+        String certPath = getFirstConfiguredString("sslClientCert", "sslPemKeyCertCertPath", "sslCert");
+        if (certPath == null) {
+            return null;
+        }
+
+        return new PemKeyCertOptions()
+                .addCertPath(certPath)
+                .addKeyPath(keyPath);
+    }
+
+    @Nullable
+    public TrustOptions getSslTrustOptions() {
+        String pemTrustCertPath = getFirstConfiguredString("sslCa", "sslTrustCertPath", "sslPemTrustCertPath");
+        if (pemTrustCertPath == null && getFirstConfiguredString("sslKey") == null) {
+            // 兼容 issue 中提出的 sslCert 命名；若同时存在 sslKey，则 sslCert 用作客户端证书。
+            pemTrustCertPath = getFirstConfiguredString("sslCert");
+        }
+        if (pemTrustCertPath != null) {
+            return new PemTrustOptions().addCertPath(pemTrustCertPath);
+        }
+
+        String jksTrustStorePath = getFirstConfiguredString("sslJksTrustStorePath");
+        if (jksTrustStorePath != null) {
+            JksOptions jksOptions = new JksOptions().setPath(jksTrustStorePath);
+            String password = getFirstConfiguredString("sslJksTrustStorePassword");
+            if (password != null) {
+                jksOptions.setPassword(password);
+            }
+            return jksOptions;
+        }
+
+        String pfxTrustStorePath = getFirstConfiguredString("sslPfxTrustStorePath");
+        if (pfxTrustStorePath != null) {
+            PfxOptions pfxOptions = new PfxOptions().setPath(pfxTrustStorePath);
+            String password = getFirstConfiguredString("sslPfxTrustStorePassword");
+            if (password != null) {
+                pfxOptions.setPassword(password);
+            }
+            return pfxOptions;
+        }
+
+        return null;
+    }
+
+    /**
      * 获取连接池最大大小
      *
      * @return 连接池最大大小
@@ -273,6 +399,24 @@ public class KeelMySQLConfiguration extends ConfigElement {
         } catch (NotConfiguredException e) {
             return true;
         }
+    }
+
+    private SslMode parseSslMode(String rawValue) {
+        String normalized = rawValue.trim()
+                                    .replace('-', '_')
+                                    .toUpperCase(Locale.ROOT);
+        return SslMode.valueOf(normalized);
+    }
+
+    @Nullable
+    private String getFirstConfiguredString(String... keys) {
+        for (String key : keys) {
+            try {
+                return readString(List.of(key));
+            } catch (NotConfiguredException ignored) {
+            }
+        }
+        return null;
     }
 
 
