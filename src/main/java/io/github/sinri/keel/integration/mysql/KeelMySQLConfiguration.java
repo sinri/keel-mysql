@@ -66,6 +66,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
         builder.add(prefix, "poolMaxSize", "10");
         builder.add(prefix, "poolShared", "YES");
         builder.add(prefix, "poolConnectionTimeout", "30");
+        builder.add(prefix, "poolIdleTimeout", "300");
 
         return builder.writeToString();
     }
@@ -119,6 +120,11 @@ public class KeelMySQLConfiguration extends ConfigElement {
         if (poolConnectionTimeout != null) {
             poolOptions.setConnectionTimeout(poolConnectionTimeout);
             poolOptions.setConnectionTimeoutUnit(TimeUnit.SECONDS);
+        }
+        Integer poolIdleTimeout = getPoolIdleTimeout();
+        if (poolIdleTimeout != null) {
+            poolOptions.setIdleTimeout(poolIdleTimeout);
+            poolOptions.setIdleTimeoutUnit(TimeUnit.SECONDS);
         }
         poolOptions.setShared(getPoolShared());
         poolOptions.setName("Keel-MySQL-Pool-" + this.getDataSourceName());
@@ -381,6 +387,26 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public Integer getPoolConnectionTimeout() {
         try {
             return readInteger(List.of("poolConnectionTimeout"));
+        } catch (NotConfiguredException e) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取池内连接空闲超时时间。
+     * <p>
+     * 若配置该值，连接池会主动关闭空闲超过该时长的连接；建议设置为小于 MySQL {@code wait_timeout}
+     * 或中间代理的空闲连接超时。
+     *
+     * @return 空闲超时时间（秒）
+     * @see <a
+     *         href="https://vertx.io/docs/apidocs/io/vertx/sqlclient/PoolOptions.html#setIdleTimeout-int-">Vertx
+     *         PoolOptions</a>
+     */
+    @Nullable
+    public Integer getPoolIdleTimeout() {
+        try {
+            return readInteger(List.of("poolIdleTimeout"));
         } catch (NotConfiguredException e) {
             return null;
         }

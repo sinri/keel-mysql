@@ -24,10 +24,14 @@
 | 池最大连接数  | `poolMaxSize`                  | 交 Vert.x 默认 |
 | 是否共享池   | `poolShared`（YES/NO）           | `true`      |
 | 取连超时    | `poolConnectionTimeout`（**秒**） | 不设置则本类不写入该项 |
+| 空闲超时    | `poolIdleTimeout`（**秒**）       | 不设置则本类不写入该项 |
 
 根级可选：**`mysql.default_data_source_name`**（默认逻辑名 `default`）。
 
 连接上 **`useAffectedRows`** 固定为 **`true`**。
+
+`poolIdleTimeout` 会映射到 Vert.x `PoolOptions#setIdleTimeout`，用于主动回收池内空闲连接。建议设置为小于
+MySQL `wait_timeout` 或中间代理的 idle timeout，避免连接被服务端或代理关闭后，首次复用时才暴露失败。
 
 ## 配置模板（5.0.1 推荐）
 

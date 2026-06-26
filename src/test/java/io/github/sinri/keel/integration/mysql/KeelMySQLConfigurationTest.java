@@ -9,6 +9,7 @@ import io.vertx.mysqlclient.SslMode;
 import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -88,6 +89,18 @@ class KeelMySQLConfigurationTest {
         PfxOptions trustOptions = assertInstanceOf(PfxOptions.class, sslOptions.getTrustOptions());
         assertEquals("/etc/mysql/truststore.p12", trustOptions.getPath());
         assertEquals("secret", trustOptions.getPassword());
+    }
+
+    @Test
+    void getPoolOptionsShouldApplyIdleTimeoutInSeconds() throws Exception {
+        KeelMySQLConfiguration configuration = createConfiguration(
+                "mysql.secure.poolIdleTimeout", "120"
+        );
+
+        var poolOptions = configuration.getPoolOptions();
+
+        assertEquals(120, poolOptions.getIdleTimeout());
+        assertEquals(TimeUnit.SECONDS, poolOptions.getIdleTimeoutUnit());
     }
 
     private KeelMySQLConfiguration createConfiguration(String... keyAndValuePairs) throws Exception {

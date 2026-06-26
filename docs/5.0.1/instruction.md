@@ -81,6 +81,7 @@ requires io.github.sinri.keel.integration.mysql;
 | `poolMaxSize`           | 池最大连接数                   | 使用 Vert.x 默认 |
 | `poolShared`            | 是否共享池（布尔，配置中为 YES/NO 形式） | `true`       |
 | `poolConnectionTimeout` | 从池取连超时（**秒**）            | 未设置则不由本类写入超时 |
+| `poolIdleTimeout`       | 池内连接空闲超时（**秒**）          | 未设置则不由本类写入超时 |
 
 此外，在根配置可提供：
 
@@ -106,6 +107,7 @@ mysql.mydb.charset=utf8mb4
 mysql.mydb.poolMaxSize=10
 mysql.mydb.poolShared=YES
 mysql.mydb.poolConnectionTimeout=30
+mysql.mydb.poolIdleTimeout=300
 ```
 
 将上述键合并进应用实际使用的 Keel 配置文件即可。
