@@ -57,7 +57,9 @@
 
 **`conn.templatedRead("/path/report.sql", m -> m.put("start", ...).put("end", ...)).executeForResultMatrix()`**
 
-占位符为 **`{name}`** 文本替换，用户参与部分须先 **`Quoter`** 或校验（见 [原始SQL与模板SQL](./raw_and_templated_sql.md)）。
+占位符为 **`{name}`** 文本替换，用户参与部分须让占位符独占 SQL 表达式位置，并用
+**`TemplateArgumentMapping.bindString(...)`** / **`TemplateArgument.forString(...)`** 转义，或对可信表达式做严格校验
+（见 [原始SQL与模板SQL](./raw_and_templated_sql.md)）。
 
 ## 7. 接入 SQL 审计
 

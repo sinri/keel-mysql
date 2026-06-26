@@ -73,6 +73,10 @@ public sealed interface TemplatedStatement<S> extends AnyStatement<S>
 
     /**
      * 构建最终的SQL字符串
+     * <p>
+     * 此方法只做字面文本替换，不解析 SQL 上下文。若参数来自用户输入，应让占位符独占一个
+     * SQL 表达式位置，并使用 {@link TemplateArgument#forString(String)} 或
+     * {@link TemplateArgumentMapping#bindString(String, String)} 生成已转义的字符串字面量。
      *
      * @return 构建后的SQL字符串
      */

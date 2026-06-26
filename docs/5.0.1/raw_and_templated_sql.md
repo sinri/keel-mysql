@@ -39,7 +39,12 @@
 *`toString()`**。
 
 - **不是** JDBC `?` 预编译参数，而是**文本替换**。
-- 调用方必须保证替换后的片段在 SQL 中合法；**若参数来自用户输入，仍要转义或引用**（可结合 **`Quoter`**）。
+- **不会识别 SQL 上下文**：不要把占位符写在已有字符串字面量内部，例如不要写
+  **`WHERE note = 'don''t {name}'`**。
+- 若参数来自用户输入，占位符应独占一个 SQL 表达式位置，例如 **`WHERE name = {name}`**，
+  并使用 **`TemplateArgument.forString(value)`** 或 **`TemplateArgumentMapping.bindString(name, value)`**
+  生成已转义、已加引号的字符串字面量。
+- 若确实要绑定 SQL 片段或函数表达式，才使用 **`forExpression`** / **`bindExpression`**，且调用方必须保证表达式可信或已严格校验。
 
 ### 工厂方法
 

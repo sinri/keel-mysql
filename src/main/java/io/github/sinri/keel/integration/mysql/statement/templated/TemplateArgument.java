@@ -62,6 +62,10 @@ public class TemplateArgument {
 
     /**
      * 创建表示字符串的模板参数
+     * <p>
+     * 此方法会通过 {@link Quoter#quoteLiteral(String)} 转义并添加引号，生成可直接放入 SQL 表达式位置的
+     * 字符串字面量。模板占位符应独占一个 SQL 表达式位置，例如 {@code WHERE name = &#123;name&#125;}，
+     * 不要写在已有字符串字面量内部。
      *
      * @param string 字符串
      * @return 模板参数实例
