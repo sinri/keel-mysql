@@ -1,7 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
 import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatementForReadAndPagination;
-import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 
@@ -11,7 +10,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public non-sealed interface PaginatableStatementMixin<S> extends AnyStatement<S> {
+public interface PaginatableStatementMixin<S> extends ReadStatementMixin<S> {
     default S limit(long limit) {
         return limit(limit, 0);
     }

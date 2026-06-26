@@ -17,7 +17,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 @NullMarked
 public sealed interface AnyStatement<S> extends SelfInterface<S>
-        permits AbstractStatement, ModifyStatementMixin, ReadStatementMixin, PaginatableStatementMixin, SpecialStatementMixin, WriteIntoStatementMixin, TemplatedStatement {
+        permits AbstractStatement, ModifyStatementMixin, ReadStatementMixin, SpecialStatementMixin, WriteIntoStatementMixin, TemplatedStatement {
     /**
      * 返回新建语句实例时将采用的默认 SQL 组件分隔符。
      */

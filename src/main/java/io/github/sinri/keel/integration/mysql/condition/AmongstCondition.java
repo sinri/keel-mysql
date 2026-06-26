@@ -99,7 +99,7 @@ public class AmongstCondition implements MySQLCondition {
     /**
      * @param readStatement A READ Statement, such as SELECT.
      */
-    public AmongstCondition amongstReadStatement(ReadStatementMixin readStatement) {
+    public AmongstCondition amongstReadStatement(ReadStatementMixin<?> readStatement) {
         return this.amongstExpression(readStatement.toString());
     }
 

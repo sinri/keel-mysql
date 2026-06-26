@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql.statement.component;
 
 import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.github.sinri.keel.integration.mysql.condition.*;
+import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -274,6 +275,22 @@ public class ConditionsComponent {
     }
 
     /**
+     * 添加表达式在子查询结果中的条件。
+     * <p>
+     * 子查询会作为 {@code IN (...)} 的右操作数直接拼接。
+     *
+     * @param expression 表达式
+     * @param subQuery   子查询语句
+     * @return 自身实例
+     */
+    public ConditionsComponent expressionInSubquery(String expression, ReadStatementMixin<?> subQuery) {
+        return this.among(amongstCondition -> amongstCondition
+                .elementAsExpression(expression)
+                .amongstReadStatement(subQuery)
+        );
+    }
+
+    /**
      * 添加表达式不在字面值列表中的条件
      *
      * @param expression 表达式
@@ -325,6 +342,23 @@ public class ConditionsComponent {
     public ConditionsComponent expressionNotInNumericValuesIfNotEmpty(String expression, Collection<? extends Number> values) {
         if (values.isEmpty()) return this;
         return expressionNotInNumericValues(expression, values);
+    }
+
+    /**
+     * 添加表达式不在子查询结果中的条件。
+     * <p>
+     * 子查询会作为 {@code NOT IN (...)} 的右操作数直接拼接。
+     *
+     * @param expression 表达式
+     * @param subQuery   子查询语句
+     * @return 自身实例
+     */
+    public ConditionsComponent expressionNotInSubquery(String expression, ReadStatementMixin<?> subQuery) {
+        return this.among(amongstCondition -> amongstCondition
+                .elementAsExpression(expression)
+                .not()
+                .amongstReadStatement(subQuery)
+        );
     }
 
     /**
