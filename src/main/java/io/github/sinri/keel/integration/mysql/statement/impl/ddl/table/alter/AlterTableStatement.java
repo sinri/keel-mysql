@@ -72,13 +72,14 @@ public class AlterTableStatement extends AbstractStatement<AlterTableStatement>
 
     @Override
     public String buildSql() {
+        final var sqlComponentSeparator = getSqlComponentSeparator();
         // ALTER TABLE tbl_name
         //    [alter_option [, alter_option] ...]
         //    [partition_options]
-        return "ALTER TABLE " + getTableExpression() + " " + SQL_COMPONENT_SEPARATOR
+        return "ALTER TABLE " + getTableExpression() + " " + sqlComponentSeparator
                 + alterOptions.stream()
                               .map(TableAlterOption::toString)
-                              .reduce((a, b) -> a + "," + b) + " " + SQL_COMPONENT_SEPARATOR
+                              .reduce((a, b) -> a + "," + b) + " " + sqlComponentSeparator
                 + (partitionOptions == null ? "" : partitionOptions);
     }
 

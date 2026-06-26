@@ -22,23 +22,23 @@ public final class UnionStatement extends AbstractStatement<UnionStatement> impl
     }
 
     public UnionStatement(String firstSelection) {
-        selections.add("(" + AbstractStatement.SQL_COMPONENT_SEPARATOR + firstSelection + AbstractStatement.SQL_COMPONENT_SEPARATOR + ")");
+        selections.add("(" + getSqlComponentSeparator() + firstSelection + getSqlComponentSeparator() + ")");
     }
 
     public UnionStatement union(String selection) {
         if (this.selections.isEmpty()) {
-            selections.add("(" + AbstractStatement.SQL_COMPONENT_SEPARATOR + selection + AbstractStatement.SQL_COMPONENT_SEPARATOR + ")");
+            selections.add("(" + getSqlComponentSeparator() + selection + getSqlComponentSeparator() + ")");
         } else {
-            selections.add(" UNION (" + AbstractStatement.SQL_COMPONENT_SEPARATOR + selection + AbstractStatement.SQL_COMPONENT_SEPARATOR + ")");
+            selections.add(" UNION (" + getSqlComponentSeparator() + selection + getSqlComponentSeparator() + ")");
         }
         return this;
     }
 
     public UnionStatement unionAll(String selection) {
         if (this.selections.isEmpty()) {
-            selections.add("(" + AbstractStatement.SQL_COMPONENT_SEPARATOR + selection + AbstractStatement.SQL_COMPONENT_SEPARATOR + ")");
+            selections.add("(" + getSqlComponentSeparator() + selection + getSqlComponentSeparator() + ")");
         } else {
-            selections.add(" UNION ALL (" + AbstractStatement.SQL_COMPONENT_SEPARATOR + selection + AbstractStatement.SQL_COMPONENT_SEPARATOR + ")");
+            selections.add(" UNION ALL (" + getSqlComponentSeparator() + selection + getSqlComponentSeparator() + ")");
         }
         return this;
     }

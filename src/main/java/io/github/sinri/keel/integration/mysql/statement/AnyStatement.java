@@ -18,18 +18,29 @@ import java.lang.reflect.InvocationTargetException;
 @NullMarked
 public sealed interface AnyStatement<S> extends SelfInterface<S>
         permits AbstractStatement, ModifyStatementMixin, ReadStatementMixin, PaginatableStatementMixin, SpecialStatementMixin, WriteIntoStatementMixin, TemplatedStatement {
-    static String getSqlComponentSeparator() {
-        return AbstractStatement.SQL_COMPONENT_SEPARATOR;
+    /**
+     * 返回新建语句实例时将采用的默认 SQL 组件分隔符。
+     */
+    static String getDefaultSqlComponentSeparator() {
+        return AbstractStatement.DEFAULT_SQL_COMPONENT_SEPARATOR;
     }
 
     /**
-     * 设置SQL组件分隔符
+     * 设置新建语句实例时的默认 SQL 组件分隔符；已创建实例不受影响。
      *
      * @param sqlComponentSeparator SQL组件分隔符
      */
-    static void setSqlComponentSeparator(String sqlComponentSeparator) {
-        AbstractStatement.SQL_COMPONENT_SEPARATOR = sqlComponentSeparator;
+    static void setDefaultSqlComponentSeparator(String sqlComponentSeparator) {
+        AbstractStatement.DEFAULT_SQL_COMPONENT_SEPARATOR = sqlComponentSeparator;
     }
+
+    /**
+     * 设置本语句实例的 SQL 组件分隔符。
+     *
+     * @param sqlComponentSeparator SQL组件分隔符
+     * @return 自身引用，便于链式调用
+     */
+    S setSqlComponentSeparator(String sqlComponentSeparator);
 
     S setRemarkAsComment(String remarkAsComment);
 

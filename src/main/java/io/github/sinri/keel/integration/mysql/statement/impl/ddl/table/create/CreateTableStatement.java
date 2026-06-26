@@ -61,18 +61,19 @@ implements SpecialStatementMixin<CreateTableStatement> {
 
     @Override
     public String buildSql() {
+        final var sqlComponentSeparator = getSqlComponentSeparator();
         var ds = definitions.stream().map(Object::toString).collect(Collectors.toList());
         var sql = "CREATE " + (useTemporary() ? "TEMPORARY " : " ") + "TABLE "
                 + (useIfNotExists() ? "IF NOT EXISTS " : " ")
-                + getTableExpression() + " " + SQL_COMPONENT_SEPARATOR
-                + "(" + SQL_COMPONENT_SEPARATOR
-                + String.join(", " + SQL_COMPONENT_SEPARATOR, ds)
-                + SQL_COMPONENT_SEPARATOR
-                + ") " + SQL_COMPONENT_SEPARATOR
-                + tableOptions + " " + SQL_COMPONENT_SEPARATOR
-                + (partitionOptions == null ? "" : partitionOptions) + " " + SQL_COMPONENT_SEPARATOR;
+                + getTableExpression() + " " + sqlComponentSeparator
+                + "(" + sqlComponentSeparator
+                + String.join(", " + sqlComponentSeparator, ds)
+                + sqlComponentSeparator
+                + ") " + sqlComponentSeparator
+                + tableOptions + " " + sqlComponentSeparator
+                + (partitionOptions == null ? "" : partitionOptions) + " " + sqlComponentSeparator;
         if (asSourceType != null) {
-            sql += " " + asSourceType + SQL_COMPONENT_SEPARATOR
+            sql += " " + asSourceType + sqlComponentSeparator
                     + " " + Objects.requireNonNull(readStatement);
         }
         return sql;

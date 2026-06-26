@@ -207,6 +207,7 @@ public class WriteIntoStatement extends AbstractStatement<WriteIntoStatement> im
 
     @Override
     public String buildSql() {
+        final var sqlComponentSeparator = getSqlComponentSeparator();
         String sql = writeType + " " + ignoreMark + " INTO ";
         if (schema != null) {
             sql += schema + ".";
@@ -214,22 +215,22 @@ public class WriteIntoStatement extends AbstractStatement<WriteIntoStatement> im
         sql += table;
         sql += " (" + String.join(",", columns) + ")";
         if (sourceTableName != null) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "TABLE " + sourceTableName;
+            sql += sqlComponentSeparator + "TABLE " + sourceTableName;
         } else if (sourceSelectSQL != null) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + sourceSelectSQL;
+            sql += sqlComponentSeparator + sourceSelectSQL;
         } else {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "VALUES" + AbstractStatement.SQL_COMPONENT_SEPARATOR;
+            sql += sqlComponentSeparator + "VALUES" + sqlComponentSeparator;
             List<String> items = new ArrayList<>();
             for (List<String> row : batchValues) {
                 items.add("(" + String.join(",", row) + ")");
             }
-            sql += String.join("," + AbstractStatement.SQL_COMPONENT_SEPARATOR, items);
+            sql += String.join("," + sqlComponentSeparator, items);
         }
         if (!onDuplicateKeyUpdateAssignmentMap.isEmpty()) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ON DUPLICATE KEY UPDATE" + AbstractStatement.SQL_COMPONENT_SEPARATOR;
+            sql += sqlComponentSeparator + "ON DUPLICATE KEY UPDATE" + sqlComponentSeparator;
             List<String> items = new ArrayList<>();
             onDuplicateKeyUpdateAssignmentMap.forEach((key, value) -> items.add(key + " = " + value));
-            sql += String.join("," + AbstractStatement.SQL_COMPONENT_SEPARATOR, items);
+            sql += String.join("," + sqlComponentSeparator, items);
         }
         if (!getRemarkAsComment().isEmpty()) {
             sql += "\n-- " + getRemarkAsComment() + "\n";

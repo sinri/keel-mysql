@@ -18,7 +18,11 @@ import java.util.UUID;
  */
 @NullMarked
 abstract public non-sealed class AbstractStatement<S> implements AnyStatement<S> {
-    protected static String SQL_COMPONENT_SEPARATOR = " ";//"\n";
+    /**
+     * 新建语句实例时采用的默认 SQL 组件分隔符；仅影响此后创建的实例。
+     */
+    static String DEFAULT_SQL_COMPONENT_SEPARATOR = " ";//"\n";
+    private String sqlComponentSeparator;
     protected final String statement_uuid;
     private String remarkAsComment = "";
     private boolean toPrepareStatement = true;
@@ -27,7 +31,24 @@ abstract public non-sealed class AbstractStatement<S> implements AnyStatement<S>
      * 构造抽象语句，生成唯一标识符
      */
     public AbstractStatement() {
+        this.sqlComponentSeparator = DEFAULT_SQL_COMPONENT_SEPARATOR;
         this.statement_uuid = UUID.randomUUID().toString();
+    }
+
+    protected String getSqlComponentSeparator() {
+        return sqlComponentSeparator;
+    }
+
+    /**
+     * 设置本语句实例的 SQL 组件分隔符。
+     *
+     * @param sqlComponentSeparator SQL组件分隔符
+     * @return 自身实例
+     */
+    @Override
+    public S setSqlComponentSeparator(String sqlComponentSeparator) {
+        this.sqlComponentSeparator = sqlComponentSeparator;
+        return getImplementation();
     }
 
     /**

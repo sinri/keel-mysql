@@ -203,6 +203,7 @@ public final class SelectStatement extends AbstractStatement<SelectStatement> im
 
     @Override
     public String buildSql() {
+        final var sqlComponentSeparator = getSqlComponentSeparator();
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
 
@@ -211,7 +212,7 @@ public final class SelectStatement extends AbstractStatement<SelectStatement> im
         //  MYSQL 5.6 /*+ MAX_STATEMENT_TIME(1000) */ THIS IS NOT FOR ONE STATEMENT.
         if (this.maxExecutionTime != null) {
             sql.append("/*+ MAX_EXECUTION_TIME(").append(maxExecutionTime).append(") */ ")
-               .append(AbstractStatement.SQL_COMPONENT_SEPARATOR);
+               .append(sqlComponentSeparator);
         }
 
         if (columns.isEmpty()) {
@@ -220,29 +221,29 @@ public final class SelectStatement extends AbstractStatement<SelectStatement> im
             sql.append(String.join(",", columns));
         }
         if (!tables.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("FROM ")
-               .append(String.join(AbstractStatement.SQL_COMPONENT_SEPARATOR, tables));
+            sql.append(sqlComponentSeparator).append("FROM ")
+               .append(String.join(sqlComponentSeparator, tables));
         }
         if (!whereConditionsComponent.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("WHERE ").append(whereConditionsComponent);
+            sql.append(sqlComponentSeparator).append("WHERE ").append(whereConditionsComponent);
         }
         if (!categories.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("GROUP BY ")
+            sql.append(sqlComponentSeparator).append("GROUP BY ")
                .append(String.join(",", categories));
         }
         if (!havingConditionsComponent.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("HAVING ").append(havingConditionsComponent);
+            sql.append(sqlComponentSeparator).append("HAVING ").append(havingConditionsComponent);
         }
         if (!sortRules.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("ORDER BY ")
+            sql.append(sqlComponentSeparator).append("ORDER BY ")
                .append(String.join(",", sortRules));
         }
         if (limit > 0) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("LIMIT ").append(limit).append(" OFFSET ")
+            sql.append(sqlComponentSeparator).append("LIMIT ").append(limit).append(" OFFSET ")
                .append(offset);
         }
         if (!lockMode.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append(lockMode);
+            sql.append(sqlComponentSeparator).append(lockMode);
         }
         if (!getRemarkAsComment().isEmpty()) {
             sql.append("\n-- ").append(getRemarkAsComment()).append("\n");

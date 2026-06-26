@@ -114,6 +114,7 @@ public class UpdateStatement extends AbstractStatement<UpdateStatement> implemen
 
     @Override
     public String buildSql() {
+        final var sqlComponentSeparator = getSqlComponentSeparator();
         String sql = "UPDATE " + ignoreMark;
         if (schema != null) {
             sql += " " + schema + ".";
@@ -122,16 +123,16 @@ public class UpdateStatement extends AbstractStatement<UpdateStatement> implemen
 
         List<String> setPairs = new ArrayList<>();
         assignments.forEach(assignment -> setPairs.add(assignment.toString()));
-        sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "SET " + String.join(", ", setPairs);
+        sql += sqlComponentSeparator + "SET " + String.join(", ", setPairs);
 
         if (!whereConditionsComponent.isEmpty()) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "WHERE " + whereConditionsComponent;
+            sql += sqlComponentSeparator + "WHERE " + whereConditionsComponent;
         }
         if (!sortRules.isEmpty()) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ORDER BY " + String.join(",", sortRules);
+            sql += sqlComponentSeparator + "ORDER BY " + String.join(",", sortRules);
         }
         if (limit > 0) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "LIMIT " + limit;
+            sql += sqlComponentSeparator + "LIMIT " + limit;
         }
         if (!getRemarkAsComment().isEmpty()) {
             sql += "\n-- " + getRemarkAsComment() + "\n";

@@ -76,19 +76,20 @@ public class DeleteStatement extends AbstractStatement<DeleteStatement> implemen
 
     @Override
     public String buildSql() {
+        final var sqlComponentSeparator = getSqlComponentSeparator();
         String sql = "DELETE FROM ";
         if (schema != null) {
             sql += schema + ".";
         }
         sql += table;
         if (!whereConditionsComponent.isEmpty()) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "WHERE " + whereConditionsComponent;
+            sql += sqlComponentSeparator + "WHERE " + whereConditionsComponent;
         }
         if (!sortRules.isEmpty()) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ORDER BY " + String.join(",", sortRules);
+            sql += sqlComponentSeparator + "ORDER BY " + String.join(",", sortRules);
         }
         if (limit > 0) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "limit " + limit;
+            sql += sqlComponentSeparator + "limit " + limit;
         }
         if (!getRemarkAsComment().isEmpty()) {
             sql += "\n-- " + getRemarkAsComment() + "\n";
