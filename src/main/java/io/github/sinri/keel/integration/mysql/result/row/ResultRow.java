@@ -154,4 +154,47 @@ public interface ResultRow extends JsonifiableDataUnit {
     default @Nullable String readTimestamp(String field) {
         return readDateTime(field);
     }
+
+    /**
+     * 读取 JSON 字段。
+     * <p>
+     * 适用于 MySQL 5.7+ 的 {@code JSON} 列。底层值可能由驱动呈现为
+     * {@link JsonObject}、{@link JsonArray}、字符串字面量或标量值，
+     * 本方法对其进行归一化：
+     * <p>
+     * - 若值为 {@link JsonObject} / {@link JsonArray}，原样返回；
+     * <p>
+     * - 若值为以 {@code &#123;} 或 {@code [} 起始的字符串，
+     * 自动解析为 {@link JsonObject} / {@link JsonArray}；
+     * <p>
+     * - 字段缺失或 SQL {@code NULL} 时返回 {@code null}；
+     * <p>
+     * - 其余情形（如 JSON 中的纯标量值）原样返回。
+     *
+     * @param field 字段名
+     * @return JSON 值，可能为 {@link JsonObject}、{@link JsonArray} 或标量；字段缺失或为 SQL {@code NULL} 时返回 {@code null}
+     * @since 5.0.4
+     */
+    default @Nullable Object readJson(String field) {
+        Object value = readValue(field);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof JsonObject || value instanceof JsonArray) {
+            return value;
+        }
+        if (value instanceof String s) {
+            String trimmed = s.trim();
+            if (!trimmed.isEmpty()) {
+                char first = trimmed.charAt(0);
+                if (first == '{') {
+                    return new JsonObject(trimmed);
+                }
+                if (first == '[') {
+                    return new JsonArray(trimmed);
+                }
+            }
+        }
+        return value;
+    }
 }

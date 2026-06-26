@@ -100,7 +100,9 @@ class TableRowClassField {
             readMethod = "readString";
         } else if (type.contains("json")) {
             // JSON 字段：根据注释中的 Type<JsonObject> / Type<JsonArray> 确定返回类型，
-            // 未声明时保持默认的 Object / readValue。
+            // 未声明时使用 ResultRow#readJson 便捷方法，由运行时统一归一化字符串/对象/数组。
+            returnType = "Object";
+            readMethod = "readJson";
             if (comment != null) {
                 Matcher matcherForJsonType = patternForJsonType.matcher(comment);
                 if (matcherForJsonType.find()) {
