@@ -4,12 +4,12 @@ import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.core.utils.ReflectionUtils;
 import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
-import io.github.sinri.keel.integration.mysql.Quoter;
 import io.github.sinri.keel.integration.mysql.action.single.NamedActionInterface;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
+import io.github.sinri.keel.integration.mysql.statement.quoter.MySQLEscapeContext;
 import io.github.sinri.keel.logger.api.LateObject;
 import io.vertx.core.Closeable;
 import io.vertx.core.Completable;
@@ -44,7 +44,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     private final AtomicInteger borrowedConnectionCounter = new AtomicInteger(0);
     private final Function<SqlConnection, C> sqlConnectionWrapper;
     private final LateObject<String> lateFullVersion = new LateObject<>();
-    private final LateObject<Quoter.EscapeContext> lateStringLiteralEscapeContext = new LateObject<>();
+    private final LateObject<MySQLEscapeContext> lateStringLiteralEscapeContext = new LateObject<>();
     /**
      * 一次性的 MySQL 会话信息初始化 Future 缓存。访问受 {@code synchronized(this)} 保护：
      * 冷启动并发建连时仅首个连接真正发起会话信息查询，其余连接复用同一 Future。
@@ -206,7 +206,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                                      c.setMysqlVersion(lateFullVersion.get());
                                  }
                                  if (this.lateStringLiteralEscapeContext.isInitialized()) {
-                                     Quoter.EscapeContext escapeContext = lateStringLiteralEscapeContext.get();
+                                     MySQLEscapeContext escapeContext = lateStringLiteralEscapeContext.get();
                                      c.setMysqlSqlMode(escapeContext.sqlMode());
                                      c.setMysqlCharacterSetConnection(escapeContext.characterSet());
                                  }
@@ -446,7 +446,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
             c.setMysqlVersion(lateFullVersion.get());
         }
         if (this.lateStringLiteralEscapeContext.isInitialized()) {
-            Quoter.EscapeContext escapeContext = lateStringLiteralEscapeContext.get();
+            MySQLEscapeContext escapeContext = lateStringLiteralEscapeContext.get();
             c.setMysqlSqlMode(escapeContext.sqlMode());
             c.setMysqlCharacterSetConnection(escapeContext.characterSet());
         }
@@ -476,8 +476,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
             @Nullable String sqlMode,
             @Nullable String characterSetConnection
     ) {
-        Quoter.EscapeContext toEscapeContext() {
-            return new Quoter.EscapeContext(characterSetConnection, sqlMode);
+        MySQLEscapeContext toEscapeContext() {
+            return new MySQLEscapeContext(characterSetConnection, sqlMode);
         }
     }
 

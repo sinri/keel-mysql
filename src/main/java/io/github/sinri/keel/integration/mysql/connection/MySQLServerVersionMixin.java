@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.mysql.connection;
 
-import io.github.sinri.keel.integration.mysql.Quoter;
+import io.github.sinri.keel.integration.mysql.statement.quoter.MySQLEscapeContext;
+import io.github.sinri.keel.integration.mysql.statement.quoter.Quoter;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -64,18 +65,28 @@ interface MySQLServerVersionMixin {
      *
      * @return 转义上下文
      */
-    default Quoter.EscapeContext getMysqlStringLiteralEscapeContext() {
-        return new Quoter.EscapeContext(getMysqlCharacterSetConnection(), getMysqlSqlMode());
+    default MySQLEscapeContext getMysqlStringLiteralEscapeContext() {
+        return new MySQLEscapeContext(getMysqlCharacterSetConnection(), getMysqlSqlMode());
     }
 
     /**
-     * 使用当前 MySQL 会话上下文构造字符串字面量引号处理器。
+     * 使用当前 MySQL 会话上下文构造表达式字面量处理器。
+     *
+     * @return 表达式处理器
+     */
+    default Quoter getQuoter() {
+        return new Quoter(getMysqlStringLiteralEscapeContext());
+    }
+
+    /**
+     * 使用当前 MySQL 会话上下文构造字符串字面量表达式。
      *
      * @param value 字符串值
-     * @return 引号处理器
+     * @return 字符串字面量表达式
      */
-    default Quoter quoteMysqlString(@Nullable String value) {
-        return new Quoter(value, getMysqlStringLiteralEscapeContext());
+    default String quoteMysqlString(@Nullable String value) {
+        Quoter quoter = getQuoter();
+        return value == null ? quoter.quoteNull() : quoter.quoteLiteral(value);
     }
 
     /**
