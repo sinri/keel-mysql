@@ -5,9 +5,11 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 @NullMarked
-public abstract class AbstractNamedMySQLConnection implements NamedMySQLConnection {
+public abstract non-sealed class AbstractNamedMySQLConnection implements NamedMySQLConnection {
     private final SqlConnection sqlConnection;
     private @Nullable String mysqlVersion;
+    private @Nullable String mysqlSqlMode;
+    private @Nullable String mysqlCharacterSetConnection;
 
     /**
      * 构造命名MySQL连接
@@ -43,6 +45,26 @@ public abstract class AbstractNamedMySQLConnection implements NamedMySQLConnecti
      */
     public final void setMysqlVersion(@Nullable String mysqlVersion) {
         this.mysqlVersion = mysqlVersion;
+    }
+
+    @Override
+    public final @Nullable String getMysqlSqlMode() {
+        return mysqlSqlMode;
+    }
+
+    @Override
+    public final void setMysqlSqlMode(@Nullable String mysqlSqlMode) {
+        this.mysqlSqlMode = mysqlSqlMode;
+    }
+
+    @Override
+    public final @Nullable String getMysqlCharacterSetConnection() {
+        return mysqlCharacterSetConnection;
+    }
+
+    @Override
+    public final void setMysqlCharacterSetConnection(@Nullable String mysqlCharacterSetConnection) {
+        this.mysqlCharacterSetConnection = mysqlCharacterSetConnection;
     }
 
 }

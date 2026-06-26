@@ -14,7 +14,9 @@ import java.io.Closeable;
  * @since 5.0.0
  */
 @NullMarked
-public interface NamedMySQLConnection extends RunnableStatementFactory,MySQLServerVersionMixin, Closeable {
+public sealed interface NamedMySQLConnection
+        extends RunnableStatementFactory, MySQLServerVersionMixin, Closeable
+        permits AbstractNamedMySQLConnection {
 
     /**
      * 获取提供SQL连接的数据源名称

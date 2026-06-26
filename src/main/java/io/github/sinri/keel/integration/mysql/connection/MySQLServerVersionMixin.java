@@ -1,8 +1,9 @@
 package io.github.sinri.keel.integration.mysql.connection;
 
-import java.util.Objects;
-
+import io.github.sinri.keel.integration.mysql.Quoter;
 import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
 
 interface MySQLServerVersionMixin {
     /**
@@ -25,6 +26,57 @@ interface MySQLServerVersionMixin {
     @Nullable String getMysqlVersion();
 
     void setMysqlVersion(@Nullable String mysqlVersion);
+
+    /**
+     * 获取 MySQL 会话 SQL 模式。
+     * <p>
+     * 该值来源于连接初始化时查询的 {@code @@session.sql_mode}。
+     *
+     * @return SQL 模式，若不可用则返回 {@code null}
+     */
+    @Nullable String getMysqlSqlMode();
+
+    /**
+     * 设置 MySQL 会话 SQL 模式。
+     *
+     * @param mysqlSqlMode SQL 模式
+     */
+    void setMysqlSqlMode(@Nullable String mysqlSqlMode);
+
+    /**
+     * 获取 MySQL 会话连接字符集。
+     * <p>
+     * 该值来源于连接初始化时查询的 {@code @@session.character_set_connection}。
+     *
+     * @return 连接字符集，若不可用则返回 {@code null}
+     */
+    @Nullable String getMysqlCharacterSetConnection();
+
+    /**
+     * 设置 MySQL 会话连接字符集。
+     *
+     * @param mysqlCharacterSetConnection 连接字符集
+     */
+    void setMysqlCharacterSetConnection(@Nullable String mysqlCharacterSetConnection);
+
+    /**
+     * 获取适用于当前 MySQL 会话的字符串字面量转义上下文。
+     *
+     * @return 转义上下文
+     */
+    default Quoter.EscapeContext getMysqlStringLiteralEscapeContext() {
+        return new Quoter.EscapeContext(getMysqlCharacterSetConnection(), getMysqlSqlMode());
+    }
+
+    /**
+     * 使用当前 MySQL 会话上下文构造字符串字面量引号处理器。
+     *
+     * @param value 字符串值
+     * @return 引号处理器
+     */
+    default Quoter quoteMysqlString(@Nullable String value) {
+        return new Quoter(value, getMysqlStringLiteralEscapeContext());
+    }
 
     /**
      * 解析MySQL主版本号与次版本号。

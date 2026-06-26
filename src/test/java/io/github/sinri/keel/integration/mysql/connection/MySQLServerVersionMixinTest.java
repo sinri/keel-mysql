@@ -3,10 +3,7 @@ package io.github.sinri.keel.integration.mysql.connection;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MySQLServerVersionMixinTest {
 
@@ -70,6 +67,8 @@ class MySQLServerVersionMixinTest {
 
     private static class TestVersionMixin implements MySQLServerVersionMixin {
         private @Nullable String mysqlVersion;
+        private @Nullable String mysqlSqlMode;
+        private @Nullable String mysqlCharacterSetConnection;
 
         @Override
         public @Nullable String getMysqlVersion() {
@@ -79,6 +78,26 @@ class MySQLServerVersionMixinTest {
         @Override
         public void setMysqlVersion(@Nullable String mysqlVersion) {
             this.mysqlVersion = mysqlVersion;
+        }
+
+        @Override
+        public @Nullable String getMysqlSqlMode() {
+            return mysqlSqlMode;
+        }
+
+        @Override
+        public void setMysqlSqlMode(@Nullable String mysqlSqlMode) {
+            this.mysqlSqlMode = mysqlSqlMode;
+        }
+
+        @Override
+        public @Nullable String getMysqlCharacterSetConnection() {
+            return mysqlCharacterSetConnection;
+        }
+
+        @Override
+        public void setMysqlCharacterSetConnection(@Nullable String mysqlCharacterSetConnection) {
+            this.mysqlCharacterSetConnection = mysqlCharacterSetConnection;
         }
     }
 }

@@ -4,6 +4,7 @@ import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.core.utils.ReflectionUtils;
 import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
+import io.github.sinri.keel.integration.mysql.Quoter;
 import io.github.sinri.keel.integration.mysql.action.single.NamedActionInterface;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
@@ -43,14 +44,50 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     private final AtomicInteger borrowedConnectionCounter = new AtomicInteger(0);
     private final Function<SqlConnection, C> sqlConnectionWrapper;
     private final LateObject<String> lateFullVersion = new LateObject<>();
+    private final LateObject<Quoter.EscapeContext> lateStringLiteralEscapeContext = new LateObject<>();
     /**
-     * 一次性的 MySQL 版本初始化 Future 缓存。访问受 {@code synchronized(this)} 保护：
-     * 冷启动并发建连时仅首个连接真正发起 {@code SELECT VERSION()}，其余连接复用同一 Future。
+     * 一次性的 MySQL 会话信息初始化 Future 缓存。访问受 {@code synchronized(this)} 保护：
+     * 冷启动并发建连时仅首个连接真正发起会话信息查询，其余连接复用同一 Future。
      * 查询失败或返回 {@code null} 时清除缓存以允许后续连接重试。
      *
-     * @see #initializeFullVersionOnce(SqlConnection)
+     * @see #initializeServerSessionInfoOnce(SqlConnection)
      */
-    private @Nullable Future<@Nullable String> versionInitFuture;
+    private @Nullable Future<@Nullable ServerSessionInfo> serverSessionInfoInitFuture;
+
+    /**
+     * 检查 MySQL 会话信息。
+     *
+     * @param sqlConnection SQL连接
+     * @return 包含会话信息的Future
+     */
+    private static Future<@Nullable ServerSessionInfo> checkMySQLServerSessionInfo(SqlConnection sqlConnection) {
+        return sqlConnection.query("""
+                                   SELECT
+                                       VERSION() as v,
+                                       @@session.sql_mode as sql_mode,
+                                       @@session.character_set_connection as character_set_connection;
+                                   """)
+                            .execute()
+                            .compose(rows -> {
+                                return Future.succeededFuture(ResultMatrix.createSimple(rows));
+                            })
+                            .compose(resultMatrix -> {
+                                try {
+                                    var row = resultMatrix.getFirstRow();
+                                    String versionExp = row.readString("v");
+                                    String sqlMode = row.readString("sql_mode");
+                                    String characterSetConnection = row.readString("character_set_connection");
+                                    return Future.succeededFuture(new ServerSessionInfo(
+                                            versionExp,
+                                            sqlMode,
+                                            characterSetConnection
+                                    ));
+                                } catch (Throwable e) {
+                                    // Keel.getLogger().exception(e);
+                                    return Future.succeededFuture(null);
+                                }
+                            });
+    }
 
     /**
      * 构造命名MySQL数据源
@@ -92,57 +129,36 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
-     * 检查MySQL版本
-     *
-     * @param sqlConnection SQL连接
-     * @return 包含版本信息的Future
-     */
-
-    private static Future<@Nullable String> checkMySQLVersion(SqlConnection sqlConnection) {
-        return sqlConnection.query("SELECT VERSION() as v; ")
-                            .execute()
-                            .compose(rows -> {
-                                return Future.succeededFuture(ResultMatrix.createSimple(rows));
-                            })
-                            .compose(resultMatrix -> {
-                                try {
-                                    String versionExp = resultMatrix.getFirstRow().readStringRequired("v");
-                                    return Future.succeededFuture(versionExp);
-                                } catch (Throwable e) {
-                                    // Keel.getLogger().exception(e);
-                                    return Future.succeededFuture(null);
-                                }
-                            });
-    }
-
-    /**
-     * 返回一次性的 MySQL 版本初始化 Future。
+     * 返回一次性的 MySQL 会话信息初始化 Future。
      * <p>
-     * 并发建连时仅首个连接真正发起 {@code SELECT VERSION()}，其余连接复用同一 Future，
-     * 既消除竞态又避免重复查询。{@code checkMySQLVersion} 是异步的，{@code synchronized}
+     * 并发建连时仅首个连接真正发起会话信息查询，其余连接复用同一 Future，
+     * 既消除竞态又避免重复查询。{@code checkMySQLServerSessionInfo} 是异步的，{@code synchronized}
      * 块内仅做内存读写与启动异步操作，不阻塞事件循环。
      * <p>
      * 查询失败或返回 {@code null}（解析失败）时清除缓存以保留"下次连接重试"语义；
-     * 成功时将版本写入 {@link #lateFullVersion}，作为同步读取来源。
+     * 成功时将版本与字符串转义上下文写入缓存，作为同步读取来源。
      *
      * @param sqlConnection 触发查询所用的连接
-     * @return 版本初始化 Future（结果可能为 {@code null}）
+     * @return 会话信息初始化 Future（结果可能为 {@code null}）
      */
-    private synchronized Future<@Nullable String> initializeFullVersionOnce(SqlConnection sqlConnection) {
-        if (versionInitFuture != null) {
-            return versionInitFuture;
+    private synchronized Future<@Nullable ServerSessionInfo> initializeServerSessionInfoOnce(SqlConnection sqlConnection) {
+        if (serverSessionInfoInitFuture != null) {
+            return serverSessionInfoInitFuture;
         }
-        versionInitFuture = checkMySQLVersion(sqlConnection).andThen(ar -> {
-            String result = ar.result();
+        serverSessionInfoInitFuture = checkMySQLServerSessionInfo(sqlConnection).andThen(ar -> {
+            ServerSessionInfo result = ar.result();
             if (ar.succeeded() && result != null) {
-                lateFullVersion.set(result);
+                if (result.version() != null) {
+                    lateFullVersion.set(result.version());
+                }
+                lateStringLiteralEscapeContext.set(result.toEscapeContext());
             } else {
                 synchronized (this) {
-                    versionInitFuture = null;
+                    serverSessionInfoInitFuture = null;
                 }
             }
         });
-        return versionInitFuture;
+        return serverSessionInfoInitFuture;
     }
 
     /**
@@ -163,11 +179,49 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                       return Future.succeededFuture();
                   }
               })
-              .compose(v -> initializeFullVersionOnce(sqlConnection))
+              .compose(v -> initializeServerSessionInfoOnce(sqlConnection))
               .compose(ignored -> Future.succeededFuture())
               .onComplete(ar -> {
                   sqlConnection.close();
               });
+    }
+
+    /**
+     * 从池中获取一个 {@link SqlConnection} 并包装为 {@code C}。
+     * <p>
+     * 该方法仅负责获取连接，不管理借出计数；借出计数由调用方（如
+     * {@link #withConnection} / {@link #executeInConnection}）负责维护。
+     *
+     * @return 包装后的连接 Future
+     */
+    private Future<C> fetchMySQLConnection() {
+        return Future.succeededFuture()
+                     .compose(v -> pool.getConnection())
+                     .compose(
+                             sqlConnection -> {
+                                 C c = this.sqlConnectionWrapper.apply(sqlConnection);
+
+                                 // add mysql version to c;
+                                 if (this.lateFullVersion.isInitialized()) {
+                                     c.setMysqlVersion(lateFullVersion.get());
+                                 }
+                                 if (this.lateStringLiteralEscapeContext.isInitialized()) {
+                                     Quoter.EscapeContext escapeContext = lateStringLiteralEscapeContext.get();
+                                     c.setMysqlSqlMode(escapeContext.sqlMode());
+                                     c.setMysqlCharacterSetConnection(escapeContext.characterSet());
+                                 }
+
+                                 return Future.succeededFuture(c);
+                             },
+                             throwable -> Future.failedFuture(
+                                     new KeelMySQLConnectionException(
+                                             "MySQLDataSource Failed to get SqlConnection From Pool " +
+                                                     "`" + this.getConfiguration().getDataSourceName() + "` " +
+                                                     "(active: " + borrowedConnectionCounter.get()
+                                                     + ", pool size: " + pool.size() + "): " +
+                                                     throwable,
+                                             throwable))
+                     );
     }
 
     /**
@@ -366,57 +420,6 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
-     * 从池中获取一个 {@link SqlConnection} 并包装为 {@code C}。
-     * <p>
-     * 该方法仅负责获取连接，不管理借出计数；借出计数由调用方（如
-     * {@link #withConnection} / {@link #executeInConnection}）负责维护。
-     *
-     * @return 包装后的连接 Future
-     */
-    private Future<C> fetchMySQLConnection() {
-        return Future.succeededFuture()
-                     .compose(v -> pool.getConnection())
-                     .compose(
-                             sqlConnection -> {
-                                 C c = this.sqlConnectionWrapper.apply(sqlConnection);
-
-                                 // add mysql version to c;
-                                 if (this.lateFullVersion.isInitialized()) {
-                                     c.setMysqlVersion(lateFullVersion.get());
-                                 }
-
-                                 return Future.succeededFuture(c);
-                             },
-                             throwable -> Future.failedFuture(
-                                     new KeelMySQLConnectionException(
-                                             "MySQLDataSource Failed to get SqlConnection From Pool " +
-                                                     "`" + this.getConfiguration().getDataSourceName() + "` " +
-                                                     "(active: " + borrowedConnectionCounter.get()
-                                                     + ", pool size: " + pool.size() + "): " +
-                                                     throwable,
-                                             throwable))
-                     );
-    }
-
-    /**
-     * 获取底层 Vert.x 连接池实例。
-     *
-     * @return 连接池
-     */
-    Pool getPool() {
-        return pool;
-    }
-
-    /**
-     * 获取 SQL 连接包装器函数。
-     *
-     * @return 将 {@link SqlConnection} 转换为 {@code C} 的函数
-     */
-    Function<SqlConnection, C> getSqlConnectionWrapper() {
-        return sqlConnectionWrapper;
-    }
-
-    /**
      * 在虚拟线程中以阻塞方式从池中获取一个连接。
      * <p>
      * 该方法通过 {@code Future.await()} 阻塞当前虚拟线程直到连接就绪，
@@ -442,7 +445,40 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
         if (this.lateFullVersion.isInitialized()) {
             c.setMysqlVersion(lateFullVersion.get());
         }
+        if (this.lateStringLiteralEscapeContext.isInitialized()) {
+            Quoter.EscapeContext escapeContext = lateStringLiteralEscapeContext.get();
+            c.setMysqlSqlMode(escapeContext.sqlMode());
+            c.setMysqlCharacterSetConnection(escapeContext.characterSet());
+        }
         return c;
+    }
+
+    /**
+     * 获取底层 Vert.x 连接池实例。
+     *
+     * @return 连接池
+     */
+    Pool getPool() {
+        return pool;
+    }
+
+    /**
+     * 获取 SQL 连接包装器函数。
+     *
+     * @return 将 {@link SqlConnection} 转换为 {@code C} 的函数
+     */
+    Function<SqlConnection, C> getSqlConnectionWrapper() {
+        return sqlConnectionWrapper;
+    }
+
+    private record ServerSessionInfo(
+            @Nullable String version,
+            @Nullable String sqlMode,
+            @Nullable String characterSetConnection
+    ) {
+        Quoter.EscapeContext toEscapeContext() {
+            return new Quoter.EscapeContext(characterSetConnection, sqlMode);
+        }
     }
 
     /**
