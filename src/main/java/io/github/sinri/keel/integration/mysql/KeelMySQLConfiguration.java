@@ -455,15 +455,35 @@ public class KeelMySQLConfiguration extends ConfigElement {
      */
     @TechnicalPreview(since = "5.0.0")
     public Future<ResultMatrix<SimpleResultRow>> instantQuery(Vertx vertx, String sql) {
+        return instantQuery(vertx, sql, null);
+    }
+
+    /**
+     * 使用客户端对目标MySQL数据库执行一次性参数化SQL查询
+     * 客户端将被创建，然后在SQL查询后很快关闭
+     * 为了安全使用此方法，请记住启用池共享并为池设置唯一名称
+     * <p>
+     * 当 {@code parameters} 为 {@code null} 时，等价于 {@link #instantQuery(Vertx, String)}。
+     *
+     * @param sql        包含 {@code ?} 占位符的SQL语句，或不需要绑定参数的完整SQL语句
+     * @param parameters 绑定到 {@code ?} 占位符的参数；不需要参数时可为 {@code null}
+     */
+    @TechnicalPreview(since = "5.0.4")
+    public Future<ResultMatrix<SimpleResultRow>> instantQuery(Vertx vertx, String sql, @Nullable Tuple parameters) {
         var sqlClient = MySQLBuilder.client()
                                     .with(this.getPoolOptions())
                                     .connectingTo(this.getConnectOptions())
                                     .using(vertx)
                                     .build();
         return Future.succeededFuture()
-                     .compose(v -> sqlClient.preparedQuery(sql)
-                                            .execute()
-                                            .compose(rows -> Future.succeededFuture(ResultMatrix.createSimple(rows))))
+                     .compose(v -> {
+                         var query = sqlClient.preparedQuery(sql);
+                         if (parameters == null) {
+                             return query.execute();
+                         }
+                         return query.execute(parameters);
+                     })
+                     .compose(rows -> Future.succeededFuture(ResultMatrix.createSimple(rows)))
                      .andThen(ar -> sqlClient.close());
     }
 
@@ -477,7 +497,33 @@ public class KeelMySQLConfiguration extends ConfigElement {
      * @param readWindowFunction the async handler of the read rows
      */
 
-    public Future<Void> instantQueryForStream(Keel keel, String sql, int readWindowSize, Function<RowSet<Row>, Future<Void>> readWindowFunction) {
+    public Future<Void> instantQueryForStream(Keel keel,
+                                              String sql,
+                                              int readWindowSize,
+                                              Function<RowSet<Row>, Future<Void>> readWindowFunction
+    ) {
+        return instantQueryForStream(keel, sql, null, readWindowSize, readWindowFunction);
+    }
+
+    /**
+     * Handle every batch of rows read from a parameterized query, or throw any exceptions in rows handler to stop the process.
+     * All dynamic resources would be closed inside this function.
+     * <p>
+     * When {@code parameters} is {@code null}, it is equivalent to
+     * {@link #instantQueryForStream(Keel, String, int, Function)}.
+     *
+     * @param sql                Here we just believe the application would give a confirmed and filtered SQL when call
+     *                           this method.
+     * @param parameters         parameters bound to {@code ?} placeholders; nullable when no parameter is required
+     * @param readWindowSize     how many rows read once
+     * @param readWindowFunction the async handler of the read rows
+     */
+    public Future<Void> instantQueryForStream(Keel keel,
+                                              String sql,
+                                              @Nullable Tuple parameters,
+                                              int readWindowSize,
+                                              Function<RowSet<Row>, Future<Void>> readWindowFunction
+    ) {
         return Future.succeededFuture()
                      .compose(v -> {
                          Pool pool = MySQLBuilder.pool()
@@ -492,7 +538,9 @@ public class KeelMySQLConfiguration extends ConfigElement {
                              .compose(sqlConnection -> sqlConnection
                                      .prepare(sql)
                                      .compose(preparedStatement -> {
-                                         Cursor cursor = preparedStatement.cursor();
+                                         Cursor cursor = parameters == null
+                                                 ? preparedStatement.cursor()
+                                                 : preparedStatement.cursor(parameters);
 
                                          return keel.asyncCallRepeatedly(routineResult -> cursor
                                                             .read(readWindowSize)
