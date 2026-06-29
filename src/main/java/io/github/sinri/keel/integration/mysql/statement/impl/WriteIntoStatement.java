@@ -246,6 +246,9 @@ public class WriteIntoStatement extends AbstractStatement<WriteIntoStatement> im
      * @return a list of WriteIntoStatement
      */
     public List<WriteIntoStatementMixin<WriteIntoStatement>> divide(int chunkSize) {
+        if (chunkSize <= 0) {
+            throw new IllegalArgumentException("chunkSize must be positive");
+        }
         if (sourceTableName != null || sourceSelectSQL != null) {
             return List.of(this);
         }

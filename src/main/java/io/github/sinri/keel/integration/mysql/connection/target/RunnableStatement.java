@@ -11,6 +11,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * 可执行的 SQL 语句
@@ -112,6 +113,13 @@ public class RunnableStatement extends AnyStatementWithSqlConnection {
         return executeThroughPrepare(null);
     }
 
+    @TechnicalPreview(since = "5.0.4")
+    protected <R> Future<R> executeWithPreparedStatement(Keel keel, String sql, Function<PreparedStatement, Future<R>> function) {
+        return getSqlConnection().prepare(sql).compose(preparedStatement -> {
+            return function.apply(preparedStatement).eventually(preparedStatement::close);
+        });
+    }
+
     /**
      * 复用同一个预编译语句，按顺序执行多组 {@code Tuple} 参数。
      * <p>
@@ -127,31 +135,25 @@ public class RunnableStatement extends AnyStatementWithSqlConnection {
         String sql = getStatement().buildSql();
         getSqlAuditLogger().info(r -> r.setPreparation(getUuid(), sql));
         List<StatementExecuteResult> results = new ArrayList<>();
-        return getSqlConnection().prepare(sql).compose(preparedStatement -> {
-                                     return keel.asyncCallIteratively(tupleList, tuple -> {
-                                                    return preparedStatement.query().execute(tuple)
-                                                                            .compose(rows -> {
-                                                                                StatementExecuteResult result = new StatementExecuteResult(rows);
-                                                                                getSqlAuditLogger().info(r -> r.setForDone(
-                                                                                        getUuid(),
-                                                                                        sql,
-                                                                                        result.getTotalAffectedRows(),
-                                                                                        result.getTotalFetchedRows()
-                                                                                ));
-                                                                                results.add(result);
-                                                                                return Future.succeededFuture();
-                                                                            });
-                                                })
-                                                .eventually(() -> {
-                                                    return preparedStatement.close();
-                                                });
-                                 })
-                                 .compose(v -> {
-                                     return Future.succeededFuture(results);
-                                 }, throwable -> {
-                                     getSqlAuditLogger().error(r -> r.setForFailed(getUuid(), sql)
-                                                                     .exception(throwable));
-                                     return Future.failedFuture(throwable);
-                                 });
+        return executeWithPreparedStatement(keel, sql, preparedStatement -> {
+            return keel.asyncCallIteratively(tupleList, tuple -> {
+                return preparedStatement.query().execute(tuple)
+                        .compose(rows -> {
+                            StatementExecuteResult result = new StatementExecuteResult(rows);
+                            getSqlAuditLogger().info(r -> r.setForDone(
+                                    getUuid(),
+                                    sql,
+                                    result.getTotalAffectedRows(),
+                                    result.getTotalFetchedRows()
+                            ));
+                            results.add(result);
+                            return Future.succeededFuture();
+                        });
+            });
+        }).compose(v -> Future.succeededFuture(results), throwable -> {
+            getSqlAuditLogger().error(r -> r.setForFailed(getUuid(), sql)
+                    .exception(throwable));
+            return Future.failedFuture(throwable);
+        });
     }
 }
