@@ -447,11 +447,15 @@ public class KeelMySQLConfiguration extends ConfigElement {
 
 
     /**
-     * 使用客户端对目标MySQL数据库执行一次性SQL查询
-     * 客户端将被创建，然后在SQL查询后很快关闭
-     * 为了安全使用此方法，请记住启用池共享并为池设置唯一名称
+     * 使用客户端对目标 MySQL 数据库执行一次性 SQL 查询。
+     * <p>
+     * 客户端将被创建，然后在 SQL 查询后很快关闭。为了安全使用此方法，
+     * 请记住启用池共享并为池设置唯一名称。
+     * <p>
+     * 若 SQL 中包含 {@code ?} 占位符，请使用
+     * {@link #instantQuery(Vertx, String, Tuple)} 传入绑定参数。
      *
-     * @param sql 确认已过滤的SQL语句
+     * @param sql 不需要参数绑定的完整 SQL 语句
      */
     @TechnicalPreview(since = "5.0.0")
     public Future<ResultMatrix<SimpleResultRow>> instantQuery(Vertx vertx, String sql) {
@@ -459,13 +463,14 @@ public class KeelMySQLConfiguration extends ConfigElement {
     }
 
     /**
-     * 使用客户端对目标MySQL数据库执行一次性参数化SQL查询
-     * 客户端将被创建，然后在SQL查询后很快关闭
-     * 为了安全使用此方法，请记住启用池共享并为池设置唯一名称
+     * 使用客户端对目标 MySQL 数据库执行一次性参数化 SQL 查询。
+     * <p>
+     * 客户端将被创建，然后在 SQL 查询后很快关闭。为了安全使用此方法，
+     * 请记住启用池共享并为池设置唯一名称。
      * <p>
      * 当 {@code parameters} 为 {@code null} 时，等价于 {@link #instantQuery(Vertx, String)}。
      *
-     * @param sql        包含 {@code ?} 占位符的SQL语句，或不需要绑定参数的完整SQL语句
+     * @param sql        包含 {@code ?} 占位符的 SQL 语句，或不需要绑定参数的完整 SQL 语句
      * @param parameters 绑定到 {@code ?} 占位符的参数；不需要参数时可为 {@code null}
      */
     @TechnicalPreview(since = "5.0.4")
@@ -490,9 +495,11 @@ public class KeelMySQLConfiguration extends ConfigElement {
     /**
      * Handle every batch of rows read, or throw any exceptions in rows handler to stop the process.
      * All dynamic resources would be closed inside this function.
+     * <p>
+     * 若 SQL 中包含 {@code ?} 占位符，请使用
+     * {@link #instantQueryForStream(Keel, String, Tuple, int, Function)} 传入绑定参数。
      *
-     * @param sql                Here we just believe the application would give a confirmed and filtered SQL when call
-     *                           this method.
+     * @param sql                SQL without parameter binding
      * @param readWindowSize     how many rows read once
      * @param readWindowFunction the async handler of the read rows
      */
@@ -512,8 +519,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
      * When {@code parameters} is {@code null}, it is equivalent to
      * {@link #instantQueryForStream(Keel, String, int, Function)}.
      *
-     * @param sql                Here we just believe the application would give a confirmed and filtered SQL when call
-     *                           this method.
+     * @param sql                SQL with {@code ?} placeholders, or a complete SQL without parameters
      * @param parameters         parameters bound to {@code ?} placeholders; nullable when no parameter is required
      * @param readWindowSize     how many rows read once
      * @param readWindowFunction the async handler of the read rows

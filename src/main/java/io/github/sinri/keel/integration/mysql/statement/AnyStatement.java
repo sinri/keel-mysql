@@ -2,7 +2,10 @@ package io.github.sinri.keel.integration.mysql.statement;
 
 import io.github.sinri.keel.base.annotations.SelfInterface;
 import io.github.sinri.keel.integration.mysql.connection.target.AnyStatementWithSqlConnection;
-import io.github.sinri.keel.integration.mysql.statement.mixin.*;
+import io.github.sinri.keel.integration.mysql.statement.mixin.ModifyStatementMixin;
+import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
+import io.github.sinri.keel.integration.mysql.statement.mixin.SpecialStatementMixin;
+import io.github.sinri.keel.integration.mysql.statement.mixin.WriteIntoStatementMixin;
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedStatement;
 import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
@@ -56,31 +59,42 @@ public sealed interface AnyStatement<S> extends SelfInterface<S>
         }
     }
 
-    //    default RunnableStatement attachToConnection(SqlConnection sqlConnection) {
-    //        return attachToConnectionForCertainRunnableStatement(sqlConnection, RunnableStatement.class);
-    //    }
-
     /**
-     * 设置是否使用 MySQL 预编译协议（COM_STMT_PREPARE）执行本语句。
+     * 已废弃的语句级执行协议开关。
      * <p>
-     * 预编译协议可获得服务端语句缓存与执行计划复用的性能优化。
-     * 注意：当前不支持 {@code ?} 占位符参数绑定（{@code Tuple}），
-     * {@link #buildSql()} 生成的 SQL 应为值已内联的完整语句。
+     * 自 5.0.4 起，预编译协议、普通查询协议以及 {@code Tuple} 参数绑定均由
+     * {@link io.github.sinri.keel.integration.mysql.connection.target.RunnableStatement}
+     * 的执行方法决定，不再在语句对象上保存执行模式。
      *
-     * @param toPrepareStatement 是否使用预编译协议
-     * @return 自身引用，便于链式调用
+     * @param toPrepareStatement 已废弃参数
+     * @return 不会返回
+     * @deprecated since 5.0.4, use {@code RunnableStatement.executeThroughPrepare(...)}
+     * or {@code RunnableStatement.executeThroughQuery()} instead.
      */
-    S setToPrepareStatement(boolean toPrepareStatement);
+    @Deprecated(since = "5.0.4", forRemoval = true)
+    default S setToPrepareStatement(boolean toPrepareStatement) {
+        throw new UnsupportedOperationException(
+                "Statement-level prepare switch was removed in 5.0.4; choose the execution method on RunnableStatement."
+        );
+    }
 
     String buildSql();
 
     /**
-     * 判断是否使用 MySQL 预编译协议（COM_STMT_PREPARE）执行本语句。
+     * 已废弃的语句级执行协议开关查询。
      * <p>
-     * 默认为 {@code true}。此标志控制的是 MySQL 通信协议层面的预编译优化，
-     * 而非 JDBC 风格的 {@code ?} 占位符参数绑定。
+     * 自 5.0.4 起，执行模式不再属于语句对象状态。调用方应在执行层显式选择
+     * {@code executeThroughPrepare(...)} 或 {@code executeThroughQuery()}。
      *
-     * @return 是否使用预编译协议
+     * @return 不会返回
+     * @deprecated since 5.0.4, use explicit execution methods on
+     * {@code RunnableStatement} instead.
      */
-    boolean isToPrepareStatement();
+    @Deprecated(since = "5.0.4", forRemoval = true)
+    default boolean isToPrepareStatement() {
+        throw new UnsupportedOperationException(
+                "Statement-level prepare switch was removed in 5.0.4; choose the execution method on RunnableStatement."
+        );
+    }
+
 }

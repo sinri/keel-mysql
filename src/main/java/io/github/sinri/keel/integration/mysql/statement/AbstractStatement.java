@@ -1,6 +1,5 @@
 package io.github.sinri.keel.integration.mysql.statement;
 
-import io.github.sinri.keel.integration.mysql.connection.target.RunnableStatement;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.UUID;
@@ -22,10 +21,9 @@ abstract public non-sealed class AbstractStatement<S> implements AnyStatement<S>
      * 新建语句实例时采用的默认 SQL 组件分隔符；仅影响此后创建的实例。
      */
     static String DEFAULT_SQL_COMPONENT_SEPARATOR = " ";//"\n";
-    private String sqlComponentSeparator;
     protected final String statement_uuid;
+    private String sqlComponentSeparator;
     private String remarkAsComment = "";
-    private boolean toPrepareStatement = true;
 
     /**
      * 构造抽象语句，生成唯一标识符
@@ -73,19 +71,6 @@ abstract public non-sealed class AbstractStatement<S> implements AnyStatement<S>
         return getImplementation();
     }
 
-    @Override
-    public S setToPrepareStatement(boolean toPrepareStatement) {
-        this.toPrepareStatement = toPrepareStatement;
-        return getImplementation();
-    }
-
-    @Override
-    public boolean isToPrepareStatement() {
-        return toPrepareStatement;
-    }
-
-    @Override
-    abstract public String buildSql();
 
     @Override
     final public String toString() {

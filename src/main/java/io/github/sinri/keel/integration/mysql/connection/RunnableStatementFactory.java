@@ -21,29 +21,38 @@ import org.jspecify.annotations.NullMarked;
 public interface RunnableStatementFactory extends SqlConnectionHolder {
 
     /**
-     * 创建原始 SQL 语句，通过 MySQL 预编译协议（COM_STMT_PREPARE）执行。
+     * 创建原始 SQL 语句。
      * <p>
-     * 预编译协议可获得服务端语句缓存与执行计划复用的性能优化。
-     * 注意：当前不支持 {@code ?} 占位符参数绑定，SQL 中的所有值应已内联，
-     * 不应包含 {@code ?} 占位符，否则执行时会因参数数量不匹配而报错。
+     * 自 5.0.4 起，语句对象不再保存执行协议。返回的 {@link RunnableStatement}
+     * 默认可通过 {@link RunnableStatement#execute()} 走预编译路径，也可通过
+     * {@link RunnableStatement#executeThroughPrepare(io.vertx.sqlclient.Tuple)}
+     * 绑定 {@code ?} 占位符参数，或通过 {@link RunnableStatement#executeThroughQuery()}
+     * 使用普通查询协议。
      *
-     * @param sql 完整的原始 SQL 语句（不含 {@code ?} 占位符）
+     * @param sql 原始 SQL 语句；可包含用于预编译执行的 {@code ?} 占位符
      * @return 可执行的 SQL 语句对象
      */
     default RunnableStatement rawForPreparedQuery(String sql) {
-        return new RawStatement(sql, true)
+        return new RawStatement(sql)
                 .attachToConnection(getSqlConnection());
     }
 
     /**
-     * 创建原始 SQL 语句，通过普通查询协议（COM_QUERY）直接执行。
+     * 已废弃的普通查询协议工厂方法。
+     * <p>
+     * 自 5.0.4 起，执行协议在执行层选择。请使用 {@link #rawForPreparedQuery(String)}
+     * 创建原始语句，再调用 {@link RunnableStatement#executeThroughQuery()}。
      *
-     * @param sql 完整的原始 SQL 语句
-     * @return 可执行的 SQL 语句对象
+     * @param sql 原始 SQL 语句
+     * @return 不会返回
+     * @deprecated since 5.0.4, use {@link #rawForPreparedQuery(String)} and
+     * {@link RunnableStatement#executeThroughQuery()} instead.
      */
+    @Deprecated(since = "5.0.4", forRemoval = true)
     default RunnableStatement rawForDirectQuery(String sql) {
-        return new RawStatement(sql, false)
-                .attachToConnection(getSqlConnection());
+        throw new UnsupportedOperationException(
+                "rawForDirectQuery(String) was removed in 5.0.4; use rawForPreparedQuery(sql).executeThroughQuery()."
+        );
     }
 
     /**
