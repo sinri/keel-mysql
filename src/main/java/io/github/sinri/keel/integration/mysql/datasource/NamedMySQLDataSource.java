@@ -152,6 +152,23 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
     }
 
     /**
+     * 构造使用给定连接池的数据源，供包内测试注入可控连接池。
+     *
+     * @param pool                 连接池
+     * @param configuration        MySQL配置
+     * @param sqlConnectionWrapper SQL连接包装器
+     */
+    NamedMySQLDataSource(
+            Pool pool,
+            KeelMySQLConfiguration configuration,
+            Function<SqlConnection, C> sqlConnectionWrapper
+    ) {
+        this.pool = pool;
+        this.configuration = configuration;
+        this.sqlConnectionWrapper = sqlConnectionWrapper;
+    }
+
+    /**
      * 返回一次性的 MySQL 会话信息初始化 Future。
      * <p>
      * 并发建连时仅首个连接真正发起会话信息查询，其余连接复用同一 Future，
@@ -221,21 +238,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
         return Future.succeededFuture()
                      .compose(v -> pool.getConnection())
                      .compose(
-                             sqlConnection -> {
-                                 C c = this.sqlConnectionWrapper.apply(sqlConnection);
-
-                                 // add mysql version to c;
-                                 if (this.lateFullVersion.isInitialized()) {
-                                     c.setMysqlVersion(lateFullVersion.get());
-                                 }
-                                 if (this.lateStringLiteralEscapeContext.isInitialized()) {
-                                     MySQLEscapeContext escapeContext = lateStringLiteralEscapeContext.get();
-                                     c.setMysqlSqlMode(escapeContext.sqlMode());
-                                     c.setMysqlCharacterSetConnection(escapeContext.characterSet());
-                                 }
-
-                                 return Future.succeededFuture(c);
-                             },
+                             this::wrapSqlConnection,
                              throwable -> Future.failedFuture(
                                      new KeelMySQLConnectionException(
                                              "MySQLDataSource Failed to get SqlConnection From Pool " +
@@ -245,6 +248,57 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
                                                      throwable,
                                              throwable))
                      );
+    }
+
+    /**
+     * 包装一个已经从池中取得的底层连接。包装过程中的同步异常会转换为 failed Future，
+     * 并在返回失败前关闭底层连接。
+     *
+     * @param sqlConnection 底层连接
+     * @return 包装后的连接 Future
+     */
+    private Future<C> wrapSqlConnection(SqlConnection sqlConnection) {
+        return Future.succeededFuture()
+                     .compose(ignored -> {
+                         C connection = this.sqlConnectionWrapper.apply(sqlConnection);
+
+                         if (this.lateFullVersion.isInitialized()) {
+                             connection.setMysqlVersion(lateFullVersion.get());
+                         }
+                         if (this.lateStringLiteralEscapeContext.isInitialized()) {
+                             MySQLEscapeContext escapeContext = lateStringLiteralEscapeContext.get();
+                             connection.setMysqlSqlMode(escapeContext.sqlMode());
+                             connection.setMysqlCharacterSetConnection(escapeContext.characterSet());
+                         }
+
+                         return Future.succeededFuture(connection);
+                     })
+                     .recover(throwable -> failAfterClosing(
+                             sqlConnection,
+                             new KeelMySQLConnectionException(
+                                     "MySQLDataSource Failed to wrap SqlConnection: " + throwable,
+                                     throwable
+                             )
+                     ));
+    }
+
+    /**
+     * 关闭连接后返回原始失败。若关闭也失败，将关闭异常附加到原始异常。
+     *
+     * @param sqlConnection 需要关闭的连接
+     * @param failure       原始异常
+     * @param <T>           Future结果类型
+     * @return 失败Future
+     */
+    private <T> Future<T> failAfterClosing(SqlConnection sqlConnection, Throwable failure) {
+        return Future.succeededFuture()
+                     .compose(ignored -> sqlConnection.close())
+                     .transform(closeResult -> {
+                         if (closeResult.failed() && closeResult.cause() != failure) {
+                             failure.addSuppressed(closeResult.cause());
+                         }
+                         return Future.failedFuture(failure);
+                     });
     }
 
     /**
@@ -345,21 +399,50 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @since 5.0.0
      */
     public <T> Future<@Nullable T> withConnection(Function<C, Future<@Nullable T>> function) {
-        return Future.succeededFuture().compose(
-                v -> fetchMySQLConnection().compose(sqlConnectionWrapper -> {
-                    borrowedConnectionCounter.incrementAndGet();
-                    return function.apply(sqlConnectionWrapper).andThen(tAsyncResult -> {
-                        Future.succeededFuture()
-                              .compose(vv -> sqlConnectionWrapper.getSqlConnection().close())
-                              .andThen(ar -> {
-                                  borrowedConnectionCounter.decrementAndGet();
-                              });
-                    }).recover(throwable -> Future.failedFuture(new KeelMySQLException(
-                            "MySQLDataSource Failed Within SqlConnection: " + throwable,
-                            throwable))
-                    ).compose(Future::succeededFuture);
-                })
-        );
+        return Future.succeededFuture()
+                     .compose(v -> fetchMySQLConnection())
+                     .compose(sqlConnectionWrapper -> {
+                         borrowedConnectionCounter.incrementAndGet();
+
+                         Future<@Nullable T> operation = Future.succeededFuture()
+                                 .compose(ignored -> function.apply(sqlConnectionWrapper))
+                                 .recover(throwable -> Future.failedFuture(new KeelMySQLException(
+                                         "MySQLDataSource Failed Within SqlConnection: " + throwable,
+                                         throwable)));
+
+                         return completeAfterClosingBorrowedConnection(sqlConnectionWrapper, operation);
+                     });
+    }
+
+    /**
+     * 在业务操作完成后关闭连接并恢复活跃连接计数。
+     * <p>
+     * 当业务操作和连接关闭都失败时，以业务异常为主异常，并将关闭异常附加为 suppressed；
+     * 当仅关闭失败时，返回关闭异常。
+     *
+     * @param connection 借出的连接
+     * @param operation  业务操作Future
+     * @param <T>        业务结果类型
+     * @return 等待连接关闭完成后的Future
+     */
+    private <T> Future<@Nullable T> completeAfterClosingBorrowedConnection(C connection, Future<@Nullable T> operation) {
+        return operation.transform(operationResult -> Future.succeededFuture()
+                .compose(ignored -> connection.getSqlConnection().close())
+                .transform(closeResult -> {
+                    borrowedConnectionCounter.decrementAndGet();
+
+                    if (operationResult.failed()) {
+                        Throwable operationFailure = operationResult.cause();
+                        if (closeResult.failed() && closeResult.cause() != operationFailure) {
+                            operationFailure.addSuppressed(closeResult.cause());
+                        }
+                        return Future.failedFuture(operationFailure);
+                    }
+                    if (closeResult.failed()) {
+                        return Future.failedFuture(closeResult.cause());
+                    }
+                    return Future.succeededFuture(operationResult.result());
+                }));
     }
 
     /**
@@ -397,24 +480,24 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
         return withConnection(c -> {
             return Future.succeededFuture()
                          .compose(v -> c.getSqlConnection().begin())
-                         .compose(transaction -> {
-                                     return function.apply(c).compose(t -> transaction
-                                             .commit().compose(committed -> Future.succeededFuture(t))
-                                     ).compose(Future::succeededFuture, err -> {
-                                         if (err instanceof TransactionRollbackException) {
-                                             // already rollback
-                                             String error = "MySQLDataSource ROLLBACK Done Manually.";
-                                             return Future.failedFuture(new KeelMySQLException(error, err));
-                                         } else {
-                                             String error = "MySQLDataSource ROLLBACK Finished. Core Reason: "
-                                                     + err.getMessage();
-                                             // rollback failure would be thrown directly to downstream.
-                                             return transaction.rollback()
-                                                               .compose(rollbackDone -> Future
-                                                                       .failedFuture(new KeelMySQLException(error, err)));
-                                         }
-                                     });
-                                 },
+                         .compose(transaction -> Future.succeededFuture()
+                                 .compose(ignored -> function.apply(c))
+                                 .compose(t -> transaction
+                                         .commit().compose(committed -> Future.succeededFuture(t)))
+                                 .compose(Future::succeededFuture, err -> {
+                                     if (err instanceof TransactionRollbackException) {
+                                         // already rollback
+                                         String error = "MySQLDataSource ROLLBACK Done Manually.";
+                                         return Future.failedFuture(new KeelMySQLException(error, err));
+                                     } else {
+                                         String error = "MySQLDataSource ROLLBACK Finished. Core Reason: "
+                                                 + err.getMessage();
+                                         // rollback failure would be thrown directly to downstream.
+                                         return transaction.rollback()
+                                                           .compose(rollbackDone -> Future
+                                                                   .failedFuture(new KeelMySQLException(error, err)));
+                                     }
+                                 }),
                                  beginFailure -> Future.failedFuture(new KeelMySQLConnectionException(
                                          "MySQLDataSource Failed to get SqlConnection for transaction From Pool: "
                                                  + beginFailure,
@@ -463,17 +546,9 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
             throw new UnsupportedOperationException("This method must be called from a virtual thread");
         }
         var sqlConnection = getPool().getConnection().await();
+        C connection = wrapSqlConnection(sqlConnection).await();
         borrowedConnectionCounter.incrementAndGet();
-        C c = getSqlConnectionWrapper().apply(sqlConnection);
-        if (this.lateFullVersion.isInitialized()) {
-            c.setMysqlVersion(lateFullVersion.get());
-        }
-        if (this.lateStringLiteralEscapeContext.isInitialized()) {
-            MySQLEscapeContext escapeContext = lateStringLiteralEscapeContext.get();
-            c.setMysqlSqlMode(escapeContext.sqlMode());
-            c.setMysqlCharacterSetConnection(escapeContext.characterSet());
-        }
-        return c;
+        return connection;
     }
 
     /**
