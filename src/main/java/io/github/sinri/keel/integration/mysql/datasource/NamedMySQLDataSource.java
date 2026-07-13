@@ -1,7 +1,6 @@
 package io.github.sinri.keel.integration.mysql.datasource;
 
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
-import io.github.sinri.keel.core.utils.ReflectionUtils;
 import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
 import io.github.sinri.keel.integration.mysql.action.single.NamedActionInterface;
@@ -22,6 +21,8 @@ import io.vertx.sqlclient.TransactionRollbackException;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -34,6 +35,8 @@ import java.util.function.Function;
  */
 @NullMarked
 public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Closeable {
+
+    private static final @Nullable Method THREAD_IS_VIRTUAL_METHOD = findThreadIsVirtualMethod();
 
     private final Pool pool;
     private final KeelMySQLConfiguration configuration;
@@ -53,6 +56,26 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @see #initializeServerSessionInfoOnce(SqlConnection)
      */
     private @Nullable Future<@Nullable ServerSessionInfo> serverSessionInfoInitFuture;
+
+    private static @Nullable Method findThreadIsVirtualMethod() {
+        try {
+            return Thread.class.getMethod("isVirtual");
+        } catch (NoSuchMethodException ignored) {
+            return null;
+        }
+    }
+
+    private static boolean isCurrentThreadVirtual() {
+        Method method = THREAD_IS_VIRTUAL_METHOD;
+        if (method == null) {
+            return false;
+        }
+        try {
+            return (boolean) method.invoke(Thread.currentThread());
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Failed to determine whether the current thread is virtual", e);
+        }
+    }
 
     /**
      * 检查 MySQL 会话信息。
@@ -436,8 +459,8 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> implements Clo
      * @since 5.0.0
      */
     public C fetchConnectionInVirtualThread() {
-        if (!ReflectionUtils.isVirtualThreadsAvailable()) {
-            throw new UnsupportedOperationException("Not in Virtual Thread!");
+        if (!isCurrentThreadVirtual()) {
+            throw new UnsupportedOperationException("This method must be called from a virtual thread");
         }
         var sqlConnection = getPool().getConnection().await();
         borrowedConnectionCounter.incrementAndGet();
