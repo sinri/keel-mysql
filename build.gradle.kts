@@ -60,6 +60,7 @@ dependencies {
 
     // Test dependencies (from pom.xml)
     testImplementation("io.github.sinri:keel-test:$keelTestVersion")
+    testImplementation("org.mockito:mockito-core:5.20.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -475,11 +475,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
      */
     @TechnicalPreview(since = "5.0.4")
     public Future<ResultMatrix<SimpleResultRow>> instantQuery(Vertx vertx, String sql, @Nullable Tuple parameters) {
-        var sqlClient = MySQLBuilder.client()
-                                    .with(this.getPoolOptions())
-                                    .connectingTo(this.getConnectOptions())
-                                    .using(vertx)
-                                    .build();
+        var sqlClient = createSqlClient(vertx);
         return Future.succeededFuture()
                      .compose(v -> {
                          var query = sqlClient.preparedQuery(sql);
@@ -490,6 +486,21 @@ public class KeelMySQLConfiguration extends ConfigElement {
                      })
                      .compose(rows -> Future.succeededFuture(ResultMatrix.createSimple(rows)))
                      .andThen(ar -> sqlClient.close());
+    }
+
+    /**
+     * 创建即时查询使用的客户端。
+     *
+     * @param vertx Vert.x 实例
+     * @return SQL 客户端
+     */
+    @TechnicalPreview(since = "5.0.5")
+    protected SqlClient createSqlClient(Vertx vertx) {
+        return MySQLBuilder.client()
+                           .with(this.getPoolOptions())
+                           .connectingTo(this.getConnectOptions())
+                           .using(vertx)
+                           .build();
     }
 
     /**
@@ -532,11 +543,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     ) {
         return Future.succeededFuture()
                      .compose(v -> {
-                         Pool pool = MySQLBuilder.pool()
-                                                 .with(this.getPoolOptions())
-                                                 .connectingTo(this.getConnectOptions())
-                                                 .using(keel)
-                                                 .build();
+                         Pool pool = createPool(keel);
                          return Future.succeededFuture(pool);
                      })
                      .compose(pool -> pool
@@ -562,5 +569,20 @@ public class KeelMySQLConfiguration extends ConfigElement {
                                      })
                                      .eventually(sqlConnection::close))
                              .eventually(pool::close));
+    }
+
+    /**
+     * 创建流式即时查询使用的连接池。
+     *
+     * @param keel 异步调度对象
+     * @return SQL 连接池
+     */
+    @TechnicalPreview(since = "5.0.5")
+    protected Pool createPool(Keel keel) {
+        return MySQLBuilder.pool()
+                           .with(this.getPoolOptions())
+                           .connectingTo(this.getConnectOptions())
+                           .using(keel)
+                           .build();
     }
 }
