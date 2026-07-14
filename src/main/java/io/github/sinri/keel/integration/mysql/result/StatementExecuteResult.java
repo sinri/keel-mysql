@@ -10,18 +10,38 @@ import io.vertx.sqlclient.RowSet;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 
 @NullMarked
 public class StatementExecuteResult implements Iterable<Row> {
-    private final RowSet<Row> rowSet;
+    private final List<RowSet<Row>> rowSets;
 
     public StatementExecuteResult(RowSet<Row> rowSet) {
-        this.rowSet = rowSet;
+        List<RowSet<Row>> resultChain = new LinkedList<>();
+        RowSet<Row> current = rowSet;
+        while (current != null) {
+            resultChain.add(current);
+            current = current.next();
+        }
+        this.rowSets = List.copyOf(resultChain);
     }
 
     public RowSet<Row> getRowSet() {
-        return rowSet;
+        return rowSets.get(0);
+    }
+
+    /**
+     * 获取完整的执行结果链。
+     *
+     * <p>批处理执行时，每组参数的结果按执行顺序包含在返回列表中。单次执行时列表仅包含
+     * {@link #getRowSet()} 返回的结果。
+     *
+     * @return 不可修改的执行结果列表
+     */
+    public List<RowSet<Row>> getRowSets() {
+        return rowSets;
     }
 
     /**
@@ -30,7 +50,9 @@ public class StatementExecuteResult implements Iterable<Row> {
      * @return 总行数
      */
     public int getTotalFetchedRows() {
-        return rowSet.size();
+        return rowSets.stream()
+                .mapToInt(RowSet::size)
+                .sum();
     }
 
     /**
@@ -39,7 +61,9 @@ public class StatementExecuteResult implements Iterable<Row> {
      * @return 影响的行数
      */
     public int getTotalAffectedRows() {
-        return rowSet.rowCount();
+        return rowSets.stream()
+                .mapToInt(RowSet::rowCount)
+                .sum();
     }
 
 
@@ -49,12 +73,12 @@ public class StatementExecuteResult implements Iterable<Row> {
      * @return 最后插入的ID
      */
     public long getLastInsertedID() {
-        return rowSet.property(MySQLClient.LAST_INSERTED_ID);
+        return getRowSet().property(MySQLClient.LAST_INSERTED_ID);
     }
 
     @Override
     public Iterator<Row> iterator() {
-        return rowSet.iterator();
+        return getRowSet().iterator();
     }
 
     public ResultMatrix<SimpleResultRow> toMatrix() {
