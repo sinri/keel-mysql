@@ -1,12 +1,10 @@
-# Keel MySQL Extension Documentation
-
-Welcome to the documentation for Keel MySQL Extension.
+# Keel-MySQL 文档
 
 Keel-MySQL 是一个面向 MySQL 的增强库，旨在提供更简单、更安全、更高效的数据库访问体验。
 
 ## 文档版本
 
-- [5.0.4 (Latest Version)](./5.0.4/index.md)
+- [5.0.4（当前版本）](./5.0.4/index.md)
 - [5.0.1](./5.0.1/index.md)
 
 ## 主要特性
@@ -15,3 +13,5 @@ Keel-MySQL 是一个面向 MySQL 的增强库，旨在提供更简单、更安�
 - **高性能**: 支持游标流式读取和批量操作。
 - **易于集成**: 兼容常见的连接池和多数据源配置。
 - **自动生成**: 提供开发工具，可从表结构自动生成 Java 代码。
+
+首次使用请从 [5.0.4 快速开始](./5.0.4/getting_started.md) 阅读；从旧版本升级请先看 [迁移与发布说明](./5.0.4/release_notes.md)。仓库入口说明见 [README](../README.md)。
