@@ -4,18 +4,12 @@ import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.base.async.Keel;
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.ConfigPropertiesBuilder;
-import io.github.sinri.keel.base.configuration.NotConfiguredException;
+import io.github.sinri.keel.base.configuration.NotConfiguredRuntimeException;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.github.sinri.keel.integration.mysql.result.row.SimpleResultRow;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.net.ClientSSLOptions;
-import io.vertx.core.net.JksOptions;
-import io.vertx.core.net.KeyCertOptions;
-import io.vertx.core.net.PemKeyCertOptions;
-import io.vertx.core.net.PemTrustOptions;
-import io.vertx.core.net.PfxOptions;
-import io.vertx.core.net.TrustOptions;
+import io.vertx.core.net.*;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.mysqlclient.SslMode;
@@ -140,7 +134,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public String getHost() {
         try {
             return readString(List.of("host"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return "127.0.0.1";
         }
     }
@@ -153,7 +147,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public int getPort() {
         try {
             return readInteger(List.of("port"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return 3306;
         }
     }
@@ -167,7 +161,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public String getPassword() {
         try {
             return readString(List.of("password"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return null;
         }
     }
@@ -181,7 +175,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public String getUsername() {
         try {
             return readString(List.of("username"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return null;
         }
     }
@@ -195,7 +189,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public String getSchema() {
         try {
             return readString(List.of("schema"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return null;
         }
     }
@@ -209,7 +203,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public String getCharset() {
         try {
             return readString(List.of("charset"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return null;
         }
     }
@@ -226,10 +220,10 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public SslMode getSslMode() {
         try {
             return parseSslMode(readString(List.of("sslMode")));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             try {
                 return readBoolean(List.of("ssl")) ? SslMode.REQUIRED : SslMode.DISABLED;
-            } catch (NotConfiguredException ignored) {
+            } catch (NotConfiguredRuntimeException ignored) {
                 return null;
             }
         }
@@ -281,7 +275,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public Boolean getSslTrustAll() {
         try {
             return readBoolean(List.of("sslTrustAll"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return null;
         }
     }
@@ -290,7 +284,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public String getSslHostnameVerificationAlgorithm() {
         try {
             return readString(List.of("sslHostnameVerificationAlgorithm"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return null;
         }
     }
@@ -355,7 +349,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public Integer getPoolMaxSize() {
         try {
             return readInteger(List.of("poolMaxSize"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return null;
         }
     }
@@ -387,7 +381,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public Integer getPoolConnectionTimeout() {
         try {
             return readInteger(List.of("poolConnectionTimeout"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return null;
         }
     }
@@ -407,7 +401,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public Integer getPoolIdleTimeout() {
         try {
             return readInteger(List.of("poolIdleTimeout"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return null;
         }
     }
@@ -422,7 +416,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
     public boolean getPoolShared() {
         try {
             return readBoolean(List.of("poolShared"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return true;
         }
     }
@@ -439,7 +433,7 @@ public class KeelMySQLConfiguration extends ConfigElement {
         for (String key : keys) {
             try {
                 return readString(List.of(key));
-            } catch (NotConfiguredException ignored) {
+            } catch (NotConfiguredRuntimeException ignored) {
             }
         }
         return null;

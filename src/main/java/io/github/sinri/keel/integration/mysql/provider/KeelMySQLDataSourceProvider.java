@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql.provider;
 
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.NotConfiguredException;
+import io.github.sinri.keel.base.configuration.NotConfiguredRuntimeException;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
 import io.github.sinri.keel.integration.mysql.connection.DynamicNamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.connection.NamedMySQLConnection;
@@ -14,9 +15,8 @@ import io.vertx.sqlclient.SqlConnection;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.concurrent.TimeoutException;
-
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 
@@ -39,7 +39,7 @@ public class KeelMySQLDataSourceProvider {
     public static String defaultMySQLDataSourceName() {
         try {
             return ConfigElement.root().readString(List.of("mysql", "default_data_source_name"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return "default";
         }
     }
